@@ -66,3 +66,11 @@ help
 ## 疑惑解答
 
 如果参照这片文档仔细思考之后仍然不清楚如何部署小柒，或则被mirai的官方文档搞得晕头转向，请联系readme文档里的QQ群。
+
+
+
+## 捐助小柒
+
+非常感谢您的捐助，能够让小柒的服务器继续运行下去
+
+捐助地址：[捐助小柒](https://github.com/Moyulingjiu/QQbot/blob/master/doc/donation.png)

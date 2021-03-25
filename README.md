@@ -60,3 +60,9 @@
 
 
 
+## 捐助小柒
+
+非常感谢您的捐助，能够让小柒的服务器继续运行下去
+
+捐助地址：[捐助小柒](https://github.com/Moyulingjiu/QQbot/blob/master/doc/donation.png)
+
