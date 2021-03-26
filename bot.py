@@ -47,7 +47,7 @@ Bot_Age = 14
 Bot_Color = '天蓝色'
 Bot_QQ = 1622057984
 Master_QQ = 1597867839
-version = '1.5'
+version = '1.6'
 
 groupClock = []
 dictClockPeople = {
@@ -280,6 +280,8 @@ def addBlacklistGroup(groupId):
     global blacklistGroup
     if groupId in blacklistGroup:
         return '该群已经在黑名单里了'
+    if groupId in testGroup:
+        return '该群为测试群聊，不能添加黑名单，请先将其移除测试群聊'
 
     blacklistGroup.append(groupId)
     with open('data/blacklistGroup.txt', 'a', encoding='utf-8') as f:
@@ -291,6 +293,8 @@ def addBlacklistMember(memberId):
     global blacklistMember
     if memberId in blacklistMember:
         return '该人已经在黑名单里了'
+    if memberId in administrator:
+        return '对方是管理员，不能加入黑名单'
 
     blacklistMember.append(memberId)
     with open('data/blacklistMember.txt', 'a', encoding='utf-8') as f:
@@ -470,37 +474,40 @@ async def friend_message_listener(app: GraiaMiraiApplication, friend: Friend, so
     needReply = False
     needAt = False
     reply = ''
-    if strMessage[0] == '*':
-        reply = function(strMessage[1:])
-        needReply = True
-    else:
-        if strMessage[:3] == '天气 ':
-            reply = weather.getWeather(strMessage[3:])
-            needReply = True
-        elif strMessage == '色子' or strMessage == '骰子':
-            reply = smallFunction.dick()
-            needReply = True
-        elif strMessage == '抛硬币':
-            reply = smallFunction.coin()
-            needReply = True
-        elif strMessage == '文摘':
-            reply = talk.poem()
-            needReply = True
-        elif strMessage == '情话':
-            reply = talk.loveTalk()
-            needReply = True
-        elif strMessage == '你好':
-            reply = '你好呀，' + friend.nickname + "。小柒很高兴遇见你！"
-            needReply = True
-        elif strMessage == '晚安':
-            reply = '晚安呀！' + friend.nickname
-            needReply = True
-        elif strMessage == '早安':
-            reply = '早哦，' + friend.nickname
-            needReply = True
+    blacklist = (friend.id in blacklistMember)
 
-        if friend.id in contributors or friend.id in administrator:
-            (needReply, needAt, reply) = await administratorOperation(strMessage, 0, friend.id, app, friend)
+    if not blacklist:
+        if strMessage[0] == '*':
+            reply = function(strMessage[1:])
+            needReply = True
+        else:
+            if strMessage[:3] == '天气 ':
+                reply = weather.getWeather(strMessage[3:])
+                needReply = True
+            elif strMessage == '色子' or strMessage == '骰子':
+                reply = smallFunction.dick()
+                needReply = True
+            elif strMessage == '抛硬币':
+                reply = smallFunction.coin()
+                needReply = True
+            elif strMessage == '文摘':
+                reply = talk.poem()
+                needReply = True
+            elif strMessage == '情话':
+                reply = talk.loveTalk()
+                needReply = True
+            elif strMessage == '你好':
+                reply = '你好呀，' + friend.nickname + "。小柒很高兴遇见你！"
+                needReply = True
+            elif strMessage == '晚安':
+                reply = '晚安呀！' + friend.nickname
+                needReply = True
+            elif strMessage == '早安':
+                reply = '早哦，' + friend.nickname
+                needReply = True
+        if not needReply:
+            if friend.id in contributors or friend.id in administrator:
+                (needReply, needAt, reply) = await administratorOperation(strMessage, 0, friend.id, app, friend)
 
     if needReply:
         await app.sendFriendMessage(friend, MessageChain.create([
