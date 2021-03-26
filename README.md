@@ -50,9 +50,9 @@
 
 ## 版本信息
 
-当前版本：1.5
-
 详见：[更新日志](https://github.com/Moyulingjiu/QQbot/blob/master/version.md)
+
+
 
 ## 授权信息
 
