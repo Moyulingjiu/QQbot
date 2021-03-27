@@ -58,6 +58,7 @@ lastMessage = ''
 remainTimeHour = 23
 remainTimeMinute = 00
 
+
 def loadFile():
     global isInit
     isInit = True
@@ -145,6 +146,8 @@ def loadFile():
     print('获取打卡人', dictClockPeople)
 
     isInit = False
+
+
 # ============================================
 # 定义全局信息
 loop = asyncio.get_event_loop()
@@ -182,10 +185,54 @@ async def sendMessage(groupId):
     return True
 
 
+async def sendClockResetMessage(groupId):
+    global app
+    group = await app.getGroup(groupId)
+    reply = '已经重置打卡日期'
+    message = MessageChain.create([
+        Plain(reply)
+    ])
+    await app.sendGroupMessage(group, message)
+    return True
+
+
+def writeClockIn(groupId):
+    global dictClockPeople
+    with open('data/clockInData/' + str(groupId) + '.txt', 'w', encoding='utf-8') as f:
+        for key, value in dictClockPeople[groupId].items():
+            text = 'F'
+            if value:
+                text = 'T'
+            f.write(str(key) + ' ' + text + '\n')
+
+
+def resetClock():
+    global dictClockPeople
+    today = str(datetime.date.today())
+    with open('data/clockInData/clockDate.txt', 'w', encoding='utf-8') as f:
+        f.write(today)
+
+    for key, group in dictClockPeople.items():
+        for key2, value in group.items():
+            dictClockPeople[key][key2] = False
+        writeClockIn(key)
+
+    dictClockPeople.clear()
+    for groupNumber in groupClock:
+        with open('data/clockInData/' + str(groupNumber) + '.txt', 'r+', encoding='utf-8') as f:
+            dictClockPeople[groupNumber] = {}
+            clockMember = f.readlines()
+            for line in clockMember:
+                if len(line.strip()) != 0:
+                    lines = line.split(' ')
+                    if lines[1][0] == 'T':
+                        dictClockPeople[groupNumber][int(lines[0])] = True
+                    else:
+                        dictClockPeople[groupNumber][int(lines[0])] = False
+
+
 async def timeWatcher():
-    times = 0
     while True:
-        times += 1
         global remainTimeHour
         global remainTimeMinute
         curr_time = datetime.datetime.now()
@@ -196,9 +243,13 @@ async def timeWatcher():
                 print('提醒：', groupId)
                 await sendMessage(groupId)
 
-        if times % 5 == 0:
-            loadFile()
-        print(curr_time.hour, '：' ,curr_time.minute, '，监听中...')
+        elif curr_time.hour == 0 and curr_time.minute == 0:
+            print('重置打卡数据')
+            resetClock()
+            for groupId in testGroup:
+                sendClockResetMessage(groupId)
+
+        print(curr_time.hour, '：', curr_time.minute, '，监听中...')
         time.sleep(60)
 
 

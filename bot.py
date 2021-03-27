@@ -47,7 +47,7 @@ Bot_Age = 14
 Bot_Color = '天蓝色'
 Bot_QQ = 1622057984
 Master_QQ = 1597867839
-version = '1.6'
+version = '1.7'
 
 groupClock = []
 dictClockPeople = {
@@ -655,8 +655,10 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
                 reply = '在' + Bot_Name + '心中，' + member.name + '一直都很厉害的哦~'
                 needReply = True
             elif strMessage == '好家伙':
-                reply = '又发生什么辣？'
-                needReply = True
+                tmpNumber = random.randrange(0, 5)
+                if tmpNumber == 3:
+                    reply = '又发生什么辣？'
+                    needReply = True
             elif strMessage == '你们早上都没课的嘛':
                 reply = Bot_Name + '还没有开始上课呢'
                 needReply = True
@@ -694,8 +696,10 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
                 reply = '能不能多读书，少看涩图'
                 needReply = True
             elif strMessage == '？':
-                reply = '怎么啦'
-                needReply = True
+                tmpNumber = random.randrange(0, 5)
+                if tmpNumber == 2:
+                    reply = '怎么啦'
+                    needReply = True
 
     if needReply:
         lastMessage = reply
