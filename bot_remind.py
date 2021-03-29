@@ -247,7 +247,7 @@ async def timeWatcher():
             print('重置打卡数据')
             resetClock()
             for groupId in testGroup:
-                sendClockResetMessage(groupId)
+                await sendClockResetMessage(groupId)
 
         print(curr_time.hour, '：', curr_time.minute, '，监听中...')
         time.sleep(60)

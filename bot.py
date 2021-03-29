@@ -16,6 +16,7 @@ from graia.broadcast import Broadcast
 # =============================================================
 # 以下为附加功能头文件
 
+import os
 from bs4 import BeautifulSoup  # 用来代替正则表达式取源码中相应标签的内容
 import random
 import requests  # 用来抓取网页的html源代码
@@ -47,7 +48,7 @@ Bot_Age = 14
 Bot_Color = '天蓝色'
 Bot_QQ = 1622057984
 Master_QQ = 1597867839
-version = '1.7'
+version = '1.8'
 
 groupClock = []
 dictClockPeople = {
@@ -65,6 +66,28 @@ isInit = False
 
 lastAutorepeat = ''
 lastMessage = ''
+
+fileTree = [
+    'data/adminstrators.txt',
+    'data/baseInfor.txt',
+    'data/blacklistGroup.txt',
+    'data/blacklistMember.txt',
+    'data/contributors.txt',
+    'data/cursePlanGroup.txt',
+    'data/groupClock.txt',
+    'data/testGroup.txt',
+]
+
+
+# ==========================================================
+# 自我检查模块
+
+def init():
+    for path in fileTree:
+        if not os.path.exists(path):
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write('')
+    
 
 # ==========================================================
 # 管理员模块
@@ -107,6 +130,9 @@ async def administratorOperation(strMessage, groupId, memberId, app, member):
         elif strMessage[:5] == '删除情话 ':
             reply = talk.delLoveTalk(int(strMessage[5:]))
             needReply = True
+        elif strMessage[:5] == '删除脏话 ':
+            reply = talk.delSwear(int(strMessage[5:]))
+            needReply = True
         elif strMessage[:8] == '添加黑名单 群 ':
             reply = addBlacklistGroup(int(strMessage[8:]))
             needReply = True
@@ -138,6 +164,11 @@ async def administratorOperation(strMessage, groupId, memberId, app, member):
         del loveTalklist[0]
         reply = talk.addLoveTalk(loveTalklist)
         needReply = True
+    elif strMessage[:4] == '添加脏话':
+        swearlist = strMessage.split(' ')
+        del swearlist[0]
+        reply = talk.addSwear(swearlist)
+        needReply = True
     elif strMessage == '管理员帮助':
         reply = command.helpAdministrators()
         needReply = True
@@ -150,7 +181,11 @@ async def administratorOperation(strMessage, groupId, memberId, app, member):
     elif strMessage == '情话条数':
         reply = talk.numLoveTalk()
         needReply = True
+    elif strMessage == '脏话条数':
+        reply = talk.numSwear()
+        needReply = True
     elif strMessage[:5] == '打卡情况 ':
+        loadFile()
         global dictClockPeople
         tmp = int(strMessage[5:])
         if tmp in groupClock:
@@ -165,6 +200,16 @@ async def administratorOperation(strMessage, groupId, memberId, app, member):
         global version
         reply = '当前版本为：' + version
         needReply = True
+    
+    elif strMessage[:7] == '加入打卡计划 ':
+        pass
+    elif strMessage[:7] == '退出打卡计划 ':
+        pass
+    elif strMessage[:7] == '锁定打卡计划':
+        pass
+    elif strMessage[:7] == '解锁打卡计划':
+        pass
+
 
     return (needReply, needAt, reply)
 
@@ -632,12 +677,18 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
                     elif strMessage == '情话':
                         reply = talk.loveTalk()
                         needReply = True
+                    elif strMessage == '骂我一句' and groupId in cursePlanGroup:
+                        reply = talk.swear()
+                        needReply = True
                     elif strMessage == '运势':
                         reply = lucky.luck(memberId)
                         needAt = True
                         needReply = True
                     elif strMessage == '打卡帮助':
                         reply = command.helpClock()
+                        needReply = True
+                    elif strMessage == '小柒测运气':
+                        reply = 'jrrp'
                         needReply = True
 
                     # ==========================================
@@ -714,6 +765,8 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
             ]))
 
 
+
+init()
 loadFile()
 
 # loop.run_until_complete(timeWatcher())
