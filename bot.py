@@ -39,6 +39,7 @@ from plugins import weather
 from plugins import smallFunction
 from plugins import lucky
 from plugins import command
+from plugins import weiboHot
 
 
 # ==========================================================
@@ -48,7 +49,7 @@ Bot_Age = 14
 Bot_Color = '天蓝色'
 Bot_QQ = 1622057984
 Master_QQ = 1597867839
-version = '1.8'
+version = '1.9'
 
 groupClock = []
 dictClockPeople = {
@@ -690,6 +691,10 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
                     elif strMessage == '小柒测运气':
                         reply = 'jrrp'
                         needReply = True
+                    elif strMessage == '微博热搜':
+                        reply = weiboHot.getHot()
+                        needReply = True
+
 
                     # ==========================================
                     # 之下为管理员模块
