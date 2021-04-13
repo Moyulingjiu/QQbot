@@ -9,8 +9,8 @@ import linecache
 def GetTarot():
     card = random.randint(0, 21)
     side = random.randint(1, 2)
-    title = linecache.getline(r'tarot.txt', card * 10 + 1)
-    contain = linecache.getline(r'tarot.txt', card * 10 + side * 4 + 1)
+    title = linecache.getline(r'data/tarot.txt', card * 10 + 1)
+    contain = linecache.getline(r'data/tarot.txt', card * 10 + side * 4 + 1)
     if side == 1:
         title += '正位'
     else:
@@ -21,8 +21,8 @@ def GetTarot():
 def GetTarot2():
     card = random.randint(0, 3)
     side = random.randint(1, 14)
-    title = linecache.getline(r'tarot2.txt', card * 16 + 1)
-    contain = linecache.getline(r'tarot2.txt', card * 16 + side + 1)
+    title = linecache.getline(r'data/tarot2.txt', card * 16 + 1)
+    contain = linecache.getline(r'data/tarot2.txt', card * 16 + side + 1)
     return title + '\n' + contain
 
 

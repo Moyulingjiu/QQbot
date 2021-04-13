@@ -1,5 +1,0 @@
-name=小柒
-age=18
-birthday=11 23
-qq=0
-master_qq=0

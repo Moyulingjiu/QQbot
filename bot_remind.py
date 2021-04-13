@@ -31,122 +31,23 @@ import linecache
 import datetime
 import threading
 # ==========================================================
-# 基本信息
-Bot_Name = '小柒'
-Bot_Age = 14
-Bot_Color = '天蓝色'
-Bot_QQ = 1622057984
-Master_QQ = 1597867839
+from plugins import dataManage
 
-groupClock = []
-dictClockPeople = {
-    0: [1]
-}
-clockDate = '2021-2-28'
-
-administrator = []
-contributors = []
-blacklistGroup = []
-blacklistMember = []
-testGroup = []
-cursePlanGroup = []
-isInit = False
-
-lastAutorepeat = ''
-lastMessage = ''
-
-remainTimeHour = 23
+remainTimeHour = 21
 remainTimeMinute = 00
 
+clock = {}
+botBaseInformation = {}
 
 def loadFile():
-    global isInit
-    isInit = True
-    with open('data/administrators.txt', 'r+', encoding='utf-8') as f:
-        global administrator
-        administrator.clear()
-        tmpList = f.readlines()
-        for i in tmpList:
-            if len(i.strip()) != 0:
-                administrator.append(int(i))
-        print('添加管理员', administrator)
+    global clock
+    global botBaseInformation
+    clock = dataManage.load_obj('clockIn')
+    botBaseInformation = dataManage.load_obj('baseInformation')
 
-    with open('data/contributors.txt', 'r+', encoding='utf-8') as f:
-        global contributors
-        contributors.clear()
-        tmpList = f.readlines()
-        for i in tmpList:
-            if len(i.strip()) != 0:
-                contributors.append(int(i))
-        print('添加贡献者', contributors)
-
-    with open('data/groupClock.txt', 'r+', encoding='utf-8') as f:
-        global groupClock
-        groupClock.clear()
-        tmpList = f.readlines()
-        for i in tmpList:
-            if len(i.strip()) != 0:
-                groupClock.append(int(i))
-        print('添加打卡群', groupClock)
-
-    with open('data/testGroup.txt', 'r+', encoding='utf-8') as f:
-        global testGroup
-        testGroup.clear()
-        tmpList = f.readlines()
-        for i in tmpList:
-            if len(i.strip()) != 0:
-                testGroup.append(int(i))
-        print('添加测试群', testGroup)
-
-    with open('data/cursePlanGroup.txt', 'r+', encoding='utf-8') as f:
-        global cursePlanGroup
-        cursePlanGroup.clear()
-        tmpList = f.readlines()
-        for i in tmpList:
-            if len(i.strip()) != 0:
-                cursePlanGroup.append(int(i))
-        print('添加骂人计划群', cursePlanGroup)
-
-    with open('data/blacklistGroup.txt', 'r+', encoding='utf-8') as f:
-        global blacklistGroup
-        blacklistGroup.clear()
-        tmpList = f.readlines()
-        for i in tmpList:
-            if len(i.strip()) != 0:
-                blacklistGroup.append(int(i))
-        print('添加黑名单群', blacklistGroup)
-
-    with open('data/blacklistMember.txt', 'r+', encoding='utf-8') as f:
-        global blacklistMember
-        blacklistMember.clear()
-        tmpList = f.readlines()
-        for i in tmpList:
-            if len(i.strip()) != 0:
-                blacklistMember.append(int(i))
-        print('添加黑名单人', blacklistMember)
-
-    with open('data/clockInData/clockDate.txt', 'r+', encoding='utf-8') as f:
-        global clockDate
-        clockDate = f.readline()
-        print('获取打卡日期', clockDate)
-
-    global dictClockPeople
-    dictClockPeople.clear()
-    for groupNumber in groupClock:
-        with open('data/clockInData/' + str(groupNumber) + '.txt', 'r+', encoding='utf-8') as f:
-            dictClockPeople[groupNumber] = {}
-            clockMember = f.readlines()
-            for line in clockMember:
-                if len(line.strip()) != 0:
-                    lines = line.split(' ')
-                    if lines[1][0] == 'T':
-                        dictClockPeople[groupNumber][int(lines[0])] = True
-                    else:
-                        dictClockPeople[groupNumber][int(lines[0])] = False
-    print('获取打卡人', dictClockPeople)
-
-    isInit = False
-
+def saveFile():
+    global clock
+    dataManage.save_obj(clock, 'clockIn')
 
 # ============================================
 # 定义全局信息
@@ -169,12 +70,13 @@ app = GraiaMiraiApplication(
 
 async def sendMessage(groupId):
     global app
+    global clock
     group = await app.getGroup(groupId)
     reply = '记得打卡呀~\n以下为未打卡名单：\n'
     message = MessageChain.create([
         Plain(reply)
     ])
-    for key, value in dictClockPeople[groupId].items():
+    for key, value in clock['dictClockPeople'][groupId].items():
         if not value:
             message.plus(MessageChain.create([
                 At(key),
@@ -197,56 +99,39 @@ async def sendClockResetMessage(groupId):
 
 
 def writeClockIn(groupId):
-    global dictClockPeople
-    with open('data/clockInData/' + str(groupId) + '.txt', 'w', encoding='utf-8') as f:
-        for key, value in dictClockPeople[groupId].items():
-            text = 'F'
-            if value:
-                text = 'T'
-            f.write(str(key) + ' ' + text + '\n')
+    global clock
+    for key, value in clock['dictClockPeople'][groupId]:
+        clock['dictClockPeople'][groupId][key] = False
 
 
 def resetClock():
-    global dictClockPeople
+    global clock
     today = str(datetime.date.today())
-    with open('data/clockInData/clockDate.txt', 'w', encoding='utf-8') as f:
-        f.write(today)
+    clock['clockDate'] = today
 
-    for key, group in dictClockPeople.items():
-        for key2, value in group.items():
-            dictClockPeople[key][key2] = False
+    for key, group in clock['dictClockPeople'].items():
         writeClockIn(key)
-
-    dictClockPeople.clear()
-    for groupNumber in groupClock:
-        with open('data/clockInData/' + str(groupNumber) + '.txt', 'r+', encoding='utf-8') as f:
-            dictClockPeople[groupNumber] = {}
-            clockMember = f.readlines()
-            for line in clockMember:
-                if len(line.strip()) != 0:
-                    lines = line.split(' ')
-                    if lines[1][0] == 'T':
-                        dictClockPeople[groupNumber][int(lines[0])] = True
-                    else:
-                        dictClockPeople[groupNumber][int(lines[0])] = False
+    saveFile()
 
 
 async def timeWatcher():
     while True:
         global remainTimeHour
         global remainTimeMinute
+        global clock
+        global botBaseInformation
         curr_time = datetime.datetime.now()
         if curr_time.hour == remainTimeHour and curr_time.minute == remainTimeMinute:
             print('到达时间点！开始提醒各群。')
             loadFile()
-            for groupId in groupClock:
+            for groupId, value in clock['groupClock'].items():
                 print('提醒：', groupId)
                 await sendMessage(groupId)
 
         elif curr_time.hour == 0 and curr_time.minute == 0:
             print('重置打卡数据')
             resetClock()
-            for groupId in testGroup:
+            for groupId, value in botBaseInformation['testGroup'].items():
                 await sendClockResetMessage(groupId)
 
         print(curr_time.hour, '：', curr_time.minute, '，监听中...')
