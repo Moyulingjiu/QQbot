@@ -32,8 +32,10 @@ def luck(memberId):
     
     a = random.random()
     b = random.random()
-    c = ((a*a + b*b) / 2) ** 0.5
-    c *= 100
+    c = ((a  *a + b * b) / 2) ** 0.5
+    if a < 0:
+        c = -c
+    c = (c + 1) * 50
     lucky["luck"][memberId] = int(c)
     writeFile()
     return '你今天的运势是：' + str(int(c))

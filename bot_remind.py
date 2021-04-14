@@ -16,24 +16,13 @@ from graia.broadcast import Broadcast
 # =============================================================
 # 以下为附加功能头文件
 
-from bs4 import BeautifulSoup  # 用来代替正则表达式取源码中相应标签的内容
-import random
-import requests  # 用来抓取网页的html源代码
-import socket  # 用做异常处理
-import time
-import http.client  # 用做异常处理
-import csv
-import execjs
-import numpy as np
-from matplotlib import pyplot as plt
-import uuid
-import linecache
 import datetime
-import threading
+import time
 # ==========================================================
 from plugins import dataManage
+from plugins import logManage
 
-remainTimeHour = 21
+remainTimeHour = 23
 remainTimeMinute = 00
 
 clock = {}
@@ -72,45 +61,54 @@ async def sendMessage(groupId):
     global app
     global clock
     group = await app.getGroup(groupId)
-    reply = '记得打卡呀~\n以下为未打卡名单：\n'
+    reply = '记得打卡呀~\n以下为未打卡名单：'
     message = MessageChain.create([
         Plain(reply)
     ])
     for key, value in clock['dictClockPeople'][groupId].items():
         if not value:
             message.plus(MessageChain.create([
-                At(key),
-                Plain('\n')
+                Plain('\n'),
+                At(key)
             ]))
 
     await app.sendGroupMessage(group, message)
     return True
 
-
+# 告诉管理员，已经重置打卡日期
 async def sendClockResetMessage(groupId):
     global app
     group = await app.getGroup(groupId)
-    reply = '已经重置打卡日期'
+    today = str(datetime.date.today())
+    reply = '已经重置打卡日期到' + today
+    logManage.log(today + ' 00:00\t已重置打卡日期')
     message = MessageChain.create([
         Plain(reply)
     ])
     await app.sendGroupMessage(group, message)
     return True
 
-
-def writeClockIn(groupId):
-    global clock
-    for key, value in clock['dictClockPeople'][groupId]:
-        clock['dictClockPeople'][groupId][key] = False
-
-
-def resetClock():
+# 重置打卡数据
+async def resetClock():
     global clock
     today = str(datetime.date.today())
     clock['clockDate'] = today
 
-    for key, group in clock['dictClockPeople'].items():
-        writeClockIn(key)
+    for key, value in clock['dictClockPeople'].items():
+        group = await app.getGroup(key)
+        reply = '以下为昨天未打卡名单：'
+        message = MessageChain.create([
+            Plain(reply)
+        ])
+
+        for key2, value2 in clock['dictClockPeople'][key]:
+            if not clock['dictClockPeople'][key][key2]:
+                message.plus(MessageChain.create([
+                    Plain('\n'),
+                    At(key2)
+                ]))
+            clock['dictClockPeople'][key][key2] = False
+        await app.sendGroupMessage(group, message)
     saveFile()
 
 
@@ -130,7 +128,8 @@ async def timeWatcher():
 
         elif curr_time.hour == 0 and curr_time.minute == 0:
             print('重置打卡数据')
-            resetClock()
+            loadFile()
+            await resetClock()
             for groupId, value in botBaseInformation['testGroup'].items():
                 await sendClockResetMessage(groupId)
 
