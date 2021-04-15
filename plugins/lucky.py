@@ -30,12 +30,11 @@ def luck(memberId):
     if lucky["luck"].__contains__(memberId):
         return '你今天的运势是：' + str(lucky["luck"][memberId])
     
-    a = random.random()
-    b = random.random()
-    c = ((a  *a + b * b) / 2) ** 0.5
-    if a < 0:
-        c = -c
-    c = (c + 1) * 50
+    c = random.normalvariate(50, 15)
+    if c < 0:
+        c = 0
+    elif c > 100:
+        c = 100
     lucky["luck"][memberId] = int(c)
     writeFile()
     return '你今天的运势是：' + str(int(c))
