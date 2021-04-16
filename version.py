@@ -10,8 +10,9 @@ def saveFile():
     global botBaseInformation
     dataManage.save_obj(botBaseInformation, 'baseInformation')
 
-string = input('请输入版本信息：')
 loadFile()
+print('当前版本：' + botBaseInformation['baseInformation']['version'])
+string = input('请输入版本信息：')
 botBaseInformation['baseInformation']['version'] = string
 saveFile()
 print('修改成功！')

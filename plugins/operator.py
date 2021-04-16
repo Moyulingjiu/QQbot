@@ -86,7 +86,12 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
         elif strMessage[:7] == '修改版本信息 ':
             reply = changeVersion(strMessage[7:], botBaseInformation)
             needReply = True
-
+        elif strMessage[:8] == '修改机器人名字 ':
+            reply = changeName(strMessage[8:], botBaseInformation)
+            needReply = True
+        elif strMessage[:8] == '修改机器人QQ ':
+            reply = changeQQ(strMessage[8:], botBaseInformation)
+            needReply = True
 
     # 非管理员权限
     if (strMessage == '小柒报告状况'):
@@ -132,7 +137,8 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
             reply = '未打卡名单：\n'
             for key, value in clock['dictClockPeople'][tmp].items():
                 if not value:
-                    reply += str(key) + '\n'
+                    member_tmp = await app.getMember(tmp, key)
+                    reply += member_tmp.name + '(' + str(key) + ')\n'
         else:
             reply = '该群没有打卡计划哦！'
         needReply = True
@@ -140,14 +146,6 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
         reply = '当前版本为：' + botBaseInformation['baseInformation']['version']
         needReply = True
     
-    elif strMessage[:7] == '加入打卡计划 ':
-        pass
-    elif strMessage[:7] == '退出打卡计划 ':
-        pass
-    elif strMessage[:7] == '锁定打卡计划':
-        pass
-    elif strMessage[:7] == '解锁打卡计划':
-        pass
     
     if needReply:
         if strMessage != '命令大全' and strMessage != '管理员帮助':
@@ -170,11 +168,26 @@ def addContributors(memberId, botBaseInformation):
         reply = '诶？这个QQ正确吗？'
     return reply
 
+# ==========================================================
+# 基本信息
+
+# 修改版本
 def changeVersion(version, botBaseInformation):
     botBaseInformation['baseInformation']['version'] = version
     dataManage.save_obj(botBaseInformation, 'baseInformation')
     return '修改成功！当前版本：' + version
 
+# 修改名字
+def changeName(name, botBaseInformation):
+    botBaseInformation['baseInformation']['Bot_Name'] = name
+    dataManage.save_obj(botBaseInformation, 'baseInformation')
+    return '修改成功！当前名字：' + name
+
+# 修改机器人QQ
+def changeQQ(qq, botBaseInformation):
+    botBaseInformation['baseInformation']['Bot_QQ'] = qq
+    dataManage.save_obj(botBaseInformation, 'baseInformation')
+    return '修改成功！当前QQ：' + qq
 
 # ==========================================================
 # 文件操作
