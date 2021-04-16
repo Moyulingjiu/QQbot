@@ -15,6 +15,8 @@ import plugins.dataManage as dataManage
 from plugins import talk
 from plugins import command
 from plugins import clockIn
+from plugins import logManage
+from plugins import getNow
 
 # ==========================================================
 # 监听模块
@@ -81,6 +83,10 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
         elif strMessage[:8] == '移除黑名单 人 ':
             reply = removeBlacklistMember(int(strMessage[8:]), botBaseInformation)
             needReply = True
+        elif strMessage[:7] == '修改版本信息 ':
+            reply = changeVersion(strMessage[7:], botBaseInformation)
+            needReply = True
+
 
     # 非管理员权限
     if (strMessage == '小柒报告状况'):
@@ -142,7 +148,12 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
         pass
     elif strMessage[:7] == '解锁打卡计划':
         pass
-
+    
+    if needReply:
+        if strMessage != '命令大全' and strMessage != '管理员帮助':
+            logManage.log(getNow.toString(), memberId, strMessage + "; 执行结果：" + reply)
+        else:
+            logManage.log(getNow.toString(), memberId, strMessage + "; 执行结果：参见command.py里的帮助内容")
 
     return (needReply, needAt, reply)
 
@@ -158,6 +169,12 @@ def addContributors(memberId, botBaseInformation):
     else:
         reply = '诶？这个QQ正确吗？'
     return reply
+
+def changeVersion(version, botBaseInformation):
+    botBaseInformation['baseInformation']['version'] = version
+    dataManage.save_obj(botBaseInformation, 'baseInformation')
+    return '修改成功！当前版本：' + version
+
 
 # ==========================================================
 # 文件操作

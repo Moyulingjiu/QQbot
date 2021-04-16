@@ -21,6 +21,7 @@ import time
 # ==========================================================
 from plugins import dataManage
 from plugins import logManage
+from plugins import getNow
 
 remainTimeHour = 23
 remainTimeMinute = 00
@@ -81,7 +82,7 @@ async def sendClockResetMessage(groupId):
     group = await app.getGroup(groupId)
     today = str(datetime.date.today())
     reply = '已经重置打卡日期到' + today
-    logManage.log(today + ' 00:00\t已重置打卡日期')
+    logManage.log(getNow.toString(), '已重置打卡日期到：' + today)
     message = MessageChain.create([
         Plain(reply)
     ])
@@ -101,7 +102,8 @@ async def resetClock():
             Plain(reply)
         ])
 
-        for key2, value2 in clock['dictClockPeople'][key]:
+        # 对于每个群进行提醒
+        for key2, value2 in clock['dictClockPeople'][key].items():
             if not clock['dictClockPeople'][key][key2]:
                 message.plus(MessageChain.create([
                     Plain('\n'),
@@ -138,5 +140,6 @@ async def timeWatcher():
 
 
 loadFile()
+logManage.log(getNow.toString(), 0, botBaseInformation['baseInformation']['Bot_Name'] + '的监听模块 启动！')
 
 loop.run_until_complete(timeWatcher())

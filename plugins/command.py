@@ -69,6 +69,7 @@ def allCommand():
     result += '6.添加黑名单 人 QQ号：将该人加入黑名单\n'
     result += '6.移除黑名单 群 群号：将该群移除黑名单\n'
     result += '6.移除黑名单 人 QQ号：将该人移除黑名单\n'
+    result += '7.修改版本信息 版本号：远程修改版本信息\n'
     return result
 
 

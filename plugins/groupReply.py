@@ -32,18 +32,9 @@ async def reply(botBaseInformation, messages, app, member):
     blacklist = (groupId in botBaseInformation['blacklistGroup']) or (memberId in botBaseInformation['blacklistMember'])
 
     if not blacklist:
-        # +1部分
-        global lastMessage
-        global lastAutorepeat
-        if lastMessage == messages and lastAutorepeat != messages and messages[0] != '[' and messages[:-1] != ']':
-            reply = messages
-            lastAutorepeat = messages
-            needReply = True
-        lastMessage = messages
 
         # 打卡计划
         if clock['groupClock'].__contains__(groupId):
-            isInit = True  # 涉及到文本操作，皆需要暂时终止相应
             if messages == '打卡':
                 reply = member.name + clockIn.clockIn(groupId, memberId)
                 #needAt = True
@@ -60,7 +51,6 @@ async def reply(botBaseInformation, messages, app, member):
                 reply = member.name + clockIn.stopClockIn(groupId)
                 # needAt = True
                 needReply = True
-            isInit = False
         # 正常回复部分
         if not needReply:
             if messages.find('@' + str(Bot_QQ)) != -1:
@@ -208,6 +198,17 @@ async def reply(botBaseInformation, messages, app, member):
                     reply = '怎么啦'
                     needReply = True
 
-    lastAutorepeat = reply
-    lastMessage = reply
+        # +1部分
+        if not needReply: # 如果需要回复，那么+1就被舍弃了
+            global lastMessage
+            global lastAutorepeat
+            if lastMessage == messages and lastAutorepeat != messages and messages[0] != '[' and messages[:-1] != ']':
+                reply = messages
+                lastAutorepeat = messages
+                needReply = True
+        lastMessage = messages # 无论如何上一条消息得改为本次的message
+    
+    if needReply:
+        lastAutorepeat = reply
+        lastMessage = reply
     return (needReply, needAt, reply)

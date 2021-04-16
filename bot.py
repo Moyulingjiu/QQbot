@@ -22,6 +22,8 @@ from graia.broadcast import Broadcast
 from plugins import dataManage
 from plugins import groupReply
 from plugins import friendReply
+from plugins import getNow
+from plugins import logManage
 
 
 # ==========================================================
@@ -92,6 +94,6 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
 
 
 init()
-
+logManage.log(getNow.toString(), 0, botBaseInformation['baseInformation']['Bot_Name'] + '启动！')
 # loop.run_until_complete(timeWatcher())
 app.launch_blocking()
