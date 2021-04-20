@@ -24,7 +24,7 @@ async def reply(botBaseInformation, messages, app, friend):
     reply = ''
     blacklist = (friend.id in botBaseInformation['blacklistMember'])
 
-    if not blacklist:
+    if (not blacklist) and (len(messages) != 0):
         if messages[0] == '*':
             reply = function(messages[1:])
             needReply = True

@@ -32,7 +32,7 @@ async def reply(botBaseInformation, messages, app, member):
     memberId = member.id
     blacklist = (groupId in botBaseInformation['blacklistGroup']) or (memberId in botBaseInformation['blacklistMember'])
 
-    if not blacklist:
+    if (not blacklist) and (len(messages) != 0):
 
         # 打卡计划
         if clock['groupClock'].__contains__(groupId):

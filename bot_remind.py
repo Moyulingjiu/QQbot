@@ -82,7 +82,9 @@ async def sendClockResetMessage(groupId):
     group = await app.getGroup(groupId)
     today = str(datetime.date.today())
     reply = '已经重置打卡日期到' + today
-    logManage.log(getNow.toString(), '已重置打卡日期到：' + today)
+
+    logManage.log(getNow.toString(), 0, '已重置打卡日期到：' + today)
+
     message = MessageChain.create([
         Plain(reply)
     ])
@@ -132,7 +134,7 @@ async def timeWatcher():
             print('重置打卡数据')
             loadFile()
             await resetClock()
-            for groupId, value in botBaseInformation['testGroup'].items():
+            for groupId in botBaseInformation['testGroup']:
                 await sendClockResetMessage(groupId)
 
         print(curr_time.hour, '：', curr_time.minute, '，监听中...')

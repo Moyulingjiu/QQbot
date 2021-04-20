@@ -15,7 +15,7 @@ def GetTarot():
         title += '正位'
     else:
         title += '逆位'
-    return title + '\n' + contain
+    return title + '\n' + contain[:-1]
 
 
 def GetTarot2():
@@ -23,7 +23,7 @@ def GetTarot2():
     side = random.randint(1, 14)
     title = linecache.getline(r'data/tarot2.txt', card * 16 + 1)
     contain = linecache.getline(r'data/tarot2.txt', card * 16 + side + 1)
-    return title + '\n' + contain
+    return title + contain[:-1]
 
 
 def tarot():
