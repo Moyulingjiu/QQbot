@@ -49,7 +49,7 @@ def tarotTime():
 
 def tarotIs():
     ans = 0
-    newline = '--------------------------\n'
+    newline = '\n--------------------------\n'
 
     tarot_1 = GetTarot()
     if tarot_1.split('\n')[1] == '正位':
@@ -74,7 +74,7 @@ def tarotIs():
 
 
 def tarotAns():
-    newline = '--------------------------\n'
+    newline = '\n--------------------------\n'
     tarot_1 = GetTarot()
     tarot_2 = GetTarot()
     tarot_3 = GetTarot()
@@ -85,7 +85,7 @@ def tarotAns():
 
 
 def tarotBussiness():
-    newline = '--------------------------\n'
+    newline = '\n--------------------------\n'
     tarot_1 = GetTarot()
     tarot_2 = GetTarot()
     tarot_3 = GetTarot()
@@ -96,7 +96,7 @@ def tarotBussiness():
 
 
 def tarotLove():
-    newline = '--------------------------\n'
+    newline = '\n--------------------------\n'
     tarot_1 = GetTarot()
     tarot_2 = GetTarot()
     tarot_3 = GetTarot()
@@ -107,7 +107,7 @@ def tarotLove():
 
 
 def tarotSelf():
-    newline = '--------------------------\n'
+    newline = '\n--------------------------\n'
     tarot_1 = GetTarot()
     tarot_2 = GetTarot()
     tarot_3 = GetTarot()
@@ -118,7 +118,7 @@ def tarotSelf():
 
 
 def tarotCross():
-    newline = '--------------------------\n'
+    newline = '\n--------------------------\n'
     tarot_1 = GetTarot()
     tarot_2 = GetTarot()
     tarot_3 = GetTarot()
@@ -131,7 +131,7 @@ def tarotCross():
 
 
 def tarotChoose():
-    newline = '--------------------------\n'
+    newline = '\n--------------------------\n'
     tarot_1 = GetTarot()
     tarot_2 = GetTarot()
     tarot_3 = GetTarot()
@@ -144,7 +144,7 @@ def tarotChoose():
 
 
 def tarotForward():
-    newline = '--------------------------\n'
+    newline = '\n--------------------------\n'
     tarot_1 = GetTarot()
     tarot_2 = GetTarot()
     tarot_3 = GetTarot()
@@ -159,7 +159,7 @@ def tarotForward():
 
 
 def tarotHexagram():
-    newline = '--------------------------\n'
+    newline = '\n--------------------------\n'
     tarot_1 = GetTarot()
     tarot_2 = GetTarot()
     tarot_3 = GetTarot()
@@ -176,7 +176,7 @@ def tarotHexagram():
 
 
 def tarotCelticCross():
-    newline = '--------------------------\n'
+    newline = '\n--------------------------\n'
     tarot_1 = GetTarot()
     tarot_2 = GetTarot()
     tarot_3 = GetTarot()

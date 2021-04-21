@@ -57,7 +57,7 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
     if memberId in botBaseInformation["administrator"]:
         # 管理员权限
         if strMessage[:6] == '添加管理员 ':
-            reply = addContributors(int(strMessage[6:]))
+            reply = addContributors(int(strMessage[6:]), botBaseInformation)
             needReply = True
         elif strMessage == '命令大全':
             reply = command.allCommand()
@@ -162,7 +162,7 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
     
     
     if needReply:
-        if strMessage != '命令大全' and strMessage != '管理员帮助':
+        if strMessage != '命令大全' and strMessage != '管理员帮助' and strMessage != '打卡计划管理帮助':
             logManage.log(getNow.toString(), memberId, strMessage + "; 执行结果：" + reply)
         else:
             logManage.log(getNow.toString(), memberId, strMessage + "; 执行结果：参见command.py里的帮助内容")

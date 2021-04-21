@@ -12,6 +12,7 @@ from plugins import weiboHot
 from plugins import clockIn
 from plugins import operator
 from plugins import autoReply
+from plugins import baidu
 
 # 朋友消息回复
 
@@ -27,7 +28,7 @@ async def reply(botBaseInformation, messages, app, friend):
 
     if (not blacklist) and (len(messages) != 0):
         if messages[0] == '*':
-            reply = function(messages[1:])
+            reply = command.function(messages[1:])
             needReply = True
         else:
             if messages[:3] == '天气 ':
@@ -45,14 +46,17 @@ async def reply(botBaseInformation, messages, app, friend):
             elif messages == '情话':
                 reply = talk.loveTalk()
                 needReply = True
-            elif messages == '你好':
-                reply = '你好呀，' + friend.nickname + "。小柒很高兴遇见你！"
+            elif messages == '骂我一句':
+                reply = talk.swear()
                 needReply = True
-            elif messages == '晚安':
-                reply = '晚安呀！' + friend.nickname
+            elif messages == '打卡帮助':
+                reply = command.helpClock()
                 needReply = True
-            elif messages == '早安':
-                reply = '早哦，' + friend.nickname
+            elif messages == '微博热搜':
+                reply = weiboHot.getHot()
+                needReply = True
+            elif messages == '百度热搜':
+                reply = baidu.getHot()
                 needReply = True
         if not needReply:
             if friend.id in botBaseInformation['contributors'] or friend.id in botBaseInformation['administrator']:

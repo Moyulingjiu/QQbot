@@ -86,7 +86,7 @@ async def reply(botBaseInformation, messages, app, member):
                 needReply = True
 
             if needReply:
-                logManage.log(getNow.toString(), memberId, messages + "; 执行结果：" + reply)
+                logManage.groupLog(getNow.toString(), memberId, groupId, member.group.name, messages + "; 执行结果：" + reply)
         # 正常回复部分
         if not needReply:
             if messages.find('@' + str(Bot_QQ)) != -1:

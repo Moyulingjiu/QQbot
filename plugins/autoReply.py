@@ -4,6 +4,8 @@ from plugins import AIchat
 
 # 自动回复部分
 
+screenWords = ['老公', '草', '为获取到相关信息', '上课', '{']
+
 def reply(messages, beAt, botBaseInformation, app, nickname):
     Bot_QQ = botBaseInformation['baseInformation']['Bot_QQ']
     Bot_Name = botBaseInformation['baseInformation']['Bot_Name']
@@ -12,6 +14,7 @@ def reply(messages, beAt, botBaseInformation, app, nickname):
     reply = ''
     
     if beAt:
+        AtMessage = messages.replace('@' + str(Bot_QQ) + ' ', '')
         AtMessage = messages.replace('@' + str(Bot_QQ), '')
         
         if AtMessage == '你好':
@@ -60,6 +63,9 @@ def reply(messages, beAt, botBaseInformation, app, nickname):
         else:
             reply = AIchat.getReply(botBaseInformation, AtMessage)
             needReply = True
+            for i in screenWords:
+                if reply.find(i) != -1:
+                    reply = '诶？'
     else:
         if messages == 'yjy爬':
             reply = 'yjy快爬'
@@ -114,8 +120,12 @@ def reply(messages, beAt, botBaseInformation, app, nickname):
                 reply = '怎么啦'
                 needReply = True
         else:
-            tmpNumber = random.randrange(0, 6)
+            tmpNumber = random.randrange(0, 4)
             if tmpNumber == 3:
                 reply = AIchat.getReply(botBaseInformation, messages)
+                needReply = True
+                for i in screenWords:
+                    if reply.find(i) != -1:
+                        needReply = False
 
     return (needReply, needAt, reply)
