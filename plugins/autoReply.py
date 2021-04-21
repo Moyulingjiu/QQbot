@@ -1,12 +1,16 @@
 import random
 
 from plugins import AIchat
+from plugins import dataManage
 
 # 自动回复部分
 
-screenWords = ['老公', '草', '为获取到相关信息', '上课', '{']
+screenWords = []
 
 def reply(messages, beAt, botBaseInformation, app, nickname):
+    global screenWords
+    screenWords = dataManage.load_obj('AIScreenWords')
+
     Bot_QQ = botBaseInformation['baseInformation']['Bot_QQ']
     Bot_Name = botBaseInformation['baseInformation']['Bot_Name']
     needReply = False

@@ -36,7 +36,7 @@ def clockIn(groupId, memberId):
     else:
         clock['dictClockPeople'][groupId][memberId]['clockIn'] = True
         clock['dictClockPeople'][groupId][memberId]['consecutiveDays'] += 1
-        reply = '，打卡成功哦！已经连续打卡 ' + str(clock['dictClockPeople'][groupId][memberId]['consecutiveDays']) + ' 天请继续坚持！'
+        reply = '，打卡成功哦！已经连续打卡 ' + str(clock['dictClockPeople'][groupId][memberId]['consecutiveDays']) + ' 天，请继续坚持！'
     writeClockIn()
     return reply
 

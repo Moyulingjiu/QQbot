@@ -59,6 +59,9 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
         if strMessage[:6] == '添加管理员 ':
             reply = addContributors(int(strMessage[6:]), botBaseInformation)
             needReply = True
+        elif strMessage[:6] == '删除管理员 ':
+            reply = delContributors(int(strMessage[6:]), botBaseInformation)
+            needReply = True
         elif strMessage == '命令大全':
             reply = command.allCommand()
             needReply = True
@@ -92,6 +95,20 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
         elif strMessage[:8] == '修改机器人QQ ':
             reply = changeQQ(strMessage[8:], botBaseInformation)
             needReply = True
+        elif strMessage[:6] == '添加屏蔽词 ':
+            reply = addScreenWord(strMessage[6:], botBaseInformation)
+            needReply = True
+        elif strMessage == '查看贡献者计划':
+            reply = str(botBaseInformation["contributors"])
+            needReply = True
+        elif strMessage == '查看黑名单 人':
+            reply = str(botBaseInformation["blacklistMember"])
+            needReply = True
+        elif strMessage == '查看黑名单 群':
+            reply = str(botBaseInformation["blacklistGroup"])
+            needReply = True
+
+
 
     # 非管理员权限
     if (strMessage == '小柒报告状况'):
@@ -159,6 +176,15 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
     elif strMessage == '版本信息':
         reply = '当前版本为：' + botBaseInformation['baseInformation']['version']
         needReply = True
+    elif strMessage[:4] == '添加回复':
+        stringList = strMessage.split(' ')
+        reply = addKeyReply(stringList[1], stringList[2])
+        needReply = True
+    elif strMessage[:4] == '删除回复':
+        stringList = strMessage.split(' ')
+        reply = delKeyReply(stringList[1], stringList[2])
+        needReply = True
+    
     
     
     if needReply:
@@ -171,13 +197,25 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
 
 
 def addContributors(memberId, botBaseInformation):
-    if memberId != 0:
+    if memberId > 0:
         if memberId in botBaseInformation["contributors"]:
             reply = '该成员已经在贡献者计划中了哦~'
         else:
             botBaseInformation["contributors"].append(memberId)
             dataManage.save_obj(botBaseInformation, 'baseInformation')
             reply = '添加成功~'
+    else:
+        reply = '诶？这个QQ正确吗？'
+    return reply
+
+def delContributors(memberId, botBaseInformation):
+    if memberId > 0:
+        if not (memberId in botBaseInformation["contributors"]):
+            reply = '该成员不在贡献者计划中哦~'
+        else:
+            botBaseInformation["contributors"].remove(memberId)
+            dataManage.save_obj(botBaseInformation, 'baseInformation')
+            reply = '删除成功~'
     else:
         reply = '诶？这个QQ正确吗？'
     return reply
@@ -242,3 +280,40 @@ def removeBlacklistMember(memberId, botBaseInformation):
     del botBaseInformation["blacklistMember"][botBaseInformation["blacklistMember"].index(memberId)]
     dataManage.save_obj(botBaseInformation, 'baseInformation')
     return '已经将人' + str(memberId) + '移除黑名单'
+
+
+def addScreenWord(word, botBaseInformation):
+    screenWords = dataManage.load_obj('AIScreenWords')
+    if word in screenWords:
+        return '已经有该屏蔽词了'
+    
+    screenWords.append(word)
+    dataManage.save_obj(screenWords, 'AIScreenWords')
+    return '添加成功~！'
+
+def addKeyReply(word, reply):
+    keyReply = dataManage.load_obj('keyReply')
+    if keyReply.__contains__(word):
+        if reply in keyReply[word]:
+            return '已经有该回复了'
+        else:
+            keyReply[word].append(reply)
+            dataManage.save_obj(keyReply, 'keyReply')
+            return '添加成功~'
+    else:
+        keyReply[word] = [reply]
+        dataManage.save_obj(keyReply, 'keyReply')
+        return '添加成功~'
+
+def delKeyReply(word, reply):
+    keyReply = dataManage.load_obj('keyReply')
+    if keyReply.__contains__(word):
+        if reply in keyReply[word]:
+            keyReply[word].remove(reply)
+            dataManage.save_obj(keyReply, 'keyReply')
+            return '删除成功~！'
+        else:
+            return '没有该词组配对~'
+    else:
+        return '没有该词组配对~'
+

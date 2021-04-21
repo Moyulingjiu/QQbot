@@ -16,6 +16,7 @@ from plugins import autoReply
 from plugins import baidu
 from plugins import logManage
 from plugins import getNow
+from plugins import keyReply
 
 lastAutorepeat = '' # 上一次加一的消息
 lastMessage = ''    # 上一条消息
@@ -142,6 +143,8 @@ async def reply(botBaseInformation, messages, app, member):
 
         # ==========================================
         # 此处为整活
+        if not needReply:
+            (needReply, needAt, reply) = keyReply.reply(messages)
         if not needReply:
             (needReply, needAt, reply) = autoReply.reply(messages, beAt, botBaseInformation, app, member.name)
             
