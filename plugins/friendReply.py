@@ -11,6 +11,7 @@ from plugins import command
 from plugins import weiboHot
 from plugins import clockIn
 from plugins import operator
+from plugins import autoReply
 
 # 朋友消息回复
 
@@ -56,5 +57,7 @@ async def reply(botBaseInformation, messages, app, friend):
         if not needReply:
             if friend.id in botBaseInformation['contributors'] or friend.id in botBaseInformation['administrator']:
                 (needReply, needAt, reply) = await operator.administratorOperation(messages, 0, friend.id, app, friend)
+        if not needReply:
+            (needReply, needAt, reply) = autoReply.reply(messages, True, botBaseInformation, app, friend.nickname)
     
     return (needReply, reply)

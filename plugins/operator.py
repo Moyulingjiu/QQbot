@@ -31,7 +31,7 @@ async def sendMessage(groupId, clock, app):
             Plain(reply)
         ])
         for key, value in clock['dictClockPeople'][groupId].items():
-            if not value:
+            if not value['clockIn']:
                 message.plus(MessageChain.create([
                     Plain('\n'),
                     At(key)
@@ -136,11 +136,25 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
         if clock['groupClock'].__contains__(tmp):
             reply = '未打卡名单：\n'
             for key, value in clock['dictClockPeople'][tmp].items():
-                if not value:
+                if not value['clockIn']:
                     member_tmp = await app.getMember(tmp, key)
                     reply += member_tmp.name + '(' + str(key) + ')\n'
         else:
             reply = '该群没有打卡计划哦！'
+        needReply = True
+    elif strMessage == '打卡情况':
+        tmp = groupId
+        if clock['groupClock'].__contains__(tmp):
+            reply = '未打卡名单：\n'
+            for key, value in clock['dictClockPeople'][tmp].items():
+                if not value['clockIn']:
+                    member_tmp = await app.getMember(tmp, key)
+                    reply += member_tmp.name + '(' + str(key) + ')\n'
+        else:
+            reply = '本群没有打卡计划哦！'
+        needReply = True
+    elif strMessage == '打卡计划管理帮助':
+        reply = command.helpClockAdmministor()
         needReply = True
     elif strMessage == '版本信息':
         reply = '当前版本为：' + botBaseInformation['baseInformation']['version']

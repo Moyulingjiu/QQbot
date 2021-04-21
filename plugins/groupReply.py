@@ -13,6 +13,9 @@ from plugins import clockIn
 from plugins import operator
 from plugins import dataManage
 from plugins import autoReply
+from plugins import baidu
+from plugins import logManage
+from plugins import getNow
 
 lastAutorepeat = '' # 上一次加一的消息
 lastMessage = ''    # 上一条消息
@@ -31,6 +34,7 @@ async def reply(botBaseInformation, messages, app, member):
     groupId = member.group.id
     memberId = member.id
     blacklist = (groupId in botBaseInformation['blacklistGroup']) or (memberId in botBaseInformation['blacklistMember'])
+    isAdministrator = (memberId in botBaseInformation['administrator'] or memberId in botBaseInformation['contributors'])
 
     if (not blacklist) and (len(messages) != 0):
 
@@ -38,24 +42,51 @@ async def reply(botBaseInformation, messages, app, member):
         if clock['groupClock'].__contains__(groupId):
             if messages == '打卡':
                 reply = member.name + clockIn.clockIn(groupId, memberId)
-                #needAt = True
                 needReply = True
             elif messages == '加入打卡计划':
                 reply = member.name + clockIn.joinClockIn(groupId, memberId)
-                # needAt = True
                 needReply = True
             elif messages == '退出打卡计划':
                 reply = member.name + clockIn.quitClockIn(groupId, memberId)
-                # needAt = True
                 needReply = True
-            elif messages == '终止打卡计划' and (memberId in botBaseInformation['administrator'] or memberId in botBaseInformation['contributors']):
+            elif messages == '终止打卡计划' and isAdministrator:
                 reply = member.name + clockIn.stopClockIn(groupId)
-                # needAt = True
                 needReply = True
-            elif messages == '锁定打卡计划' and (memberId in botBaseInformation['administrator'] or memberId in botBaseInformation['contributors']):
-                pass
-            elif messages == '解锁打卡计划' and (memberId in botBaseInformation['administrator'] or memberId in botBaseInformation['contributors']):
-                pass
+
+            elif messages == '锁定打卡计划' and isAdministrator:
+                reply = clockIn.lockClockIn(groupId)
+                needReply = True
+            elif messages == '解锁打卡计划' and isAdministrator:
+                reply = clockIn.unlockClockIn(groupId)
+                needReply = True
+            elif messages == '锁定打卡计划 加入' and isAdministrator:
+                reply = clockIn.lockClockInEnter(groupId)
+                needReply = True
+            elif messages == '解锁打卡计划 加入' and isAdministrator:
+                reply = clockIn.unlockClockInEnter(groupId)
+                needReply = True
+            elif messages == '锁定打卡计划 退出' and isAdministrator:
+                reply = clockIn.lockClockInExit(groupId)
+                needReply = True
+            elif messages == '解锁打卡计划 退出' and isAdministrator:
+                reply = clockIn.unlockClockInExit(groupId)
+                needReply = True
+
+            elif messages == '取消打卡提醒' and isAdministrator:
+                reply = clockIn.offRemind(groupId)
+                needReply = True
+            elif messages == '开启打卡提醒' and isAdministrator:
+                reply = clockIn.onRemind(groupId)
+                needReply = True
+            elif messages == '取消打卡总结' and isAdministrator:
+                reply = clockIn.offSummary(groupId)
+                needReply = True
+            elif messages == '开启打卡总结' and isAdministrator:
+                reply = clockIn.onSummary(groupId)
+                needReply = True
+
+            if needReply:
+                logManage.log(getNow.toString(), memberId, messages + "; 执行结果：" + reply)
         # 正常回复部分
         if not needReply:
             if messages.find('@' + str(Bot_QQ)) != -1:
@@ -99,17 +130,20 @@ async def reply(botBaseInformation, messages, app, member):
                     elif messages == '微博热搜':
                         reply = weiboHot.getHot()
                         needReply = True
+                    elif messages == '百度热搜':
+                        reply = baidu.getHot()
+                        needReply = True
 
 
                     # ==========================================
                     # 之下为管理员模块
-                    elif memberId in botBaseInformation['contributors'] or memberId in botBaseInformation['administrator']:
+                    elif isAdministrator:
                         (needReply, needAt, reply) = await operator.administratorOperation(messages, groupId, memberId, app, member, botBaseInformation)
 
         # ==========================================
         # 此处为整活
         if not needReply:
-            (needReply, needAt, reply) = autoReply.reply(messages, beAt, botBaseInformation, app, member)
+            (needReply, needAt, reply) = autoReply.reply(messages, beAt, botBaseInformation, app, member.name)
             
 
         # +1部分

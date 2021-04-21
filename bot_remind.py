@@ -61,20 +61,20 @@ app = GraiaMiraiApplication(
 async def sendMessage(groupId):
     global app
     global clock
-    group = await app.getGroup(groupId)
-    reply = '记得打卡呀~\n以下为未打卡名单：'
-    message = MessageChain.create([
-        Plain(reply)
-    ])
-    for key, value in clock['dictClockPeople'][groupId].items():
-        if not value:
-            message.plus(MessageChain.create([
-                Plain('\n'),
-                At(key)
-            ]))
+    if clock['groupClock'][groupId]['remind']:
+        group = await app.getGroup(groupId)
+        reply = '记得打卡呀~\n以下为未打卡名单：'
+        message = MessageChain.create([
+            Plain(reply)
+        ])
+        for key, value in clock['dictClockPeople'][groupId].items():
+            if not value['clockIn']:
+                message.plus(MessageChain.create([
+                    Plain('\n'),
+                    At(key)
+                ]))
 
-    await app.sendGroupMessage(group, message)
-    return True
+        await app.sendGroupMessage(group, message)
 
 # 告诉管理员，已经重置打卡日期
 async def sendClockResetMessage(groupId):
@@ -99,6 +99,13 @@ async def resetClock():
 
     for key, value in clock['dictClockPeople'].items():
         group = await app.getGroup(key)
+        
+        memberlist = await app.memberList(group.id)
+        memberIdList = []
+        for i in memberlist:
+            memberIdList.append(i.id)
+        print(memberIdList)
+
         reply = '以下为昨天未打卡名单：'
         message = MessageChain.create([
             Plain(reply)
@@ -106,13 +113,19 @@ async def resetClock():
 
         # 对于每个群进行提醒
         for key2, value2 in clock['dictClockPeople'][key].items():
-            if not clock['dictClockPeople'][key][key2]:
-                message.plus(MessageChain.create([
-                    Plain('\n'),
-                    At(key2)
-                ]))
-            clock['dictClockPeople'][key][key2] = False
-        await app.sendGroupMessage(group, message)
+            if key2 in memberIdList:
+                if not clock['dictClockPeople'][key][key2]['clockIn']:
+                    message.plus(MessageChain.create([
+                        Plain('\n'),
+                        At(key2)
+                    ]))
+                    clock['dictClockPeople'][key][key2]['consecutiveDays'] = 0 # 如果昨天没有打卡则重置打卡日期
+                else:
+                    clock['dictClockPeople'][key][key2]['clockIn'] = False
+            else:
+                del clock['dictClockPeople'][key][key2] # 如果这个人已经退群，则删除
+        if clock['groupClock'][key]['summary']:
+            await app.sendGroupMessage(group, message)
     saveFile()
 
 
@@ -130,7 +143,7 @@ async def timeWatcher():
                 print('提醒：', groupId)
                 await sendMessage(groupId)
 
-        elif curr_time.hour == 0 and curr_time.minute == 0:
+        elif curr_time.hour == 10 and curr_time.minute == 19:
             print('重置打卡数据')
             loadFile()
             await resetClock()
