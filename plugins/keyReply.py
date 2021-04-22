@@ -3,16 +3,19 @@
 from plugins import dataManage
 import random
 
-def reply(strMessage):
-    keyReply = dataManage.load_obj('keyReply')
+def reply(strMessage, member):
+    keyReply = dataManage.load_obj('keyReply/' + str(member.group.id))
     needReply = False
     needAt = False
     reply = ''
 
-    if keyReply.__contains__(strMessage):
-        replyList = keyReply[strMessage]
-        tmpNumber = random.randrange(0, len(replyList))
-        reply = replyList[tmpNumber]
-        needReply = True
+    rand = random.randrange(0, 100)
+    if rand < 50:
+        if keyReply.__contains__(strMessage):
+            replyList = keyReply[strMessage]
+            if len(replyList) > 0:
+                tmpNumber = random.randrange(0, len(replyList))
+                reply = replyList[tmpNumber]
+                needReply = True
 
     return (needReply, needAt, reply)

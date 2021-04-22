@@ -124,8 +124,8 @@ def reply(messages, beAt, botBaseInformation, app, nickname):
                 reply = '怎么啦'
                 needReply = True
         else:
-            tmpNumber = random.randrange(0, 4)
-            if tmpNumber == 3:
+            tmpNumber = random.randrange(0, 100)
+            if tmpNumber < 5:
                 reply = AIchat.getReply(botBaseInformation, messages)
                 needReply = True
                 for i in screenWords:

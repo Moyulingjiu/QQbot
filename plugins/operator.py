@@ -56,10 +56,10 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
 
     if memberId in botBaseInformation["administrator"]:
         # 管理员权限
-        if strMessage[:6] == '添加管理员 ':
+        if strMessage[:6] == '添加贡献者 ':
             reply = addContributors(int(strMessage[6:]), botBaseInformation)
             needReply = True
-        elif strMessage[:6] == '删除管理员 ':
+        elif strMessage[:6] == '删除贡献者 ':
             reply = delContributors(int(strMessage[6:]), botBaseInformation)
             needReply = True
         elif strMessage == '命令大全':
@@ -97,6 +97,9 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
             needReply = True
         elif strMessage[:6] == '添加屏蔽词 ':
             reply = addScreenWord(strMessage[6:], botBaseInformation)
+            needReply = True
+        elif strMessage == '查看管理员':
+            reply = str(botBaseInformation["administrator"])
             needReply = True
         elif strMessage == '查看贡献者计划':
             reply = str(botBaseInformation["contributors"])
@@ -176,14 +179,26 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
     elif strMessage == '版本信息':
         reply = '当前版本为：' + botBaseInformation['baseInformation']['version']
         needReply = True
-    elif strMessage[:4] == '添加回复':
+    elif strMessage[:5] == '添加回复 ':
         stringList = strMessage.split(' ')
-        reply = addKeyReply(stringList[1], stringList[2])
-        needReply = True
-    elif strMessage[:4] == '删除回复':
+        if len(stringList) >= 3:
+            reply = addKeyReply(stringList[1], stringList[2], member)
+            needReply = True
+    elif strMessage[:5] == '删除回复 ':
         stringList = strMessage.split(' ')
-        reply = delKeyReply(stringList[1], stringList[2])
-        needReply = True
+        if len(stringList) >= 3:
+            reply = delKeyReply(stringList[1], stringList[2], member)
+            needReply = True
+    elif strMessage[:5] == '添加回复*':
+        stringList = strMessage.split('*')
+        if len(stringList) >= 3:
+            reply = addKeyReply(stringList[1], stringList[2], member)
+            needReply = True
+    elif strMessage[:5] == '删除回复*':
+        stringList = strMessage.split('*')
+        if len(stringList) >= 3:
+            reply = delKeyReply(stringList[1], stringList[2], member)
+            needReply = True
     
     
     
@@ -291,26 +306,28 @@ def addScreenWord(word, botBaseInformation):
     dataManage.save_obj(screenWords, 'AIScreenWords')
     return '添加成功~！'
 
-def addKeyReply(word, reply):
-    keyReply = dataManage.load_obj('keyReply')
+def addKeyReply(word, reply, member):
+    keyReply = dataManage.load_obj('keyReply/' + str(member.group.id))
     if keyReply.__contains__(word):
         if reply in keyReply[word]:
             return '已经有该回复了'
         else:
             keyReply[word].append(reply)
-            dataManage.save_obj(keyReply, 'keyReply')
+            dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id))
             return '添加成功~'
     else:
         keyReply[word] = [reply]
-        dataManage.save_obj(keyReply, 'keyReply')
+        dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id))
         return '添加成功~'
 
-def delKeyReply(word, reply):
-    keyReply = dataManage.load_obj('keyReply')
+def delKeyReply(word, reply, member):
+    keyReply = dataManage.load_obj('keyReply/' + str(member.group.id))
     if keyReply.__contains__(word):
         if reply in keyReply[word]:
             keyReply[word].remove(reply)
-            dataManage.save_obj(keyReply, 'keyReply')
+            if len(keyReply[word]) == 0:
+                del keyReply[word]
+            dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id))
             return '删除成功~！'
         else:
             return '没有该词组配对~'

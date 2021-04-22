@@ -55,4 +55,4 @@ def getHot():
         contain = i.get_text()
         result += str(index + 1) + ':' + contain + '\n'
 
-    return result
+    return result[:-1]

@@ -58,9 +58,12 @@ async def reply(botBaseInformation, messages, app, friend):
             elif messages == '百度热搜':
                 reply = baidu.getHot()
                 needReply = True
+            elif messages == '运势':
+                reply = lucky.luck(friend.id)
+                needReply = True
         if not needReply:
             if friend.id in botBaseInformation['contributors'] or friend.id in botBaseInformation['administrator']:
-                (needReply, needAt, reply) = await operator.administratorOperation(messages, 0, friend.id, app, friend)
+                (needReply, needAt, reply) = await operator.administratorOperation(messages, 0, friend.id, app, friend, botBaseInformation)
         if not needReply:
             (needReply, needAt, reply) = autoReply.reply(messages, True, botBaseInformation, app, friend.nickname)
     

@@ -35,7 +35,7 @@ async def reply(botBaseInformation, messages, app, member):
     groupId = member.group.id
     memberId = member.id
     blacklist = (groupId in botBaseInformation['blacklistGroup']) or (memberId in botBaseInformation['blacklistMember'])
-    isAdministrator = (memberId in botBaseInformation['administrator'] or memberId in botBaseInformation['contributors'])
+    isAdministrator = (memberId in botBaseInformation['administrator']) or (memberId in botBaseInformation['contributors']) or (memberId == botBaseInformation['baseInformation']['Master_QQ'])
 
     if (not blacklist) and (len(messages) != 0):
 
@@ -93,7 +93,7 @@ async def reply(botBaseInformation, messages, app, member):
             if messages.find('@' + str(Bot_QQ)) != -1:
                 beAt = True
             else:
-                if messages[0] == '*':
+                if messages[0] == '*' and messages[1] != '由':
                     reply = command.function(messages[1:])
                     needReply = True
                 else:
@@ -144,7 +144,7 @@ async def reply(botBaseInformation, messages, app, member):
         # ==========================================
         # 此处为整活
         if not needReply:
-            (needReply, needAt, reply) = keyReply.reply(messages)
+            (needReply, needAt, reply) = keyReply.reply(messages, member)
         if not needReply:
             (needReply, needAt, reply) = autoReply.reply(messages, beAt, botBaseInformation, app, member.name)
             
