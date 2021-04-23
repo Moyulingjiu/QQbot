@@ -9,7 +9,7 @@ def getHot():
     data = soup.select('#pl_top_realtimehot > table > tbody > tr > td.td-02 > a')
 
     result = ''
-    for index in range(0, 16):
+    for index in range(0, 7):
         i = data[index]
         link = i.get('href')
         contain = i.get_text()

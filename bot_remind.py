@@ -67,13 +67,18 @@ async def sendMessage(groupId):
         message = MessageChain.create([
             Plain(reply)
         ])
+        numUnClockIn = 0
         for key, value in clock['dictClockPeople'][groupId].items():
             if not value['clockIn']:
                 message.plus(MessageChain.create([
                     Plain('\n'),
                     At(key)
                 ]))
-
+                numUnClockIn += 1
+        if numUnClockIn == 0:
+            message = MessageChain.create([
+                Plain('所有人都完成了打卡，小柒深感欣慰~')
+            ])
         await app.sendGroupMessage(group, message)
 
 # 告诉管理员，已经重置打卡日期
@@ -106,10 +111,12 @@ async def resetClock():
             memberIdList.append(i.id)
         print(memberIdList)
 
+
         reply = '以下为昨天未打卡名单：'
         message = MessageChain.create([
             Plain(reply)
         ])
+        numUnClockIn = 0
 
         # 对于每个群进行提醒
         for key2, value2 in clock['dictClockPeople'][key].items():
@@ -120,11 +127,16 @@ async def resetClock():
                         At(key2)
                     ]))
                     clock['dictClockPeople'][key][key2]['consecutiveDays'] = 0 # 如果昨天没有打卡则重置打卡日期
+                    numUnClockIn += 1
                 else:
                     clock['dictClockPeople'][key][key2]['clockIn'] = False
             else:
                 del clock['dictClockPeople'][key][key2] # 如果这个人已经退群，则删除
         if clock['groupClock'][key]['summary']:
+            if numUnClockIn == 0:
+                message = MessageChain.create([
+                    Plain('昨天所有人都完成了打卡，超厉害！')
+                ])
             await app.sendGroupMessage(group, message)
     saveFile()
 
@@ -143,14 +155,19 @@ async def timeWatcher():
                 print('提醒：', groupId)
                 await sendMessage(groupId)
 
-        elif curr_time.hour == 10 and curr_time.minute == 19:
+        elif curr_time.hour == 0 and curr_time.minute == 0:
             print('重置打卡数据')
             loadFile()
             await resetClock()
             for groupId in botBaseInformation['testGroup']:
                 await sendClockResetMessage(groupId)
 
-        print(curr_time.hour, '：', curr_time.minute, '，监听中...')
+        print(curr_time.hour, '：', curr_time.minute, '：')
+        botBaseInformation = dataManage.load_obj('baseInformation')
+        print('\t*上一分钟回复为：', botBaseInformation['reply']['lastMinute'])
+        botBaseInformation['reply']['lastMinute'] = 0
+        dataManage.save_obj(botBaseInformation, 'baseInformation')
+        print('\t*已将上一分钟回复其置为：0')
         time.sleep(60)
 
 

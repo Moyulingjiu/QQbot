@@ -144,7 +144,7 @@ async def reply(botBaseInformation, messages, app, member):
         # ==========================================
         # 此处为整活
         if not needReply:
-            (needReply, needAt, reply) = keyReply.reply(messages, member)
+            (needReply, needAt, reply) = keyReply.reply(messages, member, botBaseInformation)
         if not needReply:
             (needReply, needAt, reply) = autoReply.reply(messages, beAt, botBaseInformation, app, member.name)
             

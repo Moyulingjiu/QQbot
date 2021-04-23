@@ -3,19 +3,20 @@
 from plugins import dataManage
 import random
 
-def reply(strMessage, member):
+def reply(strMessage, member, botBaseInformation):
     keyReply = dataManage.load_obj('keyReply/' + str(member.group.id))
     needReply = False
     needAt = False
     reply = ''
-
-    rand = random.randrange(0, 100)
-    if rand < 50:
+    if botBaseInformation['reply']['lastMinute'] <= 10:
         if keyReply.__contains__(strMessage):
             replyList = keyReply[strMessage]
             if len(replyList) > 0:
                 tmpNumber = random.randrange(0, len(replyList))
                 reply = replyList[tmpNumber]
                 needReply = True
+                botBaseInformation['reply']['lastMinute'] += 1
+                dataManage.save_obj(botBaseInformation, 'baseInformation')
+
 
     return (needReply, needAt, reply)

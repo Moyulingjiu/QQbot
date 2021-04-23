@@ -64,6 +64,9 @@ def reply(messages, beAt, botBaseInformation, app, nickname):
         elif AtMessage == '早安':
             reply = '早哦，' + nickname
             needReply = True
+        elif AtMessage == '帮助':
+            reply = '你可以输入*help来查询帮助哦~'
+            needReply = True
         else:
             reply = AIchat.getReply(botBaseInformation, AtMessage)
             needReply = True
@@ -126,10 +129,14 @@ def reply(messages, beAt, botBaseInformation, app, nickname):
         else:
             tmpNumber = random.randrange(0, 100)
             if tmpNumber < 5:
-                reply = AIchat.getReply(botBaseInformation, messages)
-                needReply = True
-                for i in screenWords:
-                    if reply.find(i) != -1:
-                        needReply = False
+                if botBaseInformation['reply']['lastMinute'] <= 10:
+                    reply = AIchat.getReply(botBaseInformation, messages)
+                    needReply = True
+                    for i in screenWords:
+                        if reply.find(i) != -1:
+                            needReply = False
+                    if needReply:
+                        botBaseInformation['reply']['lastMinute'] += 1
+                        dataManage.save_obj(botBaseInformation, 'baseInformation')
 
     return (needReply, needAt, reply)
