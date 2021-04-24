@@ -94,6 +94,12 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
         elif strMessage[:6] == '添加屏蔽词 ':
             reply = addScreenWord(strMessage[6:], botBaseInformation)
             needReply = True
+        elif strMessage[:6] == '删除屏蔽词 ':
+            reply = delScreenWord(strMessage[6:], botBaseInformation)
+            needReply = True
+        elif strMessage == '查看屏蔽词':
+            reply = viewScreenWord(botBaseInformation)
+            needReply = True
         elif strMessage == '查看管理员':
             reply = str(botBaseInformation["administrator"])
             needReply = True
@@ -154,13 +160,19 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
             reply = '当前版本为：' + botBaseInformation['baseInformation']['version']
             needReply = True
 
+        elif strMessage == '开启脏话':
+            if groupId > 0:
+                reply = addcursePlanGroup(groupId, botBaseInformation)
+                needReply = True
+        elif strMessage == '关闭脏话':
+            if groupId > 0:
+                reply = delcursePlanGroup(groupId, botBaseInformation)
+                needReply = True
+        
 
     # 贡献者权限
     if memberId in botBaseInformation["contributors"] or passport:
-        if (strMessage == Bot_Name):
-            reply = '我在！'
-            needReply = True
-        elif strMessage == '贡献者帮助':
+        if strMessage == '贡献者帮助':
             reply = command.helpContributor()
             needReply = True
 
@@ -238,6 +250,9 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
 
     return (needReply, needAt, reply)
 
+
+# ==========================================================
+# 权限操作
 
 # 添加贡献者
 def addContributors(memberId, botBaseInformation):
@@ -335,7 +350,7 @@ def changeQQ(qq, botBaseInformation):
     return '修改成功！当前QQ：' + qq
 
 # ==========================================================
-# 文件操作
+# 黑名单操作
 
 def addBlacklistGroup(groupId, botBaseInformation):
     if groupId in botBaseInformation["blacklistGroup"]:
@@ -374,7 +389,10 @@ def removeBlacklistMember(memberId, botBaseInformation):
     dataManage.save_obj(botBaseInformation, 'baseInformation')
     return '已经将人' + str(memberId) + '移除黑名单'
 
+# ==========================================================
+# 屏蔽词操作
 
+# 添加屏蔽词
 def addScreenWord(word, botBaseInformation):
     screenWords = dataManage.load_obj('AIScreenWords')
     if word in screenWords:
@@ -383,6 +401,23 @@ def addScreenWord(word, botBaseInformation):
     screenWords.append(word)
     dataManage.save_obj(screenWords, 'AIScreenWords')
     return '添加成功~！'
+
+# 删除屏蔽词
+def delScreenWord(word, botBaseInformation):
+    screenWords = dataManage.load_obj('AIScreenWords')
+    if not word in screenWords:
+        return '没有这个词语哦！'
+    screenWords.remove(word)
+    dataManage.save_obj(screenWords, 'AIScreenWords')
+    return '删除成功'
+
+# 查看屏蔽词
+def viewScreenWord(botBaseInformation):
+    screenWords = dataManage.load_obj('AIScreenWords')
+    return str(screenWords)
+
+# ==========================================================
+# 关键词操作
 
 def addKeyReply(word, reply, member):
     keyReply = dataManage.load_obj('keyReply/' + str(member.group.id))
@@ -412,3 +447,19 @@ def delKeyReply(word, reply, member):
     else:
         return '没有该词组配对~'
 
+# ==========================================================
+# 骂人计划操作
+
+def addcursePlanGroup(groupId, botBaseInformation):
+    if groupId in botBaseInformation['cursePlanGroup']:
+        return '该群已经开启了骂人哦~'
+    botBaseInformation['cursePlanGroup'].append(groupId)
+    dataManage.save_obj(botBaseInformation, 'baseInformation')
+    return '已开启∑(っ°Д°;)っ'
+    
+def delcursePlanGroup(groupId, botBaseInformation):
+    if not groupId in botBaseInformation['cursePlanGroup']:
+        return '该群本来就没有开启了骂人!!!∑(ﾟДﾟノ)ノ'
+    botBaseInformation['cursePlanGroup'].remove(groupId)
+    dataManage.save_obj(botBaseInformation, 'baseInformation')
+    return '已关闭，切，懦夫~'

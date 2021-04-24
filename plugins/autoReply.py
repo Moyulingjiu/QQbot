@@ -20,6 +20,7 @@ def reply(messages, beAt, botBaseInformation, app, nickname):
     if beAt:
         AtMessage = messages.replace('@' + str(Bot_QQ) + ' ', '')
         AtMessage = messages.replace('@' + str(Bot_QQ), '')
+        AtMessage = AtMessage.strip()
         
         if AtMessage == '你好':
             reply = '你好呀，' + nickname + '。小柒很高兴遇见你！'

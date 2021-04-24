@@ -141,10 +141,12 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
 
     getMessage = await app.messageFromId(source)
     strMessage = getMessage.messageChain.asDisplay()
+    print('收到消息：' + strMessage)
 
     (needReply, needAt, reply) = await groupReply.reply(botBaseInformation, strMessage, app, member)
 
     if needReply:
+        print('回复消息：' + reply)
         if needAt:
             await app.sendGroupMessage(member.group, MessageChain.create([
                 At(member.id),

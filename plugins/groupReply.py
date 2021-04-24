@@ -115,7 +115,7 @@ async def reply(botBaseInformation, messages, app, member):
                     elif messages == '情话':
                         reply = talk.loveTalk()
                         needReply = True
-                    elif messages == '骂我一句' and groupId in botBaseInformation['cursePlanGroup']:
+                    elif (messages == '骂我一句' or messages == '骂我' or messages == '再骂' or messages == '你再骂') and groupId in botBaseInformation['cursePlanGroup']:
                         reply = talk.swear()
                         needReply = True
                     elif messages == '运势':
@@ -134,13 +134,18 @@ async def reply(botBaseInformation, messages, app, member):
                     elif messages == '百度热搜':
                         reply = baidu.getHot()
                         needReply = True
+                    elif messages == Bot_Name:
+                        reply = '我在！'
+                        needReply = True
 
 
                     # ==========================================
                     # 之下为管理员模块
                     elif isAdministrator:
                         (needReply, needAt, reply) = await operator.administratorOperation(messages, groupId, memberId, app, member, botBaseInformation)
-
+                    elif messages == '我的权限':
+                        reply = '当前权限：普通用户\n可以输入*help来获取指令帮助哦~'
+                        needReply = True
         # ==========================================
         # 此处为整活
         if not needReply:

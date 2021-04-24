@@ -61,9 +61,15 @@ async def reply(botBaseInformation, messages, app, friend):
             elif messages == '运势':
                 reply = lucky.luck(friend.id)
                 needReply = True
+            elif messages == Bot_Name:
+                reply = '我在！'
+                needReply = True
         if not needReply:
             if friend.id in botBaseInformation['contributors'] or friend.id in botBaseInformation['administrator']:
                 (needReply, needAt, reply) = await operator.administratorOperation(messages, 0, friend.id, app, friend, botBaseInformation)
+            elif messages == '我的权限':
+                reply = '当前权限：普通用户\n可以输入*help来获取指令帮助哦~'
+                needReply = True
         if not needReply:
             (needReply, needAt, reply) = autoReply.reply(messages, True, botBaseInformation, app, friend.nickname)
     

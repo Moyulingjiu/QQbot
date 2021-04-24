@@ -102,8 +102,13 @@ async def resetClock():
     today = str(datetime.date.today())
     clock['clockDate'] = today
 
+    nullGroup = []
+
     for key, value in clock['dictClockPeople'].items():
         group = await app.getGroup(key)
+        if group == None:
+            nullGroup.append(group)
+            continue
         
         memberlist = await app.memberList(group.id)
         memberIdList = []
@@ -138,6 +143,11 @@ async def resetClock():
                     Plain('昨天所有人都完成了打卡，超厉害！')
                 ])
             await app.sendGroupMessage(group, message)
+    
+    for group in nullGroup:
+        del clock['dictClockPeople'][group]
+        del clock['groupClock'][group]
+
     saveFile()
 
 
