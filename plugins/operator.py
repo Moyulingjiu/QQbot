@@ -110,6 +110,18 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
             reply = delAdministrator(int(strMessage[6:]), botBaseInformation)
             needReply = True
 
+        elif strMessage[:5] == '开启脏话 ':
+            reply = addcursePlanGroup(int(strMessage[5:]), botBaseInformation)
+            needReply = True
+        elif strMessage[:5] == '关闭脏话 ':
+            reply = delcursePlanGroup(int(strMessage[5:]), botBaseInformation)
+            needReply = True
+        elif strMessage == '清空每分钟回复条数':
+            botBaseInformation['reply']['lastMinute'] = 0
+            dataManage.save_obj(botBaseInformation, 'baseInformation')
+            reply = '清空成功！'
+            needReply = True
+        
     # 管理员权限
     if memberId in botBaseInformation["administrator"] or passport:
         passport = True
@@ -194,7 +206,7 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
             else:
                 reply = '该群没有打卡计划哦！'
             needReply = True
-        elif strMessage == '打卡情况':
+        elif strMessage == '打卡情况' and groupId != 0:
             tmp = groupId
             if clock['groupClock'].__contains__(tmp):
                 reply = '未打卡名单：\n'
@@ -209,27 +221,105 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
             reply = command.helpClockAdmministor()
             needReply = True
 
-        elif strMessage[:5] == '添加回复 ':
+        elif strMessage == '调教帮助':
+            reply = command.helpTraining()
+            needReply = True
+
+
+        elif strMessage[:5] == '添加回复 ' and groupId != 0:
             stringList = strMessage.split(' ')
-            if len(stringList) >= 3:
-                reply = addKeyReply(stringList[1], stringList[2], member)
+            if len(stringList) == 3:
+                reply = addQuestionReply(stringList[1], stringList[2], member)
                 needReply = True
-        elif strMessage[:5] == '删除回复 ':
+            elif len(stringList) == 4:
+                reply = addQuestionReplyAt(stringList[1], stringList[2], stringList[3], member)
+                needReply = True
+            else:
+                reply = '格式错误！请检查空格'
+                needReply = True
+        elif strMessage[:5] == '删除回复 ' and groupId != 0:
             stringList = strMessage.split(' ')
-            if len(stringList) >= 3:
-                reply = delKeyReply(stringList[1], stringList[2], member)
+            if len(stringList) == 3:
+                reply = delQuestionReply(stringList[1], stringList[2], member)
                 needReply = True
-        elif strMessage[:5] == '添加回复*':
-            stringList = strMessage.split('*')
-            if len(stringList) >= 3:
-                reply = addKeyReply(stringList[1], stringList[2], member)
+            elif len(stringList) == 4:
+                reply = delQuestionReplyAt(stringList[1], stringList[2], stringList[3], member)
                 needReply = True
-        elif strMessage[:5] == '删除回复*':
+            else:
+                reply = '格式错误！请检查空格'
+                needReply = True
+        elif strMessage[:5] == '添加回复*' and groupId != 0:
             stringList = strMessage.split('*')
-            if len(stringList) >= 3:
-                reply = delKeyReply(stringList[1], stringList[2], member)
+            if len(stringList) == 3:
+                reply = addQuestionReply(stringList[1], stringList[2], member)
+                needReply = True
+            elif len(stringList) == 4:
+                reply = addQuestionReplyAt(stringList[1], stringList[2], stringList[3], member)
+                needReply = True
+            else:
+                reply = '格式错误！请检查星号'
+                needReply = True
+        elif strMessage[:5] == '删除回复*' and groupId != 0:
+            stringList = strMessage.split('*')
+            if len(stringList) == 3:
+                reply = delQuestionReply(stringList[1], stringList[2], member)
+                needReply = True
+            elif len(stringList) == 4:
+                reply = delQuestionReplyAt(stringList[1], stringList[2], stringList[3], member)
+                needReply = True
+            else:
+                reply = '格式错误！请检查星号'
                 needReply = True
         
+        elif strMessage[:6] == '添加关键词 ' and groupId != 0:
+            stringList = strMessage.split(' ')
+            if len(stringList) == 3:
+                reply = addKeyReply(stringList[1], stringList[2], member)
+                needReply = True
+            elif len(stringList) == 4:
+                reply = addKeyReplyAt(stringList[1], stringList[2], stringList[3], member)
+                needReply = True
+            else:
+                reply = '格式错误！请检查空格'
+                needReply = True
+        elif strMessage[:6] == '删除关键词 ' and groupId != 0:
+            stringList = strMessage.split(' ')
+            if len(stringList) == 3:
+                reply = delKeyReply(stringList[1], stringList[2], member)
+                needReply = True
+            elif len(stringList) == 4:
+                reply = delKeyReplyAt(stringList[1], stringList[2], stringList[3], member)
+                needReply = True
+            else:
+                reply = '格式错误！请检查空格'
+                needReply = True
+        elif strMessage[:6] == '添加关键词*' and groupId != 0:
+            stringList = strMessage.split('*')
+            if len(stringList) == 3:
+                reply = addKeyReply(stringList[1], stringList[2], member)
+                needReply = True
+            elif len(stringList) == 4:
+                reply = addKeyReplyAt(stringList[1], stringList[2], stringList[3], member)
+                needReply = True
+            else:
+                reply = '格式错误！请检查星号'
+                needReply = True
+        elif strMessage[:6] == '删除关键词*' and groupId != 0:
+            stringList = strMessage.split('*')
+            if len(stringList) == 3:
+                reply = delKeyReply(stringList[1], stringList[2], member)
+                needReply = True
+            elif len(stringList) == 4:
+                reply = delKeyReplyAt(stringList[1], stringList[2], stringList[3], member)
+                needReply = True
+            else:
+                reply = '格式错误！请检查星号'
+                needReply = True
+        
+        elif strMessage[:8] == '关键词回复概率 ' and groupId != 0:
+            reply = editKeyProbability(strMessage[8:], member)
+            needReply = True
+
     if strMessage == '我的权限':
         if memberId ==  botBaseInformation['baseInformation']['Master_QQ']:
             reply = '当前权限：主人\n可以输入主人帮助来获取指令帮助哦~'
@@ -418,13 +508,25 @@ def viewScreenWord(botBaseInformation):
 
 # ==========================================================
 # 关键词操作
+KeyScreenWord = ['RecoveryProbability', 'reply', '~$~']
 
-def addKeyReply(word, reply, member):
+# 添加绝对匹配
+def addQuestionReply(word, reply, member):
+    if word in KeyScreenWord:
+        return word + '为保留字，不可以添加'
+    if reply in KeyScreenWord:
+        return reply + '为保留字，不可以添加'
+
     keyReply = dataManage.load_obj('keyReply/' + str(member.group.id))
+    if len(keyReply) >= 100:
+        return '最多只可以添加100个回复哦~'
+
     if keyReply.__contains__(word):
         if reply in keyReply[word]:
             return '已经有该回复了'
         else:
+            if len(keyReply[word]) >= 15:
+                return '单个关键词只能添加15个回复~'
             keyReply[word].append(reply)
             dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id))
             return '添加成功~'
@@ -433,7 +535,13 @@ def addKeyReply(word, reply, member):
         dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id))
         return '添加成功~'
 
-def delKeyReply(word, reply, member):
+# 删除绝对匹配
+def delQuestionReply(word, reply, member):
+    if word in KeyScreenWord:
+        return word + '为保留字，不可以删除'
+    if reply in KeyScreenWord:
+        return reply + '为保留字，不可以删除'
+        
     keyReply = dataManage.load_obj('keyReply/' + str(member.group.id))
     if keyReply.__contains__(word):
         if reply in keyReply[word]:
@@ -446,6 +554,205 @@ def delKeyReply(word, reply, member):
             return '没有该词组配对~'
     else:
         return '没有该词组配对~'
+
+# 添加绝对匹配（带at）
+def addQuestionReplyAt(word, reply, at, member):
+    if word in KeyScreenWord:
+        return word + '为保留字，不可以添加'
+    if reply in KeyScreenWord:
+        return reply + '为保留字，不可以添加'
+        
+    keyReply = dataManage.load_obj('keyReply/' + str(member.group.id) + 'at')
+    if len(keyReply) >= 100:
+        return '最多只可以添加100个回复哦~'
+
+    if at == '全体成员':
+        at = -1
+    else:
+        at = int(at)
+    if at != -1 and at <= 0:
+        return '艾特对象格式错误'
+    
+    reply = reply + '~$~' + str(at)
+
+    if keyReply.__contains__(word):
+        if reply in keyReply[word]:
+            return '已经有该回复了'
+        else:
+            if len(keyReply[word]) >= 15:
+                return '单个关键词只能添加15个回复~'
+            keyReply[word].append(reply)
+            dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id) + 'at')
+            return '添加成功~'
+    else:
+        keyReply[word] = [reply]
+        dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id) + 'at')
+        return '添加成功~'
+
+# 删除绝对匹配（带at）
+def delQuestionReplyAt(word, reply, at, member):
+    if word in KeyScreenWord:
+        return word + '为保留字，不可以删除'
+    if reply in KeyScreenWord:
+        return reply + '为保留字，不可以删除'
+        
+    keyReply = dataManage.load_obj('keyReply/' + str(member.group.id) + 'at')
+    if at == '全体成员':
+        at = -1
+    else:
+        at = int(at)
+    if at != -1 and at <= 0:
+        return '艾特对象格式错误'
+    
+    reply = reply + '~$~' + str(at)
+
+    if keyReply.__contains__(word):
+        if reply in keyReply[word]:
+            keyReply[word].remove(reply)
+            if len(keyReply[word]) == 0:
+                del keyReply[word]
+            dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id) + 'at')
+            return '删除成功~！'
+        else:
+            return '没有该词组配对~'
+    else:
+        return '没有该词组配对~'
+
+# =====================
+# 添加关键词匹配
+def addKeyReply(word, reply, member):
+    if word in KeyScreenWord:
+        return word + '为保留字，不可以添加'
+    if reply in KeyScreenWord:
+        return reply + '为保留字，不可以添加'
+        
+    keyReply = dataManage.load_obj('keyReply/' + str(member.group.id) + 'key')
+    if len(keyReply) >= 100:
+        return '最多只可以添加100个回复哦~'
+
+    if keyReply.__contains__(word):
+        if reply in keyReply[word]:
+            return '已经有该回复了'
+        else:
+            if len(keyReply[word]) >= 15:
+                return '单个关键词只能添加15个回复~'
+            keyReply[word].append(reply)
+            dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id) + 'key')
+            return '添加成功~'
+    else:
+        keyReply[word] = [reply]
+        dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id) + 'key')
+        return '添加成功~'
+
+# 删除关键词匹配
+def delKeyReply(word, reply, member):
+    if word in KeyScreenWord:
+        return word + '为保留字，不可以删除'
+    if reply in KeyScreenWord:
+        return reply + '为保留字，不可以删除'
+        
+    keyReply = dataManage.load_obj('keyReply/' + str(member.group.id) + 'key')
+    if keyReply.__contains__(word):
+        if reply in keyReply[word]:
+            keyReply[word].remove(reply)
+            if len(keyReply[word]) == 0:
+                del keyReply[word]
+            dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id) + 'key')
+            return '删除成功~！'
+        else:
+            return '没有该词组配对~'
+    else:
+        return '没有该词组配对~'
+
+# 添加关键词匹配（带at）
+def addKeyReplyAt(word, reply, at, member):
+    if word in KeyScreenWord:
+        return word + '为保留字，不可以添加'
+    if reply in KeyScreenWord:
+        return reply + '为保留字，不可以添加'
+        
+    keyReply = dataManage.load_obj('keyReply/' + str(member.group.id) + 'keyAt')
+    if len(keyReply) >= 100:
+        return '最多只可以添加100个回复哦~'
+
+    if at == '全体成员':
+        at = -1
+    else:
+        at = int(at)
+    if at != -1 and at <= 0:
+        return '艾特对象格式错误'
+    
+    reply = reply + '~$~' + str(at)
+
+    if keyReply.__contains__(word):
+        if reply in keyReply[word]:
+            return '已经有该回复了'
+        else:
+            if len(keyReply[word]) >= 15:
+                return '单个关键词只能添加15个回复~'
+            keyReply[word].append(reply)
+            dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id) + 'keyAt')
+            return '添加成功~'
+    else:
+        keyReply[word] = [reply]
+        dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id) + 'keyAt')
+        return '添加成功~'
+
+# 删除关键词匹配（带at）
+def delKeyReplyAt(word, reply, at, member):
+    if word in KeyScreenWord:
+        return word + '为保留字，不可以删除'
+    if reply in KeyScreenWord:
+        return reply + '为保留字，不可以删除'
+        
+    keyReply = dataManage.load_obj('keyReply/' + str(member.group.id) + 'keyAt')
+    if at == '全体成员':
+        at = -1
+    else:
+        at = int(at)
+    if at != -1 and at <= 0:
+        return '艾特对象格式错误'
+    
+    reply = reply + '~$~' + str(at)
+
+    if keyReply.__contains__(word):
+        if reply in keyReply[word]:
+            keyReply[word].remove(reply)
+            if len(keyReply[word]) == 0:
+                del keyReply[word]
+            dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id) + 'keyAt')
+            return '删除成功~！'
+        else:
+            return '没有该词组配对~'
+    else:
+        return '没有该词组配对~'
+
+def editKeyProbability(probability, member):
+    keyReply = dataManage.load_obj('keyReply/' + str(member.group.id) + 'key')
+    p = int(probability)
+    if p < 0 or p > 100:
+        return '概率只能在0到100之间'
+    keyReply['RecoveryProbability'] = p
+    dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id) + 'key')
+    return '已将关键词回复概率修改为了' + str(p) + '%'
+
+
+# =====================
+# 添加复杂回复(带艾特)
+def addComplexReply(word, reply, member):
+    pass
+
+# 删除复杂回复（带艾特）
+def delComplexReply(word, reply, member):
+    pass
+
+# 添加复杂关键词(带艾特)
+def addComplexKey(word, reply, member):
+    pass
+
+# 删除复杂关键词（带艾特）
+def delComplexKey(word, reply, member):
+    pass
 
 # ==========================================================
 # 骂人计划操作

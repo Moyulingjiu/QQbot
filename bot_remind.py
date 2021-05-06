@@ -61,6 +61,14 @@ app = GraiaMiraiApplication(
 async def sendMessage(groupId):
     global app
     global clock
+
+    group = await app.getGroup(groupId)
+    if group == None:
+        del clock['dictClockPeople'][group]
+        del clock['groupClock'][group]
+        print('已删除群：' + str(groupId))
+        return
+
     if clock['groupClock'][groupId]['remind']:
         group = await app.getGroup(groupId)
         reply = '记得打卡呀~\n以下为未打卡名单：'

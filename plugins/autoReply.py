@@ -128,8 +128,8 @@ def reply(messages, beAt, botBaseInformation, app, nickname):
                 reply = '怎么啦'
                 needReply = True
         else:
-            tmpNumber = random.randrange(0, 100)
-            if tmpNumber < 5:
+            tmpNumber = random.randrange(0, 1000)
+            if tmpNumber < 10:
                 if botBaseInformation['reply']['lastMinute'] <= 10:
                     reply = AIchat.getReply(botBaseInformation, messages)
                     needReply = True

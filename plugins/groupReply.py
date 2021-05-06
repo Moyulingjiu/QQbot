@@ -30,6 +30,7 @@ async def reply(botBaseInformation, messages, app, member):
     beAt = False
     needReply = False
     needAt = False
+    AtId = 0
     reply = ''
 
     groupId = member.group.id
@@ -149,7 +150,7 @@ async def reply(botBaseInformation, messages, app, member):
         # ==========================================
         # 此处为整活
         if not needReply:
-            (needReply, needAt, reply) = keyReply.reply(messages, member, botBaseInformation)
+            (needReply, needAt, reply, AtId) = keyReply.reply(messages, member, botBaseInformation)
         if not needReply:
             (needReply, needAt, reply) = autoReply.reply(messages, beAt, botBaseInformation, app, member.name)
             
@@ -167,4 +168,4 @@ async def reply(botBaseInformation, messages, app, member):
     if needReply:
         lastAutorepeat = reply
         lastMessage = reply
-    return (needReply, needAt, reply)
+    return (needReply, needAt, reply, AtId)

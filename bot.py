@@ -123,10 +123,12 @@ async def friend_message_listener(app: GraiaMiraiApplication, friend: Friend, so
 
     getMessage = await app.messageFromId(source)
     strMessage = getMessage.messageChain.asDisplay()
+    print('\n收到消息<' + friend.nickname + '/' + str(friend.id) + '>：' + strMessage)
 
     (needReply, reply) = await friendReply.reply(botBaseInformation, strMessage, app, friend)
 
     if needReply:
+        print('回复消息<' + friend.nickname + '/' + str(friend.id) + '>：' + reply + '\n')
         await app.sendFriendMessage(friend, MessageChain.create([
             Plain(reply)
         ]))
@@ -141,30 +143,49 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
 
     getMessage = await app.messageFromId(source)
     strMessage = getMessage.messageChain.asDisplay()
-    print('收到消息：' + strMessage)
+    print('\n\t收到消息<' + member.group.name + '/' + str(member.group.id) + '>[' + member.name + '/' + str(member.id) + ']：' + strMessage)
 
-    (needReply, needAt, reply) = await groupReply.reply(botBaseInformation, strMessage, app, member)
+    (needReply, needAt, reply, AtId) = await groupReply.reply(botBaseInformation, strMessage, app, member)
 
     if needReply:
-        print('回复消息：' + reply)
+        print('\t回复消息<' + member.group.name + '/' + str(member.group.id) + '>[' + member.name + '/' + str(member.id) + ']：' + reply + '\n')
+
         if needAt:
-            await app.sendGroupMessage(member.group, MessageChain.create([
-                At(member.id),
-                Plain(reply)
-            ]))
+            if AtId == 0: # At发言者
+                await app.sendGroupMessage(member.group, MessageChain.create([
+                    At(member.id),
+                    Plain(reply)
+                ]))
+            elif AtId > 0: # At指定人
+                member_target = await app.getMember(member.group.id, AtId)
+                if member_target != None:
+                    await app.sendGroupMessage(member.group, MessageChain.create([
+                        At(AtId),
+                        Plain(reply)
+                    ]))
+                else:
+                    await app.sendGroupMessage(member.group, MessageChain.create([
+                        Plain('@' + str(AtId) + ' '),
+                        Plain(reply)
+                    ]))
+            elif AtId == -1: # At全体
+                await app.sendGroupMessage(member.group, MessageChain.create([
+                    AtAll(),
+                    Plain(reply)
+                ]))
         else:
             await app.sendGroupMessage(member.group, MessageChain.create([
                 Plain(reply)
             ]))
 
-
+# 临时消息
 @bcc.receiver("TempMessage")
 async def group_message_listener(app: GraiaMiraiApplication, member: Member, source: Source):
     getMessage = await app.messageFromId(source)
     strMessage = getMessage.messageChain.asDisplay()
 
     await app.sendTempMessage(member.group.id, member.id, MessageChain.create([
-        Plain('暂时不能支持临时消息，请联系管理员1597867839添加小柒好友')
+        Plain('暂时不能支持临时消息，请联系管理员1597867839添加小柒好友，添加好友就可以正常使用所有功能了~')
     ]))
 
 if init():

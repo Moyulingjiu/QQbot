@@ -36,7 +36,16 @@ def clockIn(groupId, memberId):
     else:
         clock['dictClockPeople'][groupId][memberId]['clockIn'] = True
         clock['dictClockPeople'][groupId][memberId]['consecutiveDays'] += 1
-        reply = '，打卡成功哦！已经连续打卡 ' + str(clock['dictClockPeople'][groupId][memberId]['consecutiveDays']) + ' 天，请继续坚持！'
+        if clock['dictClockPeople'][groupId][memberId]['consecutiveDays'] < 10:
+            reply = '，打卡成功哦！你已经连续打卡 ' + str(clock['dictClockPeople'][groupId][memberId]['consecutiveDays']) + ' 天，请继续坚持！'
+        elif clock['dictClockPeople'][groupId][memberId]['consecutiveDays'] < 20:
+            reply = '，打卡成功哦！你已经连续打卡 ' + str(clock['dictClockPeople'][groupId][memberId]['consecutiveDays']) + ' 天，超级棒！'
+        elif clock['dictClockPeople'][groupId][memberId]['consecutiveDays'] < 50:
+            reply = '，打卡成功哦！你已经连续打卡 ' + str(clock['dictClockPeople'][groupId][memberId]['consecutiveDays']) + ' 天，为什么我就不能坚持这么久！'
+        elif clock['dictClockPeople'][groupId][memberId]['consecutiveDays'] < 365:
+            reply = '，打卡成功哦！你已经连续打卡 ' + str(clock['dictClockPeople'][groupId][memberId]['consecutiveDays']) + ' 天，自律的人最棒！'
+        else:
+            reply = '，打卡成功哦！你已经连续打卡 ' + str(clock['dictClockPeople'][groupId][memberId]['consecutiveDays']) + ' 天，啊啊啊，好厉害！'
     writeClockIn()
     return reply
 

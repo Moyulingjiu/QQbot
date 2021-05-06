@@ -25,6 +25,8 @@ async def reply(botBaseInformation, messages, app, friend):
     needReply = False
     reply = ''
     blacklist = (friend.id in botBaseInformation['blacklistMember'])
+    isAdministrator = (friend.id in botBaseInformation['administrator']) or (friend.id in botBaseInformation['contributors']) or (friend.id == botBaseInformation['baseInformation']['Master_QQ'])
+
 
     if (not blacklist) and (len(messages) != 0):
         if messages[0] == '*':
@@ -65,7 +67,7 @@ async def reply(botBaseInformation, messages, app, friend):
                 reply = '我在！'
                 needReply = True
         if not needReply:
-            if friend.id in botBaseInformation['contributors'] or friend.id in botBaseInformation['administrator']:
+            if isAdministrator:
                 (needReply, needAt, reply) = await operator.administratorOperation(messages, 0, friend.id, app, friend, botBaseInformation)
             elif messages == '我的权限':
                 reply = '当前权限：普通用户\n可以输入*help来获取指令帮助哦~'
