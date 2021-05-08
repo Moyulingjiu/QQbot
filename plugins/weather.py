@@ -5,6 +5,9 @@ from bs4 import BeautifulSoup  # 用来代替正则表达式取源码中相应�
 import time
 import socket  # 用做异常处理
 
+from plugins import getNow
+from plugins import logManage
+
 # ==========================================================
 # 天气查询
 
@@ -116,4 +119,5 @@ def getWeather(cityName):
                 str(i[3]) + '℃，最高气温为：' + str(i[2]) + '℃\n'
         return ans
     else:
+        logManage.log(getNow.toString(), 0, '查询城市：' + cityName + '，未找到该城市！')
         return '未能查询到该城市，请联系管理员将该城市加入字典'

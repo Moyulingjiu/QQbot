@@ -94,7 +94,7 @@ async def reply(botBaseInformation, messages, app, member):
             if messages.find('@' + str(Bot_QQ)) != -1:
                 beAt = True
             else:
-                if messages[0] == '*' and messages[1] != '由':
+                if messages[0] == '*' and messages[1] != '由' and messages[1] != '*':
                     reply = command.function(messages[1:])
                     needReply = True
                 else:
