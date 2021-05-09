@@ -83,4 +83,13 @@
 *  
 * Q：为什么提示远程连接被拒绝？
 * A：该问题有很多原因。第一点，mirai的console是否有在运行，如果没有运行请按照[二次开发说明](https://github.com/Moyulingjiu/QQbot/blob/master/using.md)部署console。第二点，bot.py里的app变量是否有修改？要把app里的qq号改成自己的qq，密钥改成自己console的密钥（在console安装位置的config/net.mamoe.mirai-api-http/setting.yml里的authKey就是密钥）。第三点，检查自己的网卡，是否存在硬件问题。
+*  
+* Q：为什么我的小柒越来越臃肿，占用空间越来越大？
+* A：没有删除data目录下的“bot.log”文件。该文件是日志文件，记录有没有对小柒平稳运行产生危害的操作。
+*  
+* Q：为什么我的console没有“config/net.mamoe.mirai-api-http/setting.yml”文件？
+* A：因为你没有运行console，在第一次运行时，console会自动生成该文件。
+*  
+* Q：为什么小柒提示文件缺失？
+* A：丢了data目录下的tarot和tarot2两个文件，这两个文件是塔罗牌的抽卡文件，不可缺失，请从github重新下载这两个文件。除开这两个文件，其他文件都是可以丢失的。
 
