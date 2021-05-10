@@ -327,7 +327,16 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
                 needReply = True
             else:
                 activityName = stringList[0]
-                lastMinute = int(stringList[1])
+                lastMinute = 1
+                if stringList[1][-2:] == '分钟':
+                    lastMinute = int(stringList[1][:-2])
+                elif stringList[1][-2:] == '小时':
+                    lastMinute = int(stringList[1][:-2]) * 60
+                elif stringList[1][-1:] == '天':
+                    lastMinute = int(stringList[1][:-1]) * 1440
+                else:
+                    lastMinute = int(stringList[1])
+
                 if len(activityName) == 0:
                     reply = '活动名不能为空'
                     needReply = True
@@ -853,7 +862,7 @@ def joinActivity(groupId, memberId, activityName):
             else:
                 activityList[groupId][activityName]['member'].append(memberId)
                 dataManage.save_obj(activityList, 'activity')
-                return '参加成功！'
+                return '参加活动' + activityName + '成功！'
         else:
             return '不存在该活动！'
     else:
@@ -895,7 +904,7 @@ async def viewActivity(groupId, activityName, app):
     activityList = dataManage.load_obj('activity')
     if activityList.__contains__(groupId):
         if activityList[groupId].__contains__(activityName):
-            reply = '活动名单如下：'
+            reply = '活动' + activityName + '名单如下：'
             for i in activityList[groupId][activityName]['member']:
                 member = await app.getMember(groupId, i)
                 if member == None:
@@ -908,3 +917,13 @@ async def viewActivity(groupId, activityName, app):
             return '不存在该活动！'
     else:
         return '不存在该活动！'
+
+def getActivityList(groupId, app):
+    activityList = dataManage.load_obj('activity')
+    if activityList.__contains__(groupId):
+        if len(activityList[groupId]) > 0:
+            reply = '本群当前活动如下：'
+            for key, value in activityList[groupId].items():
+                reply += '\n' + key + '(参与人数：' + str(len(value['member'])) + ')'
+            return reply
+    return '本群暂无活动'

@@ -17,6 +17,7 @@ from plugins import baidu
 from plugins import logManage
 from plugins import getNow
 from plugins import keyReply
+from plugins import vocabulary
 
 lastAutorepeat = '' # 上一次加一的消息
 lastMessage = ''    # 上一条消息
@@ -143,7 +144,7 @@ async def reply(botBaseInformation, messages, app, member):
                         reply = '我在！'
                         needReply = True
 
-                    elif messages[:5] == '参加活动 ':
+                    elif messages[:5] == '参加活动 ' or messages[:5] == '参与活动 ':
                         activityName = messages[5:].strip()
                         if len(activityName) == 0:
                             reply = '活动名不能为空'
@@ -161,6 +162,30 @@ async def reply(botBaseInformation, messages, app, member):
                             reply = operator.quitActivity(groupId, memberId, activityName)
                             needAt = True
                             needReply = True
+                    elif messages == '活动清单':
+                        reply = operator.getActivityList(groupId, app)
+                        needReply = True
+
+                    elif messages == '四级词汇':
+                        vocabularyNumber = 1
+                        reply = vocabulary.getVocabulary4(vocabularyNumber)
+                        needReply = True
+                    elif messages[:5] == '四级词汇 ':
+                        vocabularyNumber = int(messages[5:].strip())
+                        if vocabularyNumber <= 0:
+                            vocabularyNumber = 1
+                        reply = vocabulary.getVocabulary4(vocabularyNumber)
+                        needReply = True
+                    elif messages == '六级词汇':
+                        vocabularyNumber = 1
+                        reply = vocabulary.getVocabulary6(vocabularyNumber)
+                        needReply = True
+                    elif messages[:5] == '六级词汇 ':
+                        vocabularyNumber = int(messages[5:].strip())
+                        if vocabularyNumber <= 0:
+                            vocabularyNumber = 1
+                        reply = vocabulary.getVocabulary6(vocabularyNumber)
+                        needReply = True
 
                     # ==========================================
                     # 之下为管理员模块

@@ -66,6 +66,27 @@ async def reply(botBaseInformation, messages, app, friend):
             elif messages == Bot_Name:
                 reply = '我在！'
                 needReply = True
+
+            elif messages == '四级词汇':
+                vocabularyNumber = 1
+                reply = vocabulary.getVocabulary4(vocabularyNumber)
+                needReply = True
+            elif messages[:5] == '四级词汇 ':
+                vocabularyNumber = int(messages[5:].strip())
+                if vocabularyNumber <= 0:
+                    vocabularyNumber = 1
+                reply = vocabulary.getVocabulary4(vocabularyNumber)
+                needReply = True
+            elif messages == '六级词汇':
+                vocabularyNumber = 1
+                reply = vocabulary.getVocabulary6(vocabularyNumber)
+                needReply = True
+            elif messages[:5] == '六级词汇 ':
+                vocabularyNumber = int(messages[5:].strip())
+                if vocabularyNumber <= 0:
+                    vocabularyNumber = 1
+                reply = vocabulary.getVocabulary6(vocabularyNumber)
+                needReply = True
         if not needReply:
             if isAdministrator:
                 (needReply, needAt, reply) = await operator.administratorOperation(messages, 0, friend.id, app, friend, botBaseInformation)
