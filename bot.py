@@ -54,7 +54,7 @@ def init():
             'testGroup': [],
             'cursePlanGroup': [],
         }
-        save_obj(botBaseInformation, 'baseInformation')
+        dataManage.save_obj(botBaseInformation, 'baseInformation')
     else:
         botBaseInformation = dataManage.load_obj('baseInformation')
     
@@ -65,7 +65,7 @@ def init():
             'dictClockPeople': {},
             'clockDate': 'xx-xx-xx'
         }
-        save_obj(clockIn, 'clockIn')
+        dataManage.save_obj(clockIn, 'clockIn')
 
     # 幸运信息
     if not os.path.exists('data/luck.pkl'):
@@ -73,12 +73,12 @@ def init():
             'luck': {},
             'luckDate': 'xx-xx-xx' 
         }
-        save_obj(luck, 'luck')
+        dataManage.save_obj(luck, 'luck')
         
     # 屏蔽词
     if not os.path.exists('data/AIScreenWords.pkl'):
         screenWords = []
-        save_obj(screenWords, 'AIScreenWords')
+        dataManage.save_obj(screenWords, 'AIScreenWords')
 
     
     if not os.path.exists('data/lovetalk.txt'):

@@ -320,15 +320,52 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
             reply = editKeyProbability(strMessage[8:], member)
             needReply = True
 
+        elif strMessage[:5] == '发起活动 ' and groupId != 0:
+            stringList = strMessage[5:].strip().split(' ')
+            if len(stringList) != 2:
+                reply = '参数错误'
+                needReply = True
+            else:
+                activityName = stringList[0]
+                lastMinute = int(stringList[1])
+                if len(activityName) == 0:
+                    reply = '活动名不能为空'
+                    needReply = True
+                elif lastMinute <= 0:
+                    reply = '报名时间必须大于0'
+                    needReply = True
+                else:
+                    reply = addActivity(groupId, memberId, activityName, lastMinute)
+                    needReply = True
+        elif strMessage[:5] == '删除活动 ' and groupId != 0:
+            activityName = strMessage[5:].strip()
+            if len(activityName) == 0:
+                reply = '活动名不能为空'
+                needReply = True
+            else:
+                reply = delActivity(groupId, memberId, activityName)
+                needReply = True
+        elif strMessage[:7] == '查看活动名单 ' and groupId != 0:
+            activityName = strMessage[7:].strip()
+            if len(activityName) == 0:
+                reply = '活动名不能为空'
+                needReply = True
+            else:
+                reply = await viewActivity(groupId, activityName, app)
+                needReply = True
+
     if strMessage == '我的权限':
         if memberId ==  botBaseInformation['baseInformation']['Master_QQ']:
             reply = '当前权限：主人\n可以输入主人帮助来获取指令帮助哦~'
+            needAt = True
             needReply = True
         elif memberId in botBaseInformation["administrator"]:
             reply = '当前权限：管理员\n可以输入管理员帮助来获取指令帮助哦~'
+            needAt = True
             needReply = True
         elif memberId in botBaseInformation["contributors"]:
             reply = '当前权限：贡献者\n可以输入贡献者帮助来获取指令帮助哦~~'
+            needAt = True
             needReply = True
 
     
@@ -770,3 +807,104 @@ def delcursePlanGroup(groupId, botBaseInformation):
     botBaseInformation['cursePlanGroup'].remove(groupId)
     dataManage.save_obj(botBaseInformation, 'baseInformation')
     return '已关闭，切，懦夫~'
+
+# ==========================================================
+# 活动
+
+# 增加活动
+def addActivity(groupId, memberId, activityName, lastMinute):
+    activityList = dataManage.load_obj('activity')
+    if activityList.__contains__(groupId):
+        if activityList[groupId].__contains__(activityName):
+            return '已经存在该活动了'
+        else:
+            activityList[groupId][activityName] = {
+                'admin': memberId,
+                'beginTime': {
+                    'hour': getNow.getHour(),
+                    'minute': getNow.getMinute()
+                },
+                'lastMinute': lastMinute,
+                'member': []
+            }
+            dataManage.save_obj(activityList, 'activity')
+            return '活动 ' + activityName + '已开启，请在' + str(lastMinute) + '分钟内报名'
+    else:
+        activityList[groupId] = {}
+        activityList[groupId][activityName] = {
+            'admin': memberId,
+            'beginTime': {
+                'hour': getNow.getHour(),
+                'minute': getNow.getMinute()
+            },
+            'lastMinute': lastMinute,
+            'member': []
+        }
+        dataManage.save_obj(activityList, 'activity')
+        return '活动 ' + activityName + '已开启，请在' + str(lastMinute) + '分钟内输入\"参加活动 ' + activityName + '\"报名'
+
+# 参与活动
+def joinActivity(groupId, memberId, activityName):
+    activityList = dataManage.load_obj('activity')
+    if activityList.__contains__(groupId):
+        if activityList[groupId].__contains__(activityName):
+            if memberId in activityList[groupId][activityName]['member']:
+                return '你已经参加了该活动哦~'
+            else:
+                activityList[groupId][activityName]['member'].append(memberId)
+                dataManage.save_obj(activityList, 'activity')
+                return '参加成功！'
+        else:
+            return '不存在该活动！'
+    else:
+        return '不存在该活动！'
+
+# 退出活动
+def quitActivity(groupId, memberId, activityName):
+    activityList = dataManage.load_obj('activity')
+    if activityList.__contains__(groupId):
+        if activityList[groupId].__contains__(activityName):
+            if memberId in activityList[groupId][activityName]['member']:
+                activityList[groupId][activityName]['member'].remove(memberId)
+                dataManage.save_obj(activityList, 'activity')
+                return '退出成功！'
+            else:
+                return '你本来就没有参与这个活动~'
+        else:
+            return '不存在该活动！'
+    else:
+        return '不存在该活动！'
+
+# 删除活动
+def delActivity(groupId, memberId, activityName):
+    activityList = dataManage.load_obj('activity')
+    if activityList.__contains__(groupId):
+        if activityList[groupId].__contains__(activityName):
+            del activityList[groupId][activityName]
+            if len(activityList[groupId]) == 0:
+                del activityList[groupId]
+            dataManage.save_obj(activityList, 'activity')
+            return '删除成功！'
+        else:
+            return '不存在该活动！'
+    else:
+        return '不存在该活动！'
+
+# 活动名单
+async def viewActivity(groupId, activityName, app):
+    activityList = dataManage.load_obj('activity')
+    if activityList.__contains__(groupId):
+        if activityList[groupId].__contains__(activityName):
+            reply = '活动名单如下：'
+            for i in activityList[groupId][activityName]['member']:
+                member = await app.getMember(groupId, i)
+                if member == None:
+                    continue
+                print(member)
+                print(i)
+                reply += '\n' + member.name + '(' + str(i) + ')'
+            return reply
+        else:
+            return '不存在该活动！'
+    else:
+        return '不存在该活动！'

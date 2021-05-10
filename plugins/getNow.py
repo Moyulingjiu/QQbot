@@ -9,7 +9,6 @@ def getHour():
     curr_time = datetime.datetime.now()
     return curr_time.hour
     
-
 def getMinute():
     curr_time = datetime.datetime.now()
     return curr_time.minute

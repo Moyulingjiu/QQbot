@@ -22,6 +22,7 @@ import time
 from plugins import dataManage
 from plugins import logManage
 from plugins import getNow
+from plugins import operator
 
 remainTimeHour = 23
 remainTimeMinute = 00
@@ -38,6 +39,11 @@ def loadFile():
 def saveFile():
     global clock
     dataManage.save_obj(clock, 'clockIn')
+
+def timeSub(h1, m1, h2, m2):
+    minute = (h2 - h1) * 60
+    minute += m2 - m1
+    return minute
 
 # ============================================
 # 定义全局信息
@@ -165,6 +171,8 @@ async def timeWatcher():
         global remainTimeMinute
         global clock
         global botBaseInformation
+        global app
+
         curr_time = datetime.datetime.now()
         if curr_time.hour == remainTimeHour and curr_time.minute == remainTimeMinute:
             print('到达时间点！开始提醒各群。')
@@ -179,6 +187,28 @@ async def timeWatcher():
             await resetClock()
             for groupId in botBaseInformation['testGroup']:
                 await sendClockResetMessage(groupId)
+
+        activityList = dataManage.load_obj('activity')
+        delActivityList = {}
+        for key, activityDict in activityList.items():
+            for activityName, value in activityDict.items():
+                minute = timeSub(value['beginTime']['hour'], value['beginTime']['minute'], curr_time.hour, curr_time.minute)
+                if minute >= value['lastMinute']:
+                    reply = await operator.viewActivity(key, activityName, app)
+                    message = MessageChain.create([
+                        At(value['admin']),
+                        Plain(reply)
+                    ])
+                    await app.sendGroupMessage(key, message)
+                    delActivityList[key] = []
+                    delActivityList[key].append(activityName)
+        for key, activityName in delActivityList.items():
+            for i in activityName:
+                del activityList[key][i]
+                if len(activityList[key]) == 0:
+                    del activityList[key]
+                print('删除活动：' + str(key) + '/' + i)
+        dataManage.save_obj(activityList, 'activity')
 
         print(curr_time.hour, '：', curr_time.minute, '：')
         botBaseInformation = dataManage.load_obj('baseInformation')

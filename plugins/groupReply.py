@@ -126,6 +126,10 @@ async def reply(botBaseInformation, messages, app, member):
                     elif messages == '打卡帮助':
                         reply = command.helpClock()
                         needReply = True
+                    elif messages == '活动帮助':
+                        reply = command.helpActivity()
+                        needReply = True
+                    
                     elif messages == '小柒测运气':
                         reply = 'jrrp'
                         needReply = True
@@ -139,6 +143,24 @@ async def reply(botBaseInformation, messages, app, member):
                         reply = '我在！'
                         needReply = True
 
+                    elif messages[:5] == '参加活动 ':
+                        activityName = messages[5:].strip()
+                        if len(activityName) == 0:
+                            reply = '活动名不能为空'
+                            needReply = True
+                        else:
+                            reply = operator.joinActivity(groupId, memberId, activityName)
+                            needAt = True
+                            needReply = True
+                    elif messages[:5] == '退出活动 ':
+                        activityName = messages[5:].strip()
+                        if len(activityName) == 0:
+                            reply = '活动名不能为空'
+                            needReply = True
+                        else:
+                            reply = operator.quitActivity(groupId, memberId, activityName)
+                            needAt = True
+                            needReply = True
 
                     # ==========================================
                     # 之下为管理员模块
