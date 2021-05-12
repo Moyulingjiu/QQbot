@@ -30,9 +30,12 @@ def help():
     result += '(请在指令之前加上*，无需@，以便于识别)\n'
     result += '1.help 帮助\n'
     result += '2.tarot 塔罗牌（其他牌阵请输入help tarot查看）\n'
+    result += '(请注意占卜类的东西看看就好)\n'
     result += '3.game：一些第三方小游戏\n'
     result += '4.小柒还支持了骰娘，具体跑团帮助，请输入\"骰娘\"查看\n'
-    result += '(请注意占卜类的东西看看就好)'
+    result += '5.quit：让小柒自己退群，需要群管理或者群主！\n'
+    result += '6.mute：让小柒自己禁言自己，需要群管理或者群主！\n'
+    result += '7.unmute：解禁小柒，需要群管理或者群主！'
     return result
 
 def helpThrower():

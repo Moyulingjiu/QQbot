@@ -179,14 +179,16 @@ async def timeWatcher():
             loadFile()
             for groupId, value in clock['groupClock'].items():
                 print('提醒：', groupId)
-                await sendMessage(groupId)
+                if not groupId in botBaseInformation['mute']:
+                    await sendMessage(groupId)
 
         elif curr_time.hour == 0 and curr_time.minute == 0:
             print('重置打卡数据')
             loadFile()
             await resetClock()
             for groupId in botBaseInformation['testGroup']:
-                await sendClockResetMessage(groupId)
+                if not groupId in botBaseInformation['mute']:
+                    await sendClockResetMessage(groupId)
 
         activityList = dataManage.load_obj('activity')
         delActivityList = {}
@@ -199,7 +201,10 @@ async def timeWatcher():
                         At(value['admin']),
                         Plain(reply)
                     ])
-                    await app.sendGroupMessage(key, message)
+                    if not key in botBaseInformation['mute']:
+                        group = await app.getGroup(key)
+                        if group != None:
+                            await app.sendGroupMessage(group, message)
                     delActivityList[key] = []
                     delActivityList[key].append(activityName)
         for key, activityName in delActivityList.items():

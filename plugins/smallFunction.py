@@ -28,7 +28,7 @@ def rd(num, size):
     if num == 1:
         return '扔出的点数为：' + str(random.randint(1, size))
 
-    result = ''
+    result = '\n'
     sum = 0
     for i in range(0, num):
         dicks = random.randint(1, size)

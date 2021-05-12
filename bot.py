@@ -57,6 +57,7 @@ def init():
             'blacklistMember': [],
             'testGroup': [],
             'cursePlanGroup': [],
+            'mute': []
         }
         dataManage.save_obj(botBaseInformation, 'baseInformation')
     else:
@@ -161,38 +162,66 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
     strMessage = getMessage.messageChain.asDisplay()
     print('\n\t收到消息<' + member.group.name + '/' + str(member.group.id) + '>[' + member.name + '/' + str(member.id) + ']：' + strMessage)
 
-    (needReply, needAt, reply, AtId) = await groupReply.reply(botBaseInformation, strMessage, app, member)
-
-    if needReply:
-        print('\t回复消息<' + member.group.name + '/' + str(member.group.id) + '>[' + member.name + '/' + str(member.id) + ']：' + reply + '\n')
-
-        if needAt:
-            if AtId == 0: # At发言者
-                await app.sendGroupMessage(member.group, MessageChain.create([
-                    At(member.id),
-                    Plain(reply)
-                ]))
-            elif AtId > 0: # At指定人
-                member_target = await app.getMember(member.group.id, AtId)
-                if member_target != None:
-                    await app.sendGroupMessage(member.group, MessageChain.create([
-                        At(AtId),
-                        Plain(reply)
-                    ]))
-                else:
-                    await app.sendGroupMessage(member.group, MessageChain.create([
-                        Plain('@' + str(AtId) + ' '),
-                        Plain(reply)
-                    ]))
-            elif AtId == -1: # At全体
-                await app.sendGroupMessage(member.group, MessageChain.create([
-                    AtAll(),
-                    Plain(reply)
-                ]))
-        else:
+    if str(member.permission) == 'MemberPerm.Owner' or str(member.permission) == 'MemberPerm.Administrator' or (member.id in botBaseInformation['administrator']) or (member.id in botBaseInformation['contributors']) or (member.id == botBaseInformation['baseInformation']['Master_QQ']):
+        if strMessage == '*quit':
             await app.sendGroupMessage(member.group, MessageChain.create([
-                Plain(reply)
+                Plain('再见啦~各位！我会想你们的')
             ]))
+            await app.quit(member.group)
+            logManage.groupLog(getNow.toString(), member.id, member.group.id, member.group.name, strMessage + '; 小柒退群！')
+            return
+        elif strMessage == '*mute':
+            if not member.group.id in botBaseInformation['mute']:
+                botBaseInformation['mute'].append(member.group.id)
+                dataManage.save_obj(botBaseInformation, 'baseInformation')
+                await app.sendGroupMessage(member.group, MessageChain.create([
+                    Plain('QAQ，那我闭嘴了')
+                ]))
+            logManage.groupLog(getNow.toString(), member.id, member.group.id, member.group.name, strMessage + '; 小柒禁言！')
+            return
+        elif strMessage == '*unmute':
+            if member.group.id in botBaseInformation['mute']:
+                botBaseInformation['mute'].remove(member.group.id)
+                dataManage.save_obj(botBaseInformation, 'baseInformation')
+                await app.sendGroupMessage(member.group, MessageChain.create([
+                    Plain('呜呜呜，憋死我了，终于可以说话了')
+                ]))
+            logManage.groupLog(getNow.toString(), member.id, member.group.id, member.group.name, strMessage + '; 小柒解出禁言！')
+            return
+
+    if not member.group.id in botBaseInformation['mute']:
+        (needReply, needAt, reply, AtId) = await groupReply.reply(botBaseInformation, strMessage, app, member)
+
+        if needReply:
+            print('\t回复消息<' + member.group.name + '/' + str(member.group.id) + '>[' + member.name + '/' + str(member.id) + ']：' + reply + '\n')
+
+            if needAt:
+                if AtId == 0: # At发言者
+                    await app.sendGroupMessage(member.group, MessageChain.create([
+                        At(member.id),
+                        Plain(reply)
+                    ]))
+                elif AtId > 0: # At指定人
+                    member_target = await app.getMember(member.group.id, AtId)
+                    if member_target != None:
+                        await app.sendGroupMessage(member.group, MessageChain.create([
+                            At(AtId),
+                            Plain(reply)
+                        ]))
+                    else:
+                        await app.sendGroupMessage(member.group, MessageChain.create([
+                            Plain('@' + str(AtId) + ' '),
+                            Plain(reply)
+                        ]))
+                elif AtId == -1: # At全体
+                    await app.sendGroupMessage(member.group, MessageChain.create([
+                        AtAll(),
+                        Plain(reply)
+                    ]))
+            else:
+                await app.sendGroupMessage(member.group, MessageChain.create([
+                    Plain(reply)
+                ]))
 
 # 临时消息
 @bcc.receiver("TempMessage")
