@@ -1,6 +1,8 @@
+import re
 
 from plugins import tarot
 from plugins import game
+from plugins import smallFunction
 
 # ==========================================================
 
@@ -29,7 +31,39 @@ def help():
     result += '1.help 帮助\n'
     result += '2.tarot 塔罗牌（其他牌阵请输入help tarot查看）\n'
     result += '3.game：一些第三方小游戏\n'
+    result += '4.小柒还支持了骰娘，具体跑团帮助，请输入\"骰娘\"查看\n'
     result += '(请注意占卜类的东西看看就好)'
+    return result
+
+def helpThrower():
+    index = 1
+    result = '骰娘帮助如下\n'
+    result += '--------------------------\n'
+    result += str(index) + '.' + 'rd：表示r1d100' + '\n'
+    index += 1
+    result += str(index) + '.' + 'rp：表示r1d20' + '\n'
+    index += 1
+    result += str(index) + '.' + 'rxdy：表示扔x个y面骰子并将它们相加，例如\"*r1d6\"' + '\n'
+    index += 1
+    result += str(index) + '.' + 'st 属性名属性值：设置属性，会覆盖掉你的原有属性，例如\"*st 魅惑80 心理学2\"' + '\n'
+    index += 1
+    result += str(index) + '.' + 'sta 属性名属性值：追加属性' + '\n'
+    index += 1
+    result += str(index) + '.' + 'stc 属性名属性值：修改属性，改变这个属性的值' + '\n'
+    index += 1
+    result += str(index) + '.' + 'std 属性名：删除我的某个属性，例如\"*std 魅惑 心理学\"' + '\n'
+    index += 1
+    result += str(index) + '.' + 'show：展示我的高属性（属性值大于20）' + '\n'
+    index += 1
+    result += str(index) + '.' + 'show all：展示我的全部属性（请注意可能刷屏！）' + '\n'
+    index += 1
+    result += str(index) + '.' + 'ra 属性名：鉴定单一属性' + '\n'
+    index += 1
+    result += str(index) + '.' + 'clear：清空本群的跑团数据，即删掉所有人的属性记录' + '\n'
+    index += 1
+    result += '--------------------------\n'
+    result += '注：属性操作不会回显，属性值不应该超过100，或低于0，非法数据将会自动被忽略，不会回显'
+
     return result
 
 
@@ -213,7 +247,10 @@ def helpTarot3():
     return result
 
 
-def function(code):
+def function(code, member, app, groupId):
+    needAt = False
+    result = ''
+
     if code == 'help':
         result = help()
     elif code == 'help tarot' or code == 'help tarot 1':
@@ -253,6 +290,63 @@ def function(code):
 
     elif code == 'game':
         result = game.game()
-    else:
+
+    elif code == 'rd':
+        result = smallFunction.rd(1, 100)
+        needAt = True
+    elif code == 'rp':
+        result = smallFunction.rd(1, 20)
+        needAt = True
+    elif code[0] == 'r' and 'd' in code and code[len(code) - 1] != 'd':
+        num = 0
+        size = 0
+        try:
+            num = int(code[1: code.find('d')])
+            size = int(code[code.find('d') + 1: len(code)])
+        except ValueError as e:
+            pass
+
+        print('num:' + str(num))
+        print('size:' + str(size))
+        result = smallFunction.rd(num, size)
+        if result != '啊嘞？':
+            needAt = True
+    elif code[:3] == 'st ' and groupId != 0: # 设置属性
+        if len(code) > 3:
+            attribute = code[3:]
+            result = smallFunction.st(attribute, groupId, member.id)
+            needAt = True
+    elif code[:4] == 'sta ' and groupId != 0: # 追加属性
+        if len(code) > 4:
+            attribute = code[4:]
+            result = smallFunction.sta(attribute, groupId, member.id)
+            needAt = True
+    elif code[:4] == 'stc ' and groupId != 0: # 修改属性
+        if len(code) > 4:
+            attribute = code[4:]
+            result = smallFunction.stc(attribute, groupId, member.id)
+            needAt = True
+    elif code[:4] == 'std ' and groupId != 0: # 删除属性
+        if len(code) > 4:
+            attribute = code[4:]
+            result = smallFunction.std(attribute, groupId, member.id)
+            needAt = True
+    elif code == 'show' and groupId != 0: # 展示属性
+        result = smallFunction.show(groupId, member.id)
+        needAt = True
+    elif code == 'show all' and groupId != 0: # 展示属性
+        result = smallFunction.showAll(groupId, member.id)
+        needAt = True
+    elif code[:3] == 'ra ' and groupId != 0: # 鉴定属性
+        if len(code) > 3:
+            attribute = code[3:]
+            result = smallFunction.ra(attribute, groupId, member.id)
+        needAt = True
+    elif code == 'clear' and groupId != 0: # 清空属性
+        result = smallFunction.stClear(groupId)
+        needAt = True
+
+
+    if result == '':
         result = '未知指令：' + code + '\n请输入\"*help\"查看帮助'
-    return result
+    return (result, needAt)

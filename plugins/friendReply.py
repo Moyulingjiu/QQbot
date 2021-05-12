@@ -13,6 +13,7 @@ from plugins import clockIn
 from plugins import operator
 from plugins import autoReply
 from plugins import baidu
+from plugins import vocabulary
 
 # 朋友消息回复
 
@@ -30,7 +31,7 @@ async def reply(botBaseInformation, messages, app, friend):
 
     if (not blacklist) and (len(messages) != 0):
         if messages[0] == '*':
-            reply = command.function(messages[1:])
+            (reply, needAt) = command.function(messages[1:], friend, app, 0)
             needReply = True
         else:
             if messages[:3] == '天气 ':
@@ -53,7 +54,17 @@ async def reply(botBaseInformation, messages, app, friend):
                 needReply = True
             elif messages == '打卡帮助':
                 reply = command.helpClock()
+                reply += '\n只支持群聊哦~'
                 needReply = True
+            elif messages == '活动帮助':
+                reply = command.helpActivity()
+                reply += '\n只支持群聊哦~'
+                needReply = True
+            elif messages == '骰娘':
+                reply = command.helpThrower()
+                reply += '\n只支持群聊哦~'
+                needReply = True
+
             elif messages == '微博热搜':
                 reply = weiboHot.getHot()
                 needReply = True

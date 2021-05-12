@@ -38,12 +38,16 @@ def init():
     # 基本信息重置
     if not os.path.exists('data/baseInformation.pkl'):
         Master_QQ = int(input('请输入主人的QQ（不可更改！）：'))
+        bot_name = input('请输入机器人名字：')
+        bot_QQ = int(input('请输入机器人的QQ：'))
+        bot_age = int(input('请输入机器人的年龄：'))
+
         botBaseInformation = {
             'baseInformation': {
-                'Bot_Name': '小柒',
-                'Bot_Age': 20,
+                'Bot_Name': bot_name,
+                'Bot_Age': bot_age,
                 'Bot_Color': '天蓝色',
-                'Bot_QQ': 123456,
+                'Bot_QQ': bot_QQ,
                 'Master_QQ': Master_QQ,
                 'version': 'unknown version'
             },
@@ -95,6 +99,18 @@ def init():
         return False
     if not os.path.exists('data/tarot2.txt'):
         return False
+
+    # 四六级词汇
+    if not os.path.exists('data/vocabulary-4.txt'):
+        return False
+    if not os.path.exists('data/vocabulary-4-index.txt'):
+        with open('data/vocabulary-4-index.txt', 'w', encoding='utf-8') as f:
+            f.write('1')
+    if not os.path.exists('data/vocabulary-6.txt'):
+        return False
+    if not os.path.exists('data/vocabulary-6-index.txt'):
+        with open('data/vocabulary-6-index.txt', 'w', encoding='utf-8') as f:
+            f.write('1')
 
     return True
 
@@ -181,12 +197,20 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
 # 临时消息
 @bcc.receiver("TempMessage")
 async def group_message_listener(app: GraiaMiraiApplication, member: Member, source: Source):
+    global botBaseInformation
+    botBaseInformation = dataManage.load_obj('baseInformation')
+
     getMessage = await app.messageFromId(source)
     strMessage = getMessage.messageChain.asDisplay()
+    print('\n\t收到消息<' + member.group.name + '/' + str(member.group.id) + '>[' + member.name + '/' + str(member.id) + ']：' + strMessage)
 
-    await app.sendTempMessage(member.group.id, member.id, MessageChain.create([
-        Plain('暂时不能支持临时消息，请联系管理员1597867839添加小柒好友，添加好友就可以正常使用所有功能了~')
-    ]))
+    (needReply, needAt, reply, AtId) = await groupReply.reply(botBaseInformation, strMessage, app, member)
+    
+    if needReply:
+        print('\t回复消息<' + member.group.name + '/' + str(member.group.id) + '>[' + member.name + '/' + str(member.id) + ']：' + reply + '\n')
+        await app.sendTempMessage(member.group.id, member.id, MessageChain.create([
+            Plain(reply)
+        ]))
 
 if init():
     logManage.log(getNow.toString(), 0, botBaseInformation['baseInformation']['Bot_Name'] + '启动！')

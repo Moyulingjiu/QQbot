@@ -129,10 +129,18 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
             reply = command.helpAdmministor()
             needReply = True
         elif strMessage[:6] == '添加贡献者 ':
-            reply = addContributors(int(strMessage[6:]), botBaseInformation)
+            reply = ''
+            try:
+                reply = addContributors(int(strMessage[6:]), botBaseInformation)
+            except ValueError as e:
+                pass
             needReply = True
         elif strMessage[:6] == '删除贡献者 ':
-            reply = delContributors(int(strMessage[6:]), botBaseInformation)
+            reply = ''
+            try:
+                reply = delContributors(int(strMessage[6:]), botBaseInformation)
+            except ValueError as e:
+                pass
             needReply = True
         elif strMessage == '查看贡献者':
             reply = str(botBaseInformation["contributors"])

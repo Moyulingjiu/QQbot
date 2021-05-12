@@ -96,7 +96,7 @@ async def reply(botBaseInformation, messages, app, member):
                 beAt = True
             else:
                 if messages[0] == '*' and messages[1] != '由' and messages[1] != '*':
-                    reply = command.function(messages[1:])
+                    (reply, needAt) = command.function(messages[1:], member, app, groupId)
                     needReply = True
                 else:
                     if messages[:3] == '天气 ':
@@ -130,7 +130,10 @@ async def reply(botBaseInformation, messages, app, member):
                     elif messages == '活动帮助':
                         reply = command.helpActivity()
                         needReply = True
-                    
+                    elif messages == '骰娘':
+                        reply = command.helpThrower()
+                        needReply = True
+
                     elif messages == '小柒测运气':
                         reply = 'jrrp'
                         needReply = True
