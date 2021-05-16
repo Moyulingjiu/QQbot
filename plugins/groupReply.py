@@ -18,16 +18,18 @@ from plugins import logManage
 from plugins import getNow
 from plugins import keyReply
 from plugins import vocabulary
+from plugins import rpg
 
 lastAutorepeat = '' # 上一次加一的消息
 lastMessage = ''    # 上一条消息
 
 # 这里的messages是一个列表，因为发送的可能是多行信息，需要进行一定的处理
-async def reply(botBaseInformation, messages, app, member):
+async def reply(botBaseInformation, messages, app, member, messageChain):
     Bot_QQ = botBaseInformation['baseInformation']['Bot_QQ']
     Bot_Name = botBaseInformation['baseInformation']['Bot_Name']
     clock = dataManage.load_obj('clockIn')
 
+    isImage = ''
     beAt = False
     needReply = False
     needAt = False
@@ -96,7 +98,7 @@ async def reply(botBaseInformation, messages, app, member):
                 beAt = True
             else:
                 if messages[0] == '*' and messages[1] != '由' and messages[1] != '*':
-                    (reply, needAt) = command.function(messages[1:], member, app, groupId)
+                    (reply, needAt, isImage) = command.function(messages[1:], member, app, groupId)
                     needReply = True
                 else:
                     if messages[:3] == '天气 ':
@@ -107,7 +109,7 @@ async def reply(botBaseInformation, messages, app, member):
                         reply = smallFunction.dick()
                         needAt = True
                         needReply = True
-                    elif messages == '抛硬币':
+                    elif messages == '抛硬币' or messages == '硬币':
                         reply = smallFunction.coin()
                         needAt = True
                         needReply = True
@@ -124,14 +126,24 @@ async def reply(botBaseInformation, messages, app, member):
                         reply = lucky.luck(memberId)
                         needAt = True
                         needReply = True
+
+                    elif messages == '帮助':
+                        isImage = command.help()
+                        needReply = True
                     elif messages == '打卡帮助':
-                        reply = command.helpClock()
+                        isImage = command.helpClock()
                         needReply = True
                     elif messages == '活动帮助':
-                        reply = command.helpActivity()
+                        isImage = command.helpActivity()
                         needReply = True
-                    elif messages == '骰娘':
-                        reply = command.helpThrower()
+                    elif messages == '骰娘' or messages == '骰娘帮助':
+                        isImage = command.helpThrower()
+                        needReply = True
+                    elif messages == '塔罗牌帮助':
+                        isImage = command.helpTarot()
+                        needReply = True
+                    elif messages == '游戏帮助':
+                        isImage = command.helpGame()
                         needReply = True
 
                     elif messages == '小柒测运气':
@@ -193,16 +205,18 @@ async def reply(botBaseInformation, messages, app, member):
                     # ==========================================
                     # 之下为管理员模块
                     elif isAdministrator:
-                        (needReply, needAt, reply) = await operator.administratorOperation(messages, groupId, memberId, app, member, botBaseInformation)
+                        (needReply, needAt, reply, isImage) = await operator.administratorOperation(messages, groupId, memberId, app, member, botBaseInformation)
                     elif messages == '我的权限':
                         reply = '当前权限：普通用户\n可以输入*help来获取指令帮助哦~'
                         needReply = True
         # ==========================================
         # 此处为整活
+        if not needReply: # rpg游戏
+            (needReply, needAt, reply, isImage) = await rpg.menu(messages, groupId, member, app, botBaseInformation, messageChain)
         if not needReply:
             (needReply, needAt, reply, AtId) = keyReply.reply(messages, member, botBaseInformation)
         if not needReply:
-            (needReply, needAt, reply) = autoReply.reply(messages, beAt, botBaseInformation, app, member.name)
+            (needReply, needAt, reply, isImage) = autoReply.reply(messages, beAt, botBaseInformation, app, member.name)
             
 
         # +1部分
@@ -218,4 +232,4 @@ async def reply(botBaseInformation, messages, app, member):
     if needReply:
         lastAutorepeat = reply
         lastMessage = reply
-    return (needReply, needAt, reply, AtId)
+    return (needReply, needAt, reply, AtId, isImage)

@@ -10,6 +10,7 @@ from graia.application.entry import (
     BotMuteEvent, BotGroupPermissionChangeEvent
 )
 from graia.broadcast import Broadcast
+
 # from graia.template import Template     # 模板功能
 # from graia.component import Components  # 检索器
 
@@ -62,6 +63,8 @@ def init():
         dataManage.save_obj(botBaseInformation, 'baseInformation')
     else:
         botBaseInformation = dataManage.load_obj('baseInformation')
+        if not botBaseInformation.__contains__('mute'):
+            botBaseInformation['mute'] = []
     
     # 打卡信息
     if not os.path.exists('data/clockIn.pkl'):
@@ -131,8 +134,6 @@ app = GraiaMiraiApplication(
 )
 
 # 好友消息
-
-
 @bcc.receiver("FriendMessage")
 async def friend_message_listener(app: GraiaMiraiApplication, friend: Friend, source: Source):
     global botBaseInformation
@@ -142,17 +143,22 @@ async def friend_message_listener(app: GraiaMiraiApplication, friend: Friend, so
     strMessage = getMessage.messageChain.asDisplay()
     print('\n收到消息<' + friend.nickname + '/' + str(friend.id) + '>：' + strMessage)
 
-    (needReply, reply) = await friendReply.reply(botBaseInformation, strMessage, app, friend)
+    (needReply, reply, isImage) = await friendReply.reply(botBaseInformation, strMessage, app, friend, getMessage.messageChain)
 
     if needReply:
         print('回复消息<' + friend.nickname + '/' + str(friend.id) + '>：' + reply + '\n')
-        await app.sendFriendMessage(friend, MessageChain.create([
-            Plain(reply)
-        ]))
+        if len(isImage) > 0:
+            filepath = 'data/face/' + isImage
+            if os.path.exists(filepath):
+                await app.sendFriendMessage(friend, MessageChain.create([
+                    Image.fromLocalFile(filepath)
+                ]))
+        if len(reply) > 0:
+            await app.sendFriendMessage(friend, MessageChain.create([
+                Plain(reply)
+            ]))
 
 # 群聊消息
-
-
 @bcc.receiver("GroupMessage")
 async def group_message_listener(app: GraiaMiraiApplication, member: Member, source: Source):
     global botBaseInformation
@@ -188,9 +194,22 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
                 ]))
             logManage.groupLog(getNow.toString(), member.id, member.group.id, member.group.name, strMessage + '; 小柒解出禁言！')
             return
+    if strMessage[:5] == '*send':
+        friend = await app.getFriend(botBaseInformation['baseInformation']['Master_QQ'])
+        print(friend)
+        if friend != None and len(strMessage) > 5:
+            await app.sendFriendMessage(friend, MessageChain.create([
+                Plain(member.name + '(' + str(member.id) + ')：' + strMessage[5:])
+            ]))
+            await app.sendGroupMessage(member.group, MessageChain.create([
+                Plain('已经报告给主人了~')
+            ]))
+            needReply = True
+        return
+
 
     if not member.group.id in botBaseInformation['mute']:
-        (needReply, needAt, reply, AtId) = await groupReply.reply(botBaseInformation, strMessage, app, member)
+        (needReply, needAt, reply, AtId, isImage) = await groupReply.reply(botBaseInformation, strMessage, app, member, getMessage.messageChain)
 
         if needReply:
             print('\t回复消息<' + member.group.name + '/' + str(member.group.id) + '>[' + member.name + '/' + str(member.id) + ']：' + reply + '\n')
@@ -219,9 +238,16 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
                         Plain(reply)
                     ]))
             else:
-                await app.sendGroupMessage(member.group, MessageChain.create([
-                    Plain(reply)
-                ]))
+                if len(isImage) > 0:
+                    filepath = 'data/face/' + isImage
+                    if os.path.exists(filepath):
+                        await app.sendGroupMessage(member.group, MessageChain.create([
+                            Image.fromLocalFile(filepath)
+                        ]))
+                if len(reply) > 0:
+                    await app.sendGroupMessage(member.group, MessageChain.create([
+                        Plain(reply)
+                    ]))
 
 # 临时消息
 @bcc.receiver("TempMessage")
@@ -233,18 +259,74 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
     strMessage = getMessage.messageChain.asDisplay()
     print('\n\t收到消息<' + member.group.name + '/' + str(member.group.id) + '>[' + member.name + '/' + str(member.id) + ']：' + strMessage)
 
-    (needReply, needAt, reply, AtId) = await groupReply.reply(botBaseInformation, strMessage, app, member)
+
+    if str(member.permission) == 'MemberPerm.Owner' or str(member.permission) == 'MemberPerm.Administrator' or (member.id in botBaseInformation['administrator']) or (member.id in botBaseInformation['contributors']) or (member.id == botBaseInformation['baseInformation']['Master_QQ']):
+        if strMessage == '*quit':
+            await app.sendGroupMessage(member.group, MessageChain.create([
+                Plain('再见啦~各位！我会想你们的')
+            ]))
+            await app.quit(member.group)
+            logManage.groupLog(getNow.toString(), member.id, member.group.id, member.group.name, strMessage + '; 小柒退群！')
+            return
+        elif strMessage == '*mute':
+            if not member.group.id in botBaseInformation['mute']:
+                botBaseInformation['mute'].append(member.group.id)
+                dataManage.save_obj(botBaseInformation, 'baseInformation')
+                await app.sendGroupMessage(member.group, MessageChain.create([
+                    Plain('QAQ，那我闭嘴了')
+                ]))
+            logManage.groupLog(getNow.toString(), member.id, member.group.id, member.group.name, strMessage + '; 小柒禁言！')
+            return
+        elif strMessage == '*unmute':
+            if member.group.id in botBaseInformation['mute']:
+                botBaseInformation['mute'].remove(member.group.id)
+                dataManage.save_obj(botBaseInformation, 'baseInformation')
+                await app.sendGroupMessage(member.group, MessageChain.create([
+                    Plain('呜呜呜，憋死我了，终于可以说话了')
+                ]))
+            logManage.groupLog(getNow.toString(), member.id, member.group.id, member.group.name, strMessage + '; 小柒解出禁言！')
+            return
+    if strMessage[:5] == '*send':
+        friend = await app.getFriend(botBaseInformation['baseInformation']['Master_QQ'])
+        print(friend)
+        if friend != None and len(strMessage) > 5:
+            await app.sendFriendMessage(friend, MessageChain.create([
+                Plain(member.name + '(' + str(member.id) + ')：' + strMessage[5:])
+            ]))
+            await app.sendGroupMessage(member.group, MessageChain.create([
+                Plain('已经报告给主人了~')
+            ]))
+            needReply = True
+        return
+
+
+    (needReply, needAt, reply, AtId, isImage) = await groupReply.reply(botBaseInformation, strMessage, app, member)
     
     if needReply:
         print('\t回复消息<' + member.group.name + '/' + str(member.group.id) + '>[' + member.name + '/' + str(member.id) + ']：' + reply + '\n')
-        await app.sendTempMessage(member.group.id, member.id, MessageChain.create([
-            Plain(reply)
-        ]))
+        if len(isImage) > 0:
+            filepath = 'data/face/' + isImage
+            if os.path.exists(filepath):
+                await app.sendTempMessage(member.group.id, member.id, MessageChain.create([
+                    Image.fromLocalFile(filepath)
+                ]))
+        if len(reply) > 0:
+            await app.sendTempMessage(member.group.id, member.id, MessageChain.create([
+                Plain(reply)
+            ]))
 
-if init():
-    logManage.log(getNow.toString(), 0, botBaseInformation['baseInformation']['Bot_Name'] + '启动！')
-    # loop.run_until_complete(timeWatcher())
-    app.launch_blocking()
-else:
-    logManage.log(getNow.toString(), 0, '——————————————————————————\n启动失败！！！\n')
-    print('文件缺失！')
+# ======================
+# @sche.schedule(timers.every_custom_seconds(60))
+# async def test():
+#     print("60s一次")
+
+# ======================
+
+if __name__ == '__main__':
+    print('初始化...')
+    if init():
+        logManage.log(getNow.toString(), 0, botBaseInformation['baseInformation']['Bot_Name'] + '启动！')
+        app.launch_blocking()
+    else:
+        logManage.log(getNow.toString(), 0, '——————————————————————————\n启动失败！！！\n')
+        print('文件缺失！')

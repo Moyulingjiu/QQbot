@@ -54,12 +54,13 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
     needAt = False
     reply = ''
     passport = False
+    isImage = ''
 
     # 主人权限
     if memberId ==  botBaseInformation['baseInformation']['Master_QQ']:
         passport = True
         if strMessage == '主人帮助':
-            reply = command.helpMaster()
+            isImage = command.helpMaster()
             needReply = True
         elif strMessage[:5] == '删除文摘 ':
             reply = talk.delPoem(int(strMessage[5:]))
@@ -126,7 +127,7 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
     if memberId in botBaseInformation["administrator"] or passport:
         passport = True
         if strMessage == '管理员帮助':
-            reply = command.helpAdmministor()
+            isImage = command.helpAdmministor()
             needReply = True
         elif strMessage[:6] == '添加贡献者 ':
             reply = ''
@@ -193,7 +194,7 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
     # 贡献者权限
     if memberId in botBaseInformation["contributors"] or passport:
         if strMessage == '贡献者帮助':
-            reply = command.helpContributor()
+            isImage = command.helpContributor()
             needReply = True
 
         elif strMessage == '添加打卡计划' and groupId != 0:
@@ -224,13 +225,6 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
                         reply += member_tmp.name + '(' + str(key) + ')\n'
             else:
                 reply = '本群没有打卡计划哦！'
-            needReply = True
-        elif strMessage == '打卡计划管理帮助':
-            reply = command.helpClockAdmministor()
-            needReply = True
-
-        elif strMessage == '调教帮助':
-            reply = command.helpTraining()
             needReply = True
 
 
@@ -387,12 +381,12 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
 
     
     if needReply:
-        if strMessage != '贡献者帮助' and strMessage != '管理员帮助' and strMessage != '打卡计划管理帮助' and strMessage != '主人帮助':
+        if strMessage != '贡献者帮助' and strMessage != '管理员帮助' and strMessage != '主人帮助':
             logManage.log(getNow.toString(), memberId, strMessage + "; 执行结果：" + reply)
         else:
             logManage.log(getNow.toString(), memberId, strMessage + "; 执行结果：参见command.py里的帮助内容")
 
-    return (needReply, needAt, reply)
+    return (needReply, needAt, reply, isImage)
 
 
 # ==========================================================

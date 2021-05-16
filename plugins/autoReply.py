@@ -16,6 +16,7 @@ def reply(messages, beAt, botBaseInformation, app, nickname):
     needReply = False
     needAt = False
     reply = ''
+    isImage = ''
     
     if beAt:
         AtMessage = messages.replace('@' + str(Bot_QQ) + ' ', '')
@@ -32,13 +33,19 @@ def reply(messages, beAt, botBaseInformation, app, nickname):
             reply = replylist[random.randrange(0, len(replylist))]
             needReply = True
         elif AtMessage == '贴贴':
-            replylist = ['贴贴', '快来贴贴，嘿嘿！', '不贴不贴']
+            replylist = ['贴贴', 'image贴贴', '快来贴贴，嘿嘿！', '不贴不贴']
             reply = replylist[random.randrange(0, len(replylist))]
+            if reply == 'image贴贴':
+                reply = ''
+                isImage = '贴贴.jpg'
             needReply = True
         elif AtMessage == '晚安':
-            replylist = ['晚安', '晚安哦' + nickname,
+            replylist = ['晚安', 'image晚安', '晚安哦' + nickname,
                         '记得要梦见' + Bot_Name, '快睡吧']
             reply = replylist[random.randrange(0, len(replylist))]
+            if reply == 'image晚安':
+                reply = ''
+                isImage = '晚安.png'
             needReply = True
         elif AtMessage == '谢谢':
             replylist = ['嘿嘿', '不用谢啦', '要时刻想着' + Bot_Name, '没事啦']
@@ -58,9 +65,6 @@ def reply(messages, beAt, botBaseInformation, app, nickname):
             needReply = True
         elif AtMessage == '你是猪吗' or AtMessage == '猪':
             reply = '你以为谁都像你一天天哼唧哼唧的'
-            needReply = True
-        elif AtMessage == '晚安':
-            reply = '晚安呀！' + nickname
             needReply = True
         elif AtMessage == '早安':
             reply = '早哦，' + nickname
@@ -82,9 +86,12 @@ def reply(messages, beAt, botBaseInformation, app, nickname):
             reply = '在' + Bot_Name + '心中，' + nickname + '一直都很厉害的哦~'
             needReply = True
         elif messages == '好家伙':
-            tmpNumber = random.randrange(0, 5)
+            tmpNumber = random.randrange(0, 7)
             if tmpNumber == 3:
                 reply = '又发生什么辣？'
+                needReply = True
+            elif tmpNumber == 1:
+                isImage == '问号.jpg'
                 needReply = True
         elif messages == '你们早上都没课的嘛':
             reply = Bot_Name + '还没有开始上课呢'
@@ -114,7 +121,12 @@ def reply(messages, beAt, botBaseInformation, app, nickname):
             reply = Bot_Name + '来了来了'
             needReply = True
         elif messages == '晚安':
-            reply = '晚安呀！' + nickname
+            replylist = ['晚安', 'image晚安', '晚安哦' + nickname,
+                        '记得要梦见' + Bot_Name, '快睡吧']
+            reply = replylist[random.randrange(0, len(replylist))]
+            if reply == 'image晚安':
+                reply = ''
+                isImage = '晚安.png'
             needReply = True
         elif messages == '早安':
             reply = '早哦，' + nickname
@@ -123,9 +135,12 @@ def reply(messages, beAt, botBaseInformation, app, nickname):
             reply = '能不能多读书，少看涩图'
             needReply = True
         elif messages == '？':
-            tmpNumber = random.randrange(0, 5)
+            tmpNumber = random.randrange(0, 10)
             if tmpNumber == 2:
                 reply = '怎么啦'
+                needReply = True
+            elif tmpNumber == 1:
+                isImage == '问号.jpg'
                 needReply = True
         else:
             tmpNumber = random.randrange(0, 1000)
@@ -140,4 +155,4 @@ def reply(messages, beAt, botBaseInformation, app, nickname):
                         botBaseInformation['reply']['lastMinute'] += 1
                         dataManage.save_obj(botBaseInformation, 'baseInformation')
 
-    return (needReply, needAt, reply)
+    return (needReply, needAt, reply, isImage)

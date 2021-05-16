@@ -18,8 +18,20 @@ def dick():
     return '你丢出的点数是：' + str(random.randint(1, 6))
 
 def rd(num, size):
-    if num > 20:
-        return '诶诶诶！投那么骰子，我会晕掉的'
+    if num > 10:
+        if num > 200:
+            return '诶诶诶！投那么骰子，我会晕掉的'
+        else:
+            sumDick = 0
+            result = '点数：'
+            for i in range(0, num):
+                if i != 0:
+                    result += '+'
+                tmp = random.randint(1, size)
+                sumDick += tmp
+                result += str(tmp)
+            result += '=' + str(sumDick)
+            return result
     if size > 1000:
         return '啊？那么多面，这个骰子做不出来诶'
     if num < 1 or size < 2:
@@ -29,12 +41,12 @@ def rd(num, size):
         return '扔出的点数为：' + str(random.randint(1, size))
 
     result = '\n'
-    sum = 0
+    sumDick = 0
     for i in range(0, num):
         dicks = random.randint(1, size)
-        sum += dicks
+        sumDick += dicks
         result += '骰子' + str(i + 1) + '：' + str(dicks) + '\n'
-    return result + '合计点数为：' + str(sum)
+    return result + '合计点数为：' + str(sumDick)
 
 def st(attribute, groupId, memberId):
     coc = dataManage.load_obj('coc')
@@ -62,6 +74,10 @@ def sta(attribute, groupId, memberId):
                     if i[j:].isdigit():
                         a = i[:j]
                         number = int(i[j:])
+                        if number > 100:
+                            number = 100
+                        elif number < 0:
+                            number = 0
                     break
             if len(a) > 0:
                 coc[groupId][memberId][a] = number
@@ -88,6 +104,10 @@ def stc(attribute, groupId, memberId):
                     if i[j:].isdigit():
                         a = i[:j]
                         number = int(i[j:])
+                        if number > 100:
+                            number = 100
+                        elif number < 0:
+                            number = 0
                     break
             if len(a) > 0:
                 if coc[groupId][memberId].__contains__(a):
@@ -130,7 +150,7 @@ def show(groupId, memberId):
     if len(coc[groupId][memberId]) == 0:
         return '暂无属性'
     
-    result = '你的超过20的属性如下：'
+    result = '你的20及以上的属性如下：'
     for key, value in coc[groupId][memberId].items():
         if value >= 20:
             result += '\n' + key + '：' + str(value)
@@ -157,11 +177,33 @@ def ra(attribute, groupId, memberId):
         return '不存在该属性'
     if not coc[groupId].__contains__(memberId):
         return '不存在该属性'
+    if attribute[len(attribute) - 1].isdigit():
+        index = len(attribute) - 2
+        while index >= 0:
+            if not attribute[index].isdigit():
+                break
+            index -= 1
+        name = ''
+        if index == -1:
+            name = '[未知属性]'
+        else:
+            name = attribute[:index + 1]
+        number = int(attribute[index + 1:])
+        if number > 100:
+            number = 100
+        elif number < 0:
+            number = 0
+        dicks = random.randint(1, 100)
+        if dicks < number:
+            return '点数：' + str(dicks) + '\n' + name + ':' + str(number) + '\n鉴定成功！'
+        else:
+            return '点数：' + str(dicks) + '\n' + name + ':' + str(number) + '\n鉴定失败！'
+
     if not coc[groupId][memberId].__contains__(attribute):
         return '不存在该属性'
     dicks = random.randint(1, 100)
     if dicks <= coc[groupId][memberId][attribute]:
-        return '点数：' + str(dicks) + '\n鉴定成功！'
+        return '点数：' + str(dicks) + '\n' + attribute + ':' + str(coc[groupId][memberId][attribute]) + '\n鉴定成功！'
     else:
-        return '点数：' + str(dicks) + '\n鉴定失败！'
+        return '点数：' + str(dicks) + '\n' + attribute + ':' + str(coc[groupId][memberId][attribute]) + '\n鉴定失败！'
     

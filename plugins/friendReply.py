@@ -14,17 +14,19 @@ from plugins import operator
 from plugins import autoReply
 from plugins import baidu
 from plugins import vocabulary
+from plugins import rpg
 
 # 朋友消息回复
 
 # 这里的messages是一个列表，因为发送的可能是多行信息，需要进行一定的处理
-async def reply(botBaseInformation, messages, app, friend):
+async def reply(botBaseInformation, messages, app, friend, messageChain):
     Bot_QQ = botBaseInformation['baseInformation']['Bot_QQ']
     Bot_Name = botBaseInformation['baseInformation']['Bot_Name']
 
     
     needReply = False
     reply = ''
+    isImage = ''
     blacklist = (friend.id in botBaseInformation['blacklistMember'])
     isAdministrator = (friend.id in botBaseInformation['administrator']) or (friend.id in botBaseInformation['contributors']) or (friend.id == botBaseInformation['baseInformation']['Master_QQ'])
 
@@ -52,18 +54,30 @@ async def reply(botBaseInformation, messages, app, friend):
             elif messages == '骂我一句':
                 reply = talk.swear()
                 needReply = True
+
+            elif messages == '帮助':
+                isImage = command.help()
+                needReply = True
             elif messages == '打卡帮助':
-                reply = command.helpClock()
-                reply += '\n只支持群聊哦~'
+                isImage = command.helpClock()
+                reply = '这部分命令，只支持群聊哦~'
                 needReply = True
             elif messages == '活动帮助':
-                reply = command.helpActivity()
-                reply += '\n只支持群聊哦~'
+                isImage = command.helpActivity()
+                reply = '这部分命令，只支持群聊哦~'
                 needReply = True
-            elif messages == '骰娘':
-                reply = command.helpThrower()
-                reply += '\n只支持群聊哦~'
+            elif messages == '骰娘' or messages == '骰娘帮助':
+                isImage = command.helpThrower()
+                reply = '这部分命令，只支持群聊哦~'
                 needReply = True
+            elif messages == '塔罗牌帮助':
+                isImage = command.helpTarot()
+                needReply = True
+            elif messages == '游戏帮助':
+                isImage = command.helpGame()
+                reply = '这部分命令，只支持群聊哦~'
+                needReply = True
+
 
             elif messages == '微博热搜':
                 reply = weiboHot.getHot()
@@ -100,11 +114,14 @@ async def reply(botBaseInformation, messages, app, friend):
                 needReply = True
         if not needReply:
             if isAdministrator:
-                (needReply, needAt, reply) = await operator.administratorOperation(messages, 0, friend.id, app, friend, botBaseInformation)
+                (needReply, needAt, reply, isImage) = await operator.administratorOperation(messages, 0, friend.id, app, friend, botBaseInformation)
             elif messages == '我的权限':
                 reply = '当前权限：普通用户\n可以输入*help来获取指令帮助哦~'
                 needReply = True
+        # 自主回复部分
+        if not needReply: # rpg游戏
+            (needReply, needAt, reply, isImage) = await rpg.menu(messages, 0, friend, app, botBaseInformation, messageChain)
         if not needReply:
-            (needReply, needAt, reply) = autoReply.reply(messages, True, botBaseInformation, app, friend.nickname)
+            (needReply, needAt, reply, isImage) = autoReply.reply(messages, True, botBaseInformation, app, friend.nickname)
     
-    return (needReply, reply)
+    return (needReply, reply, isImage)

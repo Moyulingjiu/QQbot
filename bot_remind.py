@@ -219,6 +219,7 @@ async def timeWatcher():
         botBaseInformation = dataManage.load_obj('baseInformation')
         print('\t*上一分钟回复为：', botBaseInformation['reply']['lastMinute'])
         botBaseInformation['reply']['lastMinute'] = 0
+        botBaseInformation['reply']['cards'] = 0
         dataManage.save_obj(botBaseInformation, 'baseInformation')
         print('\t*已将上一分钟回复其置为：0')
         time.sleep(60)
