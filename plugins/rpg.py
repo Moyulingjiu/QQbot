@@ -36,7 +36,7 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
 
     if strMessage.strip() == '签到':
         id = member.id
-        reply = sign(id)
+        reply = memberName + sign(id)
         needReply = True
     elif '击剑' in strMessage and groupId != 0:
         tmp = strMessage.replace('击剑', '').strip()
@@ -45,7 +45,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
             if target != Bot_QQ:
                 await fencing(member, target, app)
             else:
-                reply = Bot_Name + '一把把你按在了地上'
+                replylist = ['一把把你按在了地上', '敲了敲你的脑袋', '摸了摸你的头说：“乖，一边去~”']
+                reply = Bot_Name + random.choice(replylist)
         needReply = True
     elif strMessage == '我的积分' or strMessage == '积分':
         id = member.id
@@ -62,16 +63,36 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
     elif strMessage == '排行榜':
         reply = getRank()
         needReply = True
+    elif strMessage == '兑换体力':
+        reply = memberName + rechargeStrength(member.id)
+        needReply = True
     elif strMessage == '模拟抽卡' or strMessage == '模拟单抽':
         reply = MRFZ_card()
         needReply = True
     elif strMessage == '模拟十连':
         reply = MRFZ_card10()
         needReply = True
-    elif strMessage == '围攻榜首':
+    elif strMessage == '围攻榜首' and groupId != 0:
         await fencingTop(member, app)
         needReply = True
-
+    elif strMessage == '探险':
+        reply = fishing(member.id, memberName)
+        needReply = True
+    elif strMessage == '闲逛':
+        reply = memberName + hangOut(member.id)
+        needReply = True
+    elif '摸摸' in strMessage and groupId != 0:
+        tmp = strMessage.replace('摸摸', '').strip()
+        if tmp[0] == '@' and tmp[1:].isdigit():
+            target = int(tmp[1:])
+            print(target)
+            print(Bot_QQ)
+            print(str(target) == str(Bot_QQ))
+            if str(target) == str(Bot_QQ):
+                reply = Bot_Name + touch(member.id, memberName)
+                print(reply)
+        needReply = True
+    
     return (needReply, needAt, reply, isImage)
 
 def sign(id):
@@ -134,17 +155,26 @@ def newUser(id, name):
                 'hp': 100,
                 'defense': 0,
                 'san': 100,
-                'strength': 15
+                'strength': 20
             },
             'last-operate-date': today
         }
         dataManage.save_obj(user, 'user/information')
     else:
         if user[id]['last-operate-date'] != today:
-            user[id]['attribute']['strength'] = 15
+            user[id]['attribute']['strength'] += 20
             user[id]['last-operate-date'] = today
             user[id]['name'] = name
             dataManage.save_obj(user, 'user/information')
+
+def rechargeStrength(id):
+    user = dataManage.load_obj('user/information')
+    if user[id]['gold'] < 2:
+        return '你的积分小于2不能兑换体力'
+    user[id]['gold'] -= 2
+    user[id]['attribute']['strength'] += 5
+    dataManage.save_obj(user, 'user/information')
+    return '你获得了5点体力'
 
 async def fencing(member, id2, app):
     if member.id == id2:
@@ -360,8 +390,10 @@ def getRank():
     rateValue = round(rateValue, 2) * 100
     if rateValueId != 0:
         result += '胜率第一（大于50场）：' + user[rateValueId]['name'] + '（' + str(int(rateValue)) + '%）\n'
-    result += '击剑达人：' + user[timesId]['name'] + '（' + str(int(user[timesId]['match']['win'] + user[timesId]['match']['lose'])) + '场）\n'
+    result += '击剑达人：' + user[timesId]['name'] + '（' + str(int(user[timesId]['match']['win'] + user[timesId]['match']['lose'])) + '场）'
     return result
+
+# ============================================
 
 def MRFZ_card():
     botBaseInformation = dataManage.load_obj('baseInformation')
@@ -497,3 +529,184 @@ def star2string(star):
         return '★★★★★☆'
     elif star == 6:
         return '★★★★★★'
+
+# ============================================
+def touch(id, name):
+    user = dataManage.load_obj('user/information')
+    if user[id]['attribute']['strength'] < 1 or user[id]['gold'] > 1:
+        return '对' + name + '不屑一顾'
+    user[id]['attribute']['strength'] -= 1
+    user[id]['gold'] += random.randint(1, 5)
+    dataManage.save_obj(user, 'user/information')
+    return '看' + name + '太可怜，于是给了你一些积分'
+
+'''
+消耗体力：1
+
+50% 啥也没有
+20% 1点体力 | 1点积分
+20% 2点体力 | 2点积分
+9% 3点体力 | 3点积分
+0.9% 4点体力 | 4点积分
+0.1% 10点体力 | 10点积分
+
+E = 0.916
+'''
+def fishing(id, name):
+    user = dataManage.load_obj('user/information')
+    if user[id]['attribute']['strength'] < 1:
+        return name + '体力值不足不能探险'
+    user[id]['attribute']['strength'] -= 1
+    ran = random.randrange(0, 1000)
+    ran2 = random.randrange(0, 2)
+
+    describe_dict = ['你来到了一个黑漆漆的山洞，四周十分安静，一番探索之后', '你来到一个遗迹，一番探索之后', '你发现了一个宝箱', '在亚马逊的原始森林里，你被讨厌的虫子烦的要死']
+
+    describe = random.choice(describe_dict)
+    result = ''
+
+    if ran < 500:
+        result = '什么也没有获得'
+    elif ran < 700:
+        if ran2 == 0:
+            user[id]['attribute']['strength'] += 1
+            result = '获得了1点体力'
+        else:
+            user[id]['gold'] += 1
+            result = '获得了1点积分值'
+    elif ran < 900:
+        if ran2 == 0:
+            user[id]['attribute']['strength'] += 2
+            result = '获得了2点体力'
+        else:
+            user[id]['gold'] += 2
+            result = '获得了2点积分值'
+    elif ran < 990:
+        if ran2 == 0:
+            user[id]['attribute']['strength'] += 3
+            result = '获得了3点体力'
+        else:
+            user[id]['gold'] += 3
+            result = '获得了3点积分值'
+    elif ran < 999:
+        if ran2 == 0:
+            user[id]['attribute']['strength'] += 4
+            result = '获得了4点体力'
+        else:
+            user[id]['gold'] += 4
+            result = '获得了4点积分值'
+    else:
+        if ran2 == 0:
+            user[id]['attribute']['strength'] += 10
+            result = '获得了10点体力'
+        else:
+            user[id]['gold'] += 10
+            result = '获得了10点积分值'
+
+    
+    dataManage.save_obj(user, 'user/information')
+    return name + describe + '，' + result
+
+
+def hangOut(id):
+    user = dataManage.load_obj('user/information')
+    if user[id]['gold'] <= 0:
+        return '你的积分为0，不能闲逛了'
+    result = ''
+
+    ran = random.randrange(0, 19)
+    if ran == 0:
+        result = '你在闲逛的时候被舞女拉进了小树林，积分-2，体力+2'
+        user[id]['gold'] -= 2
+        user[id]['attribute']['strength'] += 2
+    elif ran == 1:
+        result = '你在闲逛的时候遇见了阿拉灯神丁，他说实现你三个愿望然后摸了你的钱包转身就走，积分+3'
+        user[id]['gold'] += 3
+    elif ran == 2:
+        result = '你在闲逛的时候邂逅了笑猫，他送给你了一个大大的笑容，体力+3'
+        user[id]['attribute']['strength'] += 3
+    elif ran == 3:
+        result = '你在闲逛的时候被网红火锅店吸引没忍住冲了进去，积分-1，体力+2'
+        user[id]['gold'] -= 1
+        user[id]['attribute']['strength'] += 2
+    elif ran == 4:
+        result = '你在闲逛的时候逛回去了，啥也没获得,体力-1'
+        if user[id]['attribute']['strength'] > 1:
+            user[id]['attribute']['strength'] -= 1
+    elif ran == 5:
+        result = '你在闲逛的时候踩了一坨便便并且坚信明天会走狗屎运'
+    elif ran == 6:
+        result = '你在闲逛的时候遇见了一个可怜的乞丐，给了他一些钱，积分-5'
+        user[id]['gold'] -= 5
+    elif ran == 7:
+        result = '你在闲逛的时候玩手机没看路，撞上了电线杆，体力值-10'
+        if user[id]['attribute']['strength'] > 10:
+            user[id]['attribute']['strength'] -= 10
+        else:
+            user[id]['attribute']['strength'] = 0
+    elif ran == 8:
+        result = '你在路上看美女被小柒发现，惨遭暴打，体力-2，积分-2'
+        user[id]['gold'] -= 2
+        if user[id]['attribute']['strength'] > 2:
+            user[id]['attribute']['strength'] -= 2
+        else:
+            user[id]['attribute']['strength'] = 0
+    elif ran == 9:
+        result = '你出门之后天下起了倾盆大雨，狂奔回家之后发现钥匙丢在了咖啡厅，于是去咖啡厅拿了钥匙后折返，体力-1'
+        if user[id]['attribute']['strength'] > 1:
+            user[id]['attribute']['strength'] -= 1
+        else:
+            user[id]['attribute']['strength'] = 0
+    elif ran == 10:
+        result = '你闲逛的时候碰见富豪在路上撒钱，积分+2'
+        user[id]['gold'] += 2
+    elif ran == 11:
+        result = '你在闲逛的时候，不小心掉进了下水道，积分-5，体力-5'
+        user[id]['gold'] -= 5
+        if user[id]['attribute']['strength'] > 5:
+            user[id]['attribute']['strength'] -= 5
+        else:
+            user[id]['attribute']['strength'] = 0
+    elif ran == 12:
+        result = '你在闲逛的时候，遇见了一个卖苹果的老婆婆，你买了一些苹果，积分-1，体力+5'
+        user[id]['gold'] -= 1
+        user[id]['attribute']['strength'] += 5
+    elif ran == 13:
+        result = '你在闲逛的时候，遇见了一个卖苹果的老婆婆，你买了一些苹果，发现是毒苹果，积分-1，体力-5'
+        user[id]['gold'] -= 1
+        if user[id]['attribute']['strength'] > 5:
+            user[id]['attribute']['strength'] -= 5
+        else:
+            user[id]['attribute']['strength'] = 0
+    elif ran == 14:
+        result = '你在闲逛的时候，决定尝试一下彩票，但是没有中奖，积分-2'
+        user[id]['gold'] -= 2
+    elif ran == 15:
+        result = '你在闲逛的时候，决定尝试一下彩票，中奖了，积分+2'
+        user[id]['gold'] += 2
+    elif ran == 16:
+        result = '你在闲逛的时候，决定尝试一下彩票，中奖了，积分+3'
+        user[id]['gold'] += 3
+    elif ran == 17:
+        result = '你在闲逛的时候，决定尝试一下彩票，中奖了，积分+1'
+        user[id]['gold'] += 1
+    elif ran == 18:
+        result = '你在闲逛的时候，决定尝试一下刮刮乐，但是没有中奖，积分-2'
+        user[id]['gold'] -= 2
+    elif ran == 19:
+        result = '你在闲逛的时候，决定尝试一下刮刮乐，中奖了，积分+1'
+        user[id]['gold'] += 1
+    elif ran == 20:
+        result = '你在闲逛的时候，嘴馋买了个 冰淇淋，积分-2'
+        user[id]['gold'] -= 2
+    elif ran == 21:
+        result = '你在闲逛的时候，嘴馋买了个 冰淇淋，积分-2，体力+2'
+        user[id]['gold'] -= 2
+        user[id]['attribute']['strength'] += 2
+
+    else:
+        result = '你闲逛了一圈，啥也没有发生'
+
+    
+    dataManage.save_obj(user, 'user/information')
+    return result
