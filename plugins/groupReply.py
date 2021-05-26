@@ -181,21 +181,21 @@ async def reply(botBaseInformation, messages, app, member, messageChain):
                         reply = operator.getActivityList(groupId, app)
                         needReply = True
 
-                    elif messages == '四级词汇':
+                    elif messages == '四级词汇' or messages == '四级单词':
                         vocabularyNumber = 1
                         reply = vocabulary.getVocabulary4(vocabularyNumber)
                         needReply = True
-                    elif messages[:5] == '四级词汇 ':
+                    elif messages[:5] == '四级词汇 ' or messages[:5] == '四级单词 ':
                         vocabularyNumber = int(messages[5:].strip())
                         if vocabularyNumber <= 0:
                             vocabularyNumber = 1
                         reply = vocabulary.getVocabulary4(vocabularyNumber)
                         needReply = True
-                    elif messages == '六级词汇':
+                    elif messages == '六级词汇' or messages == '六级单词':
                         vocabularyNumber = 1
                         reply = vocabulary.getVocabulary6(vocabularyNumber)
                         needReply = True
-                    elif messages[:5] == '六级词汇 ':
+                    elif messages[:5] == '六级词汇 ' or messages[:5] == '六级单词 ':
                         vocabularyNumber = int(messages[5:].strip())
                         if vocabularyNumber <= 0:
                             vocabularyNumber = 1

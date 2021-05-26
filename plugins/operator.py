@@ -18,6 +18,8 @@ from plugins import clockIn
 from plugins import logManage
 from plugins import getNow
 
+import sys
+
 # ==========================================================
 # 监听模块
 
@@ -62,6 +64,10 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
         if strMessage == '主人帮助':
             isImage = command.helpMaster()
             needReply = True
+        elif strMessage == Bot_Name + '关机':
+            logManage.log(getNow.toString(), 0, Bot_Name + '关机！')
+            print('退出')
+            sys.exit()
         elif strMessage[:5] == '删除文摘 ':
             reply = talk.delPoem(int(strMessage[5:]))
             needReply = True

@@ -143,6 +143,20 @@ async def friend_message_listener(app: GraiaMiraiApplication, friend: Friend, so
     strMessage = getMessage.messageChain.asDisplay()
     print('\n收到消息<' + friend.nickname + '/' + str(friend.id) + '>：' + strMessage)
 
+    if strMessage[:5] == '*send':
+        master = await app.getFriend(botBaseInformation['baseInformation']['Master_QQ'])
+
+        if master != None and len(strMessage) > 5:
+            await app.sendFriendMessage(friend, MessageChain.create([
+                Plain(friend.nickname + '(' + str(friend.id) + ')：' + strMessage[5:])
+            ]))
+            await app.sendFriendMessage(friend, MessageChain.create([
+                Plain('已经报告给主人了~')
+            ]))
+            needReply = True
+        return
+
+
     (needReply, reply, isImage) = await friendReply.reply(botBaseInformation, strMessage, app, friend, getMessage.messageChain)
 
     if needReply:
@@ -293,14 +307,14 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
             await app.sendFriendMessage(friend, MessageChain.create([
                 Plain(member.name + '(' + str(member.id) + ')：' + strMessage[5:])
             ]))
-            await app.sendGroupMessage(member.group, MessageChain.create([
+            await app.sendTempMessage(member.group.id, member.id, MessageChain.create([
                 Plain('已经报告给主人了~')
             ]))
             needReply = True
         return
 
 
-    (needReply, needAt, reply, AtId, isImage) = await groupReply.reply(botBaseInformation, strMessage, app, member)
+    (needReply, needAt, reply, AtId, isImage) = await groupReply.reply(botBaseInformation, strMessage, app, member, getMessage.messageChain)
     
     if needReply:
         print('\t回复消息<' + member.group.name + '/' + str(member.group.id) + '>[' + member.name + '/' + str(member.id) + ']：' + reply + '\n')
