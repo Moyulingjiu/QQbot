@@ -16,6 +16,8 @@ import datetime
 import linecache
 
 from plugins import dataManage
+from plugins import logManage
+from plugins import getNow
 
 maxStrength = 120 # 最大体力
 signStrength = 20 # 签到体力
@@ -23,14 +25,182 @@ user = {} # 用户数据
 systemData = {}
 init = True
 
+'''
+# type（
+# 0：药水
+# 1:武器
+# 2：头盔
+# 3：胸甲
+# 4：护腿
+# 5：靴子
+# 6：左戒指
+# 7：右戒指
+# 8：背包
+# 9：卷轴
+# 10：礼盒、宝箱
+# 11：矿石
+# 12：纪念品
+# ）
+'''
+
 goods = {
     '破旧的木剑': {
-        'attack': 1
+        'attack': 1,
+        'cost': 10,
+        'sell': 5,
+        'comments': '一把勉强可以使用的木剑，攻击力+1',
+        'type': 1
+    },
+    '破旧的木斧': {
+        'attack': 2,
+        'cost': 30,
+        'sell': 5,
+        'comments': '一把勉强可以使用的木斧，攻击力+2',
+        'type': 1
+    },
+    '破旧的布头盔': {
+        'defense': 1,
+        'cost': 20,
+        'sell': 5,
+        'comments': '一顶勉强可以使用的头盔，护甲+1',
+        'type': 2
     },
     '破旧的布甲': {
-        'defense': 1
+        'defense': 1,
+        'cost': 20,
+        'sell': 5,
+        'comments': '一件勉强可以使用的布甲，护甲+1',
+        'type': 3
+    },
+    '破旧的布护腿': {
+        'defense': 1,
+        'cost': 20,
+        'sell': 5,
+        'comments': '一件勉强可以使用的布护腿，护甲+1',
+        'type': 4
+    },
+    '破旧的布靴': {
+        'defense': 1,
+        'cost': 20,
+        'sell': 5,
+        'comments': '一双勉强可以使用的布靴，护甲+1',
+        'type': 5
+    },
+    '攻击戒指': {
+        'attack': 3,
+        'cost': 100,
+        'sell': 50,
+        'comments': '一个充斥着神奇力量的戒指，攻击力+3',
+        'type': 6
+    },
+    '守护戒指': {
+        'defense': 1,
+        'cost': 100,
+        'sell': 50,
+        'comments': '一个充斥着神奇力量的戒指，护甲+1',
+        'type': 7
+    },
+    '贪婪戒指': {
+        'gold': 1,
+        'cost': 100,
+        'sell': 50,
+        'comments': '一个充斥着神奇力量的戒指，每次收益积分+1',
+        'type': 7
+    },
+
+    '制式长枪': {
+        'attack': 3,
+        'defense': -1,
+        'cost': 100,
+        'sell': 50,
+        'comments': '人类军队的制式长枪，长武器带来极强的进攻性，但也削弱了防御，攻击力+3，护甲-1',
+        'type': 1
+    },
+    '大鸡腿': {
+        'attack': -1,
+        'cost': -1,
+        'sell': 2,
+        'comments': '这东西真的有杀伤力吗，攻击力-1',
+        'type': 1
+    },
+
+    '金粒': {
+        'gold': 5,
+        'cost': -1,
+        'sell': 5,
+        'comments': '看！那小小的金粒，积分+5',
+        'type': 0
+    },
+    '金条': {
+        'gold': 10,
+        'cost': -1,
+        'sell': 10,
+        'comments': '闪闪发光！积分+10',
+        'type': 0
+    },
+
+    '体力药水': {
+        'strength': 5,
+        'cost': 5,
+        'sell': 4,
+        'comments': '体力值+5',
+        'type': 0
+    },
+    '生命药水': {
+        'hp': 10,
+        'cost': 5,
+        'sell': 4,
+        'comments': '生命值+10',
+        'type': 0
+    },
+    '精神药水': {
+        'san': 10,
+        'cost': 5,
+        'sell': 4,
+        'comments': 'san值+10',
+        'type': 0
+    },
+    '积分药水': {
+        'gold': 5,
+        'cost': -1,
+        'sell': 5,
+        'comments': '积分+5',
+        'type': 0
+    },
+
+    '体力补偿礼包': {
+        'strength': 5,
+        'cost': -1,
+        'sell': 0,
+        'comments': '体力值+5',
+        'type': 10
+    },
+    '积分补偿礼包': {
+        'gold': 5,
+        'cost': -1,
+        'sell': 0,
+        'comments': '积分+5',
+        'type': 10
+    },
+    '内测玩家纪念品': {
+        'cost': -1,
+        'sell': 30,
+        'comments': '一个看起来没什么用的摆件',
+        'type': 12
     }
 }
+
+goodsAvailable = [
+    '破旧的木剑',
+    '破旧的木斧',
+    '破旧的布头盔',
+    '破旧的布甲',
+    '破旧的布护腿',
+    '破旧的布靴',
+    '攻击戒指',
+    '体力药水',
+    '精神药水'
+]
 
 async def menu(strMessage, groupId, member, app, botBaseInformation, messageChain):
     global user
@@ -96,8 +266,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
     elif strMessage == '模拟十连':
         reply = MRFZ_card10()
         needReply = True
-    elif strMessage == '围攻榜首' and groupId != 0:
-        await fencingTop(member, app)
+    elif strMessage == '围攻榜首':
+        await fencingTop(member, app, groupId)
         needReply = True
     elif strMessage == '探险':
         reply = fishing(member.id, memberName)
@@ -122,7 +292,7 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
     elif strMessage == '强化防守' or strMessage == '强化防御' or strMessage == '强化防御力':
         reply = memberName + strengthenDefense(member.id)
         needReply = True
-    elif strMessage == '数据' or strMessage == '我的数据':
+    elif strMessage == '数据' or strMessage == '我的数据' or strMessage == '属性' or strMessage == '我的属性':
         reply = getMyData(member.id)
         needReply = True
     elif strMessage == '背包' or strMessage == '我的背包':
@@ -135,23 +305,60 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
         reply = memberName + getBuff(member.id)
         needReply = True
     elif strMessage[:2] == '装备' or strMessage[:2] == '使用':
-        pass
-        needReply = True
+        strList = strMessage[2:].strip().split(' ')
+        if len(strList) == 1:
+            reply = memberName + userGoods(member.id, strList[0], 1)
+            needReply = True
+        elif len(strList) == 2:
+            if strList[1].isdigit():
+                number = int(strList[1])
+                if number > 0:
+                    reply = memberName + userGoods(member.id, strList[0], number)
+                    needReply = True
     elif strMessage[:2] == '取下':
-        pass
-        needReply = True
+        strList = strMessage[2:].strip().split(' ')
+        if len(strList) == 1:
+            reply = memberName + getOffGoods(member.id, strList[0])
+            needReply = True
     elif strMessage == '商店':
         reply = getShop()
         needReply = True
+    elif '介绍' in strMessage:
+        reply = getComments(strMessage.replace('介绍', '').strip())
+        needReply = True
     elif strMessage[:2] == '购买':
-        pass
-        needReply = True
+        strList = strMessage[2:].strip().split(' ')
+        if len(strList) == 1:
+            reply = memberName + purchase(member.id, strList[0], 1)
+            needReply = True
+        elif len(strList) == 2:
+            if strList[1].isdigit():
+                number = int(strList[1])
+                if number > 0:
+                    reply = memberName + purchase(member.id, strList[0], number)
+                    needReply = True
     elif strMessage[:2] == '出售':
-        pass
-        needReply = True
+        strList = strMessage[2:].strip().split(' ')
+        if len(strList) == 1:
+            reply = memberName + sellGoods(member.id, strList[0], 1)
+            needReply = True
+        elif len(strList) == 2:
+            if strList[1].isdigit():
+                number = int(strList[1])
+                if number > 0:
+                    reply = memberName + sellGoods(member.id, strList[0], number)
+                    needReply = True
     elif strMessage[:2] == '丢弃' or strMessage[:2] == '丢掉':
-        pass
-        needReply = True
+        strList = strMessage[2:].strip().split(' ')
+        if len(strList) == 1:
+            reply = memberName + discard(member.id, strList[0], 1)
+            needReply = True
+        elif len(strList) == 2:
+            if strList[1].isdigit():
+                number = int(strList[1])
+                if number > 0:
+                    reply = memberName + discard(member.id, strList[0], number)
+                    needReply = True
     elif '决斗' in strMessage and groupId != 0:
         tmp = strMessage.replace('决斗', '').strip()
         if tmp[0] == '@' and tmp[1:].isdigit():
@@ -173,6 +380,10 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
         tmpName = strMessage[4:].strip()
         reply = changeName(member.id, tmpName)
         needReply = True
+    elif strMessage == '挑战BOSS' or strMessage == '挑战boss':
+        needReply = True
+
+
 
     if member.id ==  botBaseInformation['baseInformation']['Master_QQ']:
         if strMessage == '重新加载游戏数据':
@@ -190,6 +401,9 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = editStrength(int(strList[1]), int(strList[2]))
                     needReply = True
+                elif strList[1] == '*' and strList[2].isdigit():
+                    reply = giveAllStrength(int(strList[2]))
+                    needReply = True
         elif strMessage[:5] == '修改积分 ':
             strList = strMessage.split(' ')
 
@@ -200,6 +414,9 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
             elif len(strList) == 3:
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = editGold(int(strList[1]), int(strList[2]))
+                    needReply = True
+                elif strList[1] == '*' and strList[2].isdigit():
+                    reply = giveAllGold(int(strList[2]))
                     needReply = True
         elif strMessage[:5] == '查看数据 ':
             strList = strMessage.split(' ')
@@ -231,6 +448,29 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit():
                     reply = viewBuff(int(strList[1]))
                     needReply = True        
+
+        elif strMessage[:5] == '给予物品 ':
+            strList = strMessage.split(' ')
+            if len(strList) == 2:
+                reply = giveGoods(member.id, strList[1], 1)
+                needReply = True
+            elif len(strList) == 3:
+                if strList[2].isdigit():
+                    reply = giveGoods(member.id, strList[1], int(strList[2]))
+                    needReply = True
+                elif strList[1].isdigit():
+                    reply = giveGoods(int(strList[1]), strList[2], 1)
+                    needReply = True
+                elif strList[1] == '*':
+                    reply = giveAllGoods(strList[2], 1)
+                    needReply = True
+            elif len(strList) == 4:
+                if strList[1].isdigit() and strList[3].isdigit(): # 给指定人物品
+                    reply = giveGoods(int(strList[1]), strList[2], int(strList[3]))
+                    needReply = True
+                elif strList[1] == '*' and strList[3].isdigit(): # 给所有人物品
+                    reply = giveAllGoods(strList[2], int(strList[3]))
+                    needReply = True
 
         elif strMessage == '开启无敌':
             reply = changeToGod(member.id)
@@ -268,7 +508,6 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
         elif strMessage == '查看无敌的人':
             reply = viewGod()
             needReply = True
-
 
         elif strMessage[:7] == '开启1级防御 ':
             strList = strMessage.split(' ')
@@ -389,6 +628,10 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                         reply = changeToFixedGold(int(strList[1]), int(strList[2]), -int(strList[3][1:]))
                         needReply = True
 
+        # 记录操作
+        if needReply:
+            logManage.log(getNow.toString(), member.id, strMessage + "; 执行结果：" + reply)
+
     if needReply:
         dataManage.save_obj(user, 'user/information')
         dataManage.save_obj(systemData, 'user/system')
@@ -397,42 +640,44 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
 # ============================================
 # 基础操作
 
-def update(id, mode, gold, strength): # mode值表示了该击剑由什么模式产生的（-1：管理员权限、0：击剑、1：探险、2：闲逛）
+# 积分、体力值修改
+def update(id, mode, gold, strength): # mode值表示了该击剑由什么模式产生的（-2：交易操作、-1：管理员权限、0：击剑、1：探险、2：闲逛）
     global user
     global systemData
     if user.__contains__(id):
-        if gold > 0: # 增益buff
-            if systemData['halveGold'].__contains__(id): # 积分收益减半
-                systemData['halveGold'][id]['number'] -= 1
-                if systemData['halveGold'][id]['number'] <= 0:
-                    del systemData['halveGold'][id]
-                gold *= 0.5
-                gold = int(gold)
-            elif systemData['doubleGold'].__contains__(id): # 双倍积分收益
-                systemData['doubleGold'][id]['number'] -= 1
-                if systemData['doubleGold'][id]['number'] <= 0:
-                    del systemData['doubleGold'][id]
-                gold *= 2
-            elif systemData['tripleGold'].__contains__(id): # 三倍积分收益
-                systemData['tripleGold'][id]['number'] -= 1
-                if systemData['tripleGold'][id]['number'] <= 0:
-                    del systemData['tripleGold'][id]
-                gold *= 3
-            elif systemData['fixedGold'].__contains__(id): # 固定增减积分收益
-                systemData['fixedGold'][id]['number'] -= 1
-                gold += systemData['fixedGold'][id]['gold']
-                if gold < 0: # 收益不能减少为负数
-                    gold = 0
-                if systemData['fixedGold'][id]['number'] <= 0:
-                    del systemData['fixedGold'][id]
-        elif gold < 0: # 负收益buff
-            if systemData['noLoss'].__contains__(id): # 击剑不掉积分
-                if mode == 0:
-                    systemData['noLoss'][id]['number'] -= 1
-                    if systemData['noLoss'][id]['number'] <= 0:
-                        del systemData['noLoss'][id]
-                    gold = 0
-        
+        if mode >= 0:
+            if gold > 0: # 增益buff
+                if systemData['halveGold'].__contains__(id): # 积分收益减半
+                    systemData['halveGold'][id]['number'] -= 1
+                    if systemData['halveGold'][id]['number'] <= 0:
+                        del systemData['halveGold'][id]
+                    gold *= 0.5
+                    gold = int(gold)
+                elif systemData['doubleGold'].__contains__(id): # 双倍积分收益
+                    systemData['doubleGold'][id]['number'] -= 1
+                    if systemData['doubleGold'][id]['number'] <= 0:
+                        del systemData['doubleGold'][id]
+                    gold *= 2
+                elif systemData['tripleGold'].__contains__(id): # 三倍积分收益
+                    systemData['tripleGold'][id]['number'] -= 1
+                    if systemData['tripleGold'][id]['number'] <= 0:
+                        del systemData['tripleGold'][id]
+                    gold *= 3
+                elif systemData['fixedGold'].__contains__(id): # 固定增减积分收益
+                    systemData['fixedGold'][id]['number'] -= 1
+                    gold += systemData['fixedGold'][id]['gold']
+                    if gold < 0: # 收益不能减少为负数
+                        gold = 0
+                    if systemData['fixedGold'][id]['number'] <= 0:
+                        del systemData['fixedGold'][id]
+            elif gold < 0: # 负收益buff
+                if systemData['noLoss'].__contains__(id): # 击剑不掉积分
+                    if mode == 0:
+                        systemData['noLoss'][id]['number'] -= 1
+                        if systemData['noLoss'][id]['number'] <= 0:
+                            del systemData['noLoss'][id]
+                        gold = 0
+            
         user[id]['attribute']['strength'] += strength
         if user[id]['attribute']['strength'] < 0:
             user[id]['attribute']['strength'] = 0
@@ -532,7 +777,261 @@ def update(id, mode, gold, strength): # mode值表示了该击剑由什么模式
                 systemData['rank']['gold-3']['id'] = goldId3
                 systemData['rank']['gold-3']['gold'] = user[goldId3]['gold'] if goldId3 != 0 else 0
 
+# 获得商品
+def getGooods(id, mode, name, number): #（-1：系统补偿,0：购买所得，1：探险、闲逛获得）
+    global user
+    if user[id]['warehouse'].__contains__(name):
+        user[id]['warehouse'][name]['number'] += number
+        return True
+    elif len(user[id]['warehouse']) < 10:
+        user[id]['warehouse'][name] = {
+            'number': number
+        }
+        return True
+    else:
+        return False
 
+def getOffGoods(id, name):
+    global goods
+    global user
+
+    flag = -1
+    if user[id]['equipment']['arms'] == name:
+        flag = 1
+        user[id]['equipment']['arms'] = ''
+    elif user[id]['equipment']['hat'] == name:
+        flag = 2
+        user[id]['equipment']['hat'] = ''
+    elif user[id]['equipment']['jacket'] == name:
+        flag = 3
+        user[id]['equipment']['jacket'] = ''
+    elif user[id]['equipment']['trousers'] == name:
+        flag = 4
+        user[id]['equipment']['trousers'] = ''
+    elif user[id]['equipment']['shoes'] == name:
+        flag = 5
+        user[id]['equipment']['shoes'] = ''
+    elif user[id]['equipment']['ring-left'] == name:
+        flag = 6
+        user[id]['equipment']['ring-left'] = ''
+    elif user[id]['equipment']['ring-right'] == name:
+        flag = 7
+        user[id]['equipment']['ring-right'] = ''
+    elif user[id]['equipment']['knapsack'] == name:
+        flag = 8
+        user[id]['equipment']['knapsack'] = ''
+    
+    if flag > 0:
+        if getGooods(id, 0, name, 1):
+            if goods[name].__contains__('attack'):
+                user[id]['attribute']['attack'] -= goods[name]['attack']
+            if goods[name].__contains__('defense'):
+                user[id]['attribute']['defense'] -= goods[name]['defense']
+            return '已将' + name + '放入背包'
+        else:
+            if flag == 1:
+                user[id]['equipment']['arms'] = name
+            elif flag == 2:
+                user[id]['equipment']['hat'] = name
+            elif flag == 3:
+                user[id]['equipment']['jacket'] = name
+            elif flag == 4:
+                user[id]['equipment']['trousers'] = name
+            elif flag == 5:
+                user[id]['equipment']['shoes'] = name
+            elif flag == 6:
+                user[id]['equipment']['ring-left'] = name
+            elif flag == 7:
+                user[id]['equipment']['ring-right'] = name
+            elif flag == 8:
+                user[id]['equipment']['knapsack'] = name
+            return '背包已满'
+    else:
+        return '你的装备不存在该物品'
+
+def apllyAttribute(id, name):
+    global goods
+    global user
+
+    if goods[name].__contains__('attack'):
+        user[id]['attribute']['attack'] += goods[name]['attack']
+    if goods[name].__contains__('defense'):
+        user[id]['attribute']['defense'] += goods[name]['defense']
+
+def userGoods(id, name, number):
+    global user
+    global goods
+    global maxStrength
+
+    if user[id]['warehouse'].__contains__(name):
+        # 武器装备
+        if goods[name]['type'] > 0 and goods[name]['type'] < 8:
+            if goods[name]['type'] == 1:
+                if user[id]['equipment']['arms'] != '':
+                    discard(id, name, 1)
+                    if '放入背包' in getOffGoods(id, user[id]['equipment']['arms']):
+                        user[id]['equipment']['arms'] = name
+                        apllyAttribute(id, name)
+                        return '装备成功！'
+                    else:
+                        getGooods(id, -1, name, 1)
+                        return '背包无法给其腾出空间'
+                else:
+                    discard(id, name, 1)
+                    user[id]['equipment']['arms'] = name
+                    apllyAttribute(id, name)
+                    return '装备成功！'
+            elif goods[name]['type'] == 2:
+                if user[id]['equipment']['hat'] != '':
+                    discard(id, name, 1)
+                    if '放入背包' in getOffGoods(id, user[id]['equipment']['hat']):
+                        user[id]['equipment']['hat'] = name
+                        apllyAttribute(id, name)
+                        return '装备成功！'
+                    else:
+                        getGooods(id, -1, name, 1)
+                        return '背包无法给其腾出空间'
+                else:
+                    discard(id, name, 1)
+                    user[id]['equipment']['hat'] = name
+                    apllyAttribute(id, name)
+                    return '装备成功！'
+            elif goods[name]['type'] == 3:
+                if user[id]['equipment']['jacket'] != '':
+                    discard(id, name, 1)
+                    if '放入背包' in getOffGoods(id, user[id]['equipment']['jacket']):
+                        user[id]['equipment']['jacket'] = name
+                        apllyAttribute(id, name)
+                        return '装备成功！'
+                    else:
+                        getGooods(id, -1, name, 1)
+                        return '背包无法给其腾出空间'
+                else:
+                    discard(id, name, 1)
+                    user[id]['equipment']['jacket'] = name
+                    apllyAttribute(id, name)
+                    return '装备成功！'
+            elif goods[name]['type'] == 4:
+                if user[id]['equipment']['trousers'] != '':
+                    discard(id, name, 1)
+                    if '放入背包' in getOffGoods(id, user[id]['equipment']['trousers']):
+                        user[id]['equipment']['trousers'] = name
+                        apllyAttribute(id, name)
+                        return '装备成功！'
+                    else:
+                        getGooods(id, -1, name, 1)
+                        return '背包无法给其腾出空间'
+                else:
+                    discard(id, name, 1)
+                    user[id]['equipment']['trousers'] = name
+                    apllyAttribute(id, name)
+                    return '装备成功！'
+            elif goods[name]['type'] == 5:
+                if user[id]['equipment']['shoes'] != '':
+                    discard(id, name, 1)
+                    if '放入背包' in getOffGoods(id, user[id]['equipment']['shoes']):
+                        user[id]['equipment']['shoes'] = name
+                        apllyAttribute(id, name)
+                        return '装备成功！'
+                    else:
+                        getGooods(id, -1, name, 1)
+                        return '背包无法给其腾出空间'
+                else:
+                    discard(id, name, 1)
+                    user[id]['equipment']['shoes'] = name
+                    apllyAttribute(id, name)
+                    return '装备成功！'
+            elif goods[name]['type'] == 6:
+                if user[id]['equipment']['ring-left'] != '':
+                    discard(id, name, 1)
+                    if '放入背包' in getOffGoods(id, user[id]['equipment']['ring-left']):
+                        user[id]['equipment']['ring-left'] = name
+                        apllyAttribute(id, name)
+                        return '装备成功！'
+                    else:
+                        getGooods(id, -1, name, 1)
+                        return '背包无法给其腾出空间'
+                else:
+                    discard(id, name, 1)
+                    user[id]['equipment']['ring-left'] = name
+                    apllyAttribute(id, name)
+                    return '装备成功！'
+            elif goods[name]['type'] == 7:
+                if user[id]['equipment']['ring-right'] != '':
+                    discard(id, name, 1)
+                    if '放入背包' in getOffGoods(id, user[id]['equipment']['ring-right']):
+                        user[id]['equipment']['ring-right'] = name
+                        apllyAttribute(id, name)
+                        return '装备成功！'
+                    else:
+                        getGooods(id, -1, name, 1)
+                        return '背包无法给其腾出空间'
+                else:
+                    discard(id, name, 1)
+                    user[id]['equipment']['ring-right'] = name
+                    apllyAttribute(id, name)
+                    return '装备成功！'
+        # 消耗品
+        else:
+            if goods[name]['type'] == 12:
+                return '纪念品不可以使用，只可以出售和丢弃'
+
+            if number > user[id]['warehouse'][name]['number']:
+                number = user[id]['warehouse'][name]['number']
+            countWord = ''
+            if goods[name]['type'] == 0:
+                countWord = '瓶'
+            elif goods[name]['type'] == 9:
+                countWord = '张'
+            elif goods[name]['type'] == 10:
+                countWord = '个'
+            
+
+            gold = 0
+            strength = 0
+            if goods[name].__contains__('gold'):
+                gold = goods[name]['gold'] * number
+            if goods[name].__contains__('strength'):
+                if user[id]['attribute']['strength'] + goods[name]['strength'] * number > maxStrength:
+                    return '体力值已满，无法使用'
+                strength = goods[name]['strength'] * number
+            update(id, -2, gold, strength)
+
+            if goods[name].__contains__('san'):
+                user[id]['attribute']['san'] += goods[name]['san'] * number
+            if goods[name].__contains__('hp'):
+                user[id]['attribute']['hp'] += goods[name]['san'] * number
+
+            discard(id, name, number)
+            return '你成功使用' + str(number) + countWord + name
+    else:
+        return '你没有该物品'
+
+def typeToString(number):
+    if number == 0:
+        return '药水'
+    elif number == 1:
+        return '武器'
+    elif number == 2:
+        return '头盔'
+    elif number == 3:
+        return '胸甲'
+    elif number == 4:
+        return '护腿'
+    elif number == 5:
+        return '靴子'
+    elif number == 6:
+        return '戒指（左）'
+    elif number == 7:
+        return '戒指（右）'
+    elif number == 8:
+        return '背包'
+    elif number == 9:
+        return '卷轴'
+    elif number == 10:
+        return '宝箱'
+    elif number == 12:
+        return '纪念品'
 
 # ============================================
 # 操作
@@ -543,7 +1042,7 @@ def sign(id):
 
     if today != user[id]['sign-date']:
         user[id]['sign-date'] = today
-        user[id]['gold'] += random.randint(5, 10)
+        update(id, -2, random.randint(5, 30), 0)
         return '签到成功！当前积分：' + str(user[id]['gold'])
     else:
         return '你今天已经签到过了哦~'
@@ -585,8 +1084,8 @@ def getMyData(id):
     if user[id]['match']['win'] + user[id]['match']['lose'] != 0:
         rate = float(user[id]['match']['win']) / float(user[id]['match']['win'] + user[id]['match']['lose'])
         rate = round(rate, 2) * 100
-        result += '（' + str(int(rate)) + '%）\n'
-    result += '背包物品数：' + str(len(user[id]['warehouse']))
+        result += '（' + str(int(rate)) + '%）'
+    result += '\n背包物品数：' + str(len(user[id]['warehouse']))
     return result
     
 def getWarehouse(id):
@@ -595,11 +1094,11 @@ def getWarehouse(id):
     if len(user[id]['warehouse']) == 0:
         result += '无'
     else:
-        for i in user[id]['warehouse']:
+        for i, value in user[id]['warehouse'].items():
             result += '\n'
-            result += i['name']
-            if i['number'] > 1:
-                result += 'X' + str(i['number'])
+            result += i
+            if value['number'] > 1:
+                result += 'X' + str(value['number'])
     return result
 
 def getEquipment(id):
@@ -657,12 +1156,27 @@ def getBuff(id):
     return result
 
 def getShop():
-    return '商店暂未开放~'
-
+    global goodsAvailable
+    global goods
     result = '商品目录如下：'
-    result += '\n破旧的木剑：10'
-    result += '\n破旧的布甲：20'
+    for i in goodsAvailable:
+        result += '\n' + i + '：' + str(goods[i]['cost']) + '积分'
     return result
+
+def getComments(name):
+    global goods
+    if goods.__contains__(name):
+        result ='名字：' + name
+        result += '\n类型：' + typeToString(goods[name]['type'])
+        if goods[name]['cost'] > 0:
+            result += '\n购买：' + str(goods[name]['cost']) + '积分'
+        else:
+            result += '\n购买：无法购买'
+        result += '\n出售：' + str(goods[name]['sell']) + '积分'
+        result += '\n介绍：' + str(goods[name]['comments'])
+        return result
+    else:
+        return '不存在该物品'
 
 def changeName(id, name):
     global user
@@ -693,7 +1207,7 @@ def newUser(id, name):
             'initName': False,
             'gold': 0,
             'sign-date': '',
-            'warehouse': [], # 背包
+            'warehouse': {}, # 背包
             'match': { # 比赛场次
                 'win': 0,
                 'lose': 0,
@@ -810,7 +1324,17 @@ async def fencing(member, id2, app):
             if systemData['tmpGod'][other.id]['number'] <= 0:
                 del systemData['tmpGod'][other.id]
         else:
-            if systemData['defense-3'].__contains__(other.id): # 3级防御
+            if systemData['defense-5'].__contains__(other.id): # 5级防御
+                winPoint -= 500
+                systemData['defense-5'][other.id]['number'] -= 1
+                if systemData['defense-5'][other.id]['number'] <= 0:
+                    del systemData['defense-5'][other.id]
+            elif systemData['defense-4'].__contains__(other.id): # 4级防御
+                winPoint -= 400
+                systemData['defense-4'][other.id]['number'] -= 1
+                if systemData['defense-4'][other.id]['number'] <= 0:
+                    del systemData['defense-4'][other.id]
+            elif systemData['defense-3'].__contains__(other.id): # 3级防御
                 winPoint -= 300
                 systemData['defense-3'][other.id]['number'] -= 1
                 if systemData['defense-3'][other.id]['number'] <= 0:
@@ -826,7 +1350,17 @@ async def fencing(member, id2, app):
                 if systemData['defense-1'][other.id]['number'] <= 0:
                     del systemData['defense-1'][other.id]
 
-            if systemData['rampage-3'].__contains__(member.id): # 3级暴走
+            if systemData['rampage-5'].__contains__(member.id): # 5级暴走
+                winPoint += 500
+                systemData['rampage-5'][member.id]['number'] -= 1
+                if systemData['rampage-5'][member.id]['number'] <= 0:
+                    del systemData['rampage-5'][member.id]
+            elif systemData['rampage-4'].__contains__(member.id): # 4级暴走
+                winPoint += 400
+                systemData['rampage-4'][member.id]['number'] -= 1
+                if systemData['rampage-4'][member.id]['number'] <= 0:
+                    del systemData['rampage-4'][member.id]
+            elif systemData['rampage-3'].__contains__(member.id): # 3级暴走
                 winPoint += 300
                 systemData['rampage-3'][member.id]['number'] -= 1
                 if systemData['rampage-3'][member.id]['number'] <= 0:
@@ -881,17 +1415,23 @@ async def fencing(member, id2, app):
             Plain(result)
         ]))
 
-async def fencingTop(member, app):
+async def fencingTop(member, app, groupId):
     global user
     global systemData
 
     goldId = systemData['rank']['gold-1']['id']
     
     if goldId == member.id:
-        await app.sendGroupMessage(member.group, MessageChain.create([
-            Plain('自己也要围攻自己吗？')
-        ]))
-        return
+        if groupId != 0:
+            await app.sendGroupMessage(member.group, MessageChain.create([
+                Plain('自己也要围攻自己吗？')
+            ]))
+            return
+        else:
+            await app.sendFriendMessage(member, MessageChain.create([
+                Plain('自己也要围攻自己吗？~')
+            ]))
+            return
     else:
         if user[goldId]['gold'] <= 1:
             await app.sendGroupMessage(member.group, MessageChain.create([
@@ -932,7 +1472,17 @@ async def fencingTop(member, app):
             if systemData['tmpGod'][goldId]['number'] <= 0:
                 del systemData['tmpGod'][goldId]
         else:
-            if systemData['defense-3'].__contains__(goldId): # 3级防御
+            if systemData['defense-5'].__contains__(goldId): # 5级防御
+                winPoint -= 500
+                systemData['defense-5'][goldId]['number'] -= 1
+                if systemData['defense-5'][goldId]['number'] <= 0:
+                    del systemData['defense-5'][goldId]
+            elif systemData['defense-4'].__contains__(goldId): # 4级防御
+                winPoint -= 400
+                systemData['defense-4'][goldId]['number'] -= 1
+                if systemData['defense-4'][goldId]['number'] <= 0:
+                    del systemData['defense-4'][goldId]
+            elif systemData['defense-3'].__contains__(goldId): # 3级防御
                 winPoint -= 300
                 systemData['defense-3'][goldId]['number'] -= 1
                 if systemData['defense-3'][goldId]['number'] <= 0:
@@ -948,7 +1498,17 @@ async def fencingTop(member, app):
                 if systemData['defense-1'][goldId]['number'] <= 0:
                     del systemData['defense-1'][goldId]
 
-            if systemData['rampage-3'].__contains__(member.id): # 3级暴走
+            if systemData['rampage-5'].__contains__(member.id): # 5级暴走
+                winPoint += 500
+                systemData['rampage-5'][member.id]['number'] -= 1
+                if systemData['rampage-5'][member.id]['number'] <= 0:
+                    del systemData['rampage-5'][member.id]
+            elif systemData['rampage-4'].__contains__(member.id): # 4级暴走
+                winPoint += 400
+                systemData['rampage-4'][member.id]['number'] -= 1
+                if systemData['rampage-4'][member.id]['number'] <= 0:
+                    del systemData['rampage-4'][member.id]
+            elif systemData['rampage-3'].__contains__(member.id): # 3级暴走
                 winPoint += 300
                 systemData['rampage-3'][member.id]['number'] -= 1
                 if systemData['rampage-3'][member.id]['number'] <= 0:
@@ -996,12 +1556,21 @@ async def fencingTop(member, app):
         lineNumber = linecache.getline(r'data/user/fencing.txt', x * 2 + 3)
         process = lineNumber.replace('*name1*', winner).replace('*name2*', loser)
 
-        await app.sendGroupMessage(member.group, MessageChain.create([
-            Plain(process),
-            Plain('------------\n'),
-            Plain(result)
-        ]))
+        if groupId != 0:
+            await app.sendGroupMessage(member.group, MessageChain.create([
+                Plain(process),
+                Plain('------------\n'),
+                Plain(result)
+            ]))
+        else:
+            await app.sendFriendMessage(member, MessageChain.create([
+                Plain(process),
+                Plain('------------\n'),
+                Plain(result)
+            ]))
+            
         
+# 获取排行榜
 def getRank():
     global user
     global systemData
@@ -1031,6 +1600,51 @@ def getRank():
         result += '\n被击剑次数最多：' + user[systemData['rank']['loser']['id']]['name'] + '（' + str(systemData['rank']['loser']['number']) + '次）'
 
     return result
+
+# 购买商品
+def purchase(id, name, number):
+    global goodsAvailable
+    global goods
+    global user
+    if name in goodsAvailable:
+        if user[id]['gold'] >= goods[name]['cost'] * number:
+            if getGooods(id, 0, name, number):
+                update(id, -2, -goods[name]['cost'] * number, 0)
+                return '购买成功！'
+            else:
+                return '背包已满'
+        else:
+            return '积分不足~'
+    else:
+        return '不存在该物品或者不可购买'
+
+# 丢弃商品
+def discard(id, name, number):
+    global user
+    if user[id]['warehouse'].__contains__(name):
+        user[id]['warehouse'][name]['number'] -= number
+        if user[id]['warehouse'][name]['number'] <= 0:
+            del user[id]['warehouse'][name]
+        return '丢弃成功！'
+    else:
+        return '你没有该物品~'
+
+# 出售商品
+def sellGoods(id, name, number):
+    global user
+    global goods
+    if user[id]['warehouse'].__contains__(name):
+        if number > user[id]['warehouse'][name]['number']:
+            number = user[id]['warehouse'][name]['number']
+        gold = goods[name]['sell'] * number
+        update(id, -2, gold, 0)
+        user[id]['warehouse'][name]['number'] -= number
+        if user[id]['warehouse'][name]['number'] <= 0:
+            del user[id]['warehouse'][name]
+        return '你成功出售' + str(number) + '件物品，获得' + str(gold) + '积分'
+    else:
+        return '你没有该物品~'
+
 
 # ============================================
 # 明日方舟抽卡模拟器
@@ -1175,8 +1789,7 @@ def touch(id, name):
     global user
     if user[id]['attribute']['strength'] < 1 or user[id]['gold'] > 1:
         return '对' + name + '不屑一顾'
-    user[id]['attribute']['strength'] -= 1
-    user[id]['gold'] += random.randint(1, 5)
+    update(id, -2, random.randint(1, 5), 0)
     return '看' + name + '太可怜，于是给了你一些积分'
 
 '''
@@ -1218,7 +1831,8 @@ def fishing(id, name):
         '你决定在后院探险，发现了祖辈留下来的宝箱',
         '你走在大路上发现了一个人手里拿着宝箱，于是你来骗、来偷袭，获得了这个宝箱',
         '你乘坐飞船抵达了月球，探索一番后',
-        '你来到了九龙城，这里乌烟瘴气，一番探索之后'
+        '你来到了九龙城，这里乌烟瘴气，一番探索之后',
+        '你乘坐宇宙飞船抵达了火星，一番探索之后'
     ]
 
     describe = random.choice(describe_dict)
@@ -1228,42 +1842,42 @@ def fishing(id, name):
 
     if ran < 400:
         result = '什么也没有获得'
-    elif ran < 550:
+    elif ran < 450:
         ran = random.randrange(0, 100)
         if ran < 40: # 进攻模式
-            ran2 = random.randrange(0, 3)
-            if ran2 == 0:
+            ran2 = random.randrange(0, 100)
+            if ran2 < 60:
                 tmp = random.randrange(0, 10) + 1
                 changeToRampage1(id, tmp)
                 result += '获得了一个' + str(tmp) + '次的1级进攻BUFF'
-            elif ran2 == 1:
+            elif ran2 < 90:
                 tmp = random.randrange(0, 5) + 1
                 changeToRampage2(id, tmp)
                 result += '获得了一个' + str(tmp) + '次的2级进攻BUFF'
-            elif ran2 == 2:
+            elif ran2 < 100:
                 tmp = random.randrange(0, 3) + 1
                 changeToRampage3(id, tmp)
                 result += '获得了一个' + str(tmp) + '次的3级进攻BUFF'
         elif ran < 80: # 防御模式
-            ran2 = random.randrange(0, 3)
-            if ran2 == 0:
+            ran2 = random.randrange(0, 100)
+            if ran2 < 60:
                 tmp = random.randrange(0, 10) + 1
                 changeToDefense1(id, tmp)
                 result += '获得了一个' + str(tmp) + '次的1级防御BUFF'
-            elif ran2 == 1:
+            elif ran2 < 90:
                 tmp = random.randrange(0, 5) + 1
                 changeToDefense2(id, tmp)
                 result += '获得了一个' + str(tmp) + '次的2级防御BUFF'
-            elif ran2 == 2:
+            elif ran2 < 100:
                 tmp = random.randrange(0, 3) + 1
                 changeToDefense3(id, tmp)
                 result += '获得了一个' + str(tmp) + '次的3级防御BUFF'
         elif ran < 88: # 减半积分收益
-            tmp = random.randrange(0, 3) + 1
+            tmp = random.randrange(0, 10) + 1
             changeToHalveGold(id, tmp)
             result += '获得了一个' + str(tmp) + '次的收益减半BUFF'
         elif ran < 96: # 双倍积分收益
-            tmp = random.randrange(0, 3) + 1
+            tmp = random.randrange(0, 10) + 1
             changeToDoubleGold(id, tmp)
             result += '获得了一个' + str(tmp) + '次的双倍积分收益BUFF'
         else: # 固定增减积分收益
@@ -1275,21 +1889,21 @@ def fishing(id, name):
             else:
                 result += '获得了一个' + str(tmp) + '次的收益积分' + str(tmp2) + 'BUFF'
 
-    elif ran < 800:
+    elif ran < 700:
         if ran2 == 0:
             strength = 1
             result = '获得了1点体力'
         else:
             gold = 1
             result = '获得了1点积分值'
-    elif ran < 950:
+    elif ran < 800:
         if ran2 == 0:
             strength = 2
             result = '获得了2点体力'
         else:
             gold = 2
             result = '获得了2点积分值'
-    elif ran < 995:
+    elif ran < 990:
         gold = 3
         result = '获得了3点积分值'
     elif ran < 999:
@@ -1308,10 +1922,17 @@ def fishing(id, name):
 
 '''
 20% 一无所获
-15% BUFF
+15% BUFF & 装备
     2% 无敌模式
-    40% 进攻模式
-    40% 防御模式
+    10% 装备
+        20% 守护戒指
+        ```(10% 贪婪戒指)
+        10% 大鸡腿
+        10% 制式长枪
+        20% 金条
+        40% 金粒
+    35% 进攻模式
+    35% 防御模式
     5% 双倍积分收益
     3% 三倍积分收益
     5% 固定增减积分收益
@@ -1345,52 +1966,83 @@ def hangOut(id):
 
     elif probability < 350: #BUFF
         ran = random.randrange(0, 100)
-        if ran < 40: # 进攻模式
-            ran2 = random.randrange(0, 3)
-            if ran2 == 0:
+        if ran < 10: # 装备
+            ran2 = random.randrange(0, 100)
+            if ran2 < 40:
+                if getGooods(id, 1, '金粒', 1):
+                    result = '你闲逛时获得了金粒'
+                else:
+                    result = '你闲逛时获得了金粒，但是背包满了'
+            elif ran2 < 60:
+                if getGooods(id, 1, '金条', 1):
+                    result = '你闲逛时获得了金条'
+                else:
+                    result = '你闲逛时获得了金条，但是背包满了'
+            elif ran2 < 80:
+                if getGooods(id, 1, '守护戒指', 1):
+                    result = '你闲逛时获得了守护戒指'
+                else:
+                    result = '你闲逛时获得了守护戒指，但是背包满了'
+            elif ran2 < 90:
+                if getGooods(id, 1, '大鸡腿', 1):
+                    result = '你闲逛时获得了大鸡腿'
+                else:
+                    result = '你闲逛时获得了大鸡腿，但是背包满了'
+            else:
+                if getGooods(id, 1, '制式长枪', 1):
+                    result = '你闲逛时获得了制式长枪'
+                else:
+                    result = '你闲逛时获得了制式长枪，但是背包满了'
+        elif ran < 45: # 进攻模式
+            ran2 = random.randrange(0, 100)
+            if ran2 < 50:
                 tmp = random.randrange(0, 10) + 1
                 changeToRampage1(id, tmp)
                 result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的1级进攻BUFF'
-            elif ran2 == 1:
+            elif ran2 < 80:
                 tmp = random.randrange(0, 5) + 1
                 changeToRampage2(id, tmp)
                 result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的2级进攻BUFF'
-            elif ran2 == 2:
+            elif ran2 < 100:
                 tmp = random.randrange(0, 3) + 1
                 changeToRampage3(id, tmp)
                 result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的3级进攻BUFF'
         elif ran < 80: # 防御模式
-            ran2 = random.randrange(0, 3)
-            if ran2 == 0:
+            ran2 = random.randrange(0, 100)
+            if ran2 < 50:
                 tmp = random.randrange(0, 10) + 1
                 changeToDefense1(id, tmp)
                 result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的1级防御BUFF'
-            elif ran2 == 1:
+            elif ran2 < 80:
                 tmp = random.randrange(0, 5) + 1
                 changeToDefense2(id, tmp)
                 result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的2级防御BUFF'
-            elif ran2 == 2:
+            elif ran2 < 100:
                 tmp = random.randrange(0, 3) + 1
                 changeToDefense3(id, tmp)
                 result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的3级防御BUFF'
         elif ran < 85: # 减半积分收益
-            tmp = random.randrange(0, 3) + 1
+            tmp = random.randrange(0, 10) + 1
             changeToHalveGold(id, tmp)
             result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的收益减半BUFF'
-        elif ran < 90: # 固定增减积分收益
+        elif ran < 87: # 固定增减积分收益
             tmp = random.randrange(0, 3) + 1
             tmp2 = random.randrange(0, 11) - 5
             changeToFixedGold(id, tmp, tmp2)
             if tmp2 > 0:
-                result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的收益积分+' + str(tmp2) + 'BUFF'
+                result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的收益积分+' + str(tmp2) + '的BUFF'
             else:
-                result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的收益积分' + str(tmp2) + 'BUFF'
+                result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的收益积分' + str(tmp2) + '的BUFF'
+        elif ran < 90: # 击剑不损失积分
+            tmp = random.randrange(0, 5) + 1
+            changeToNoLoss(id, tmp)
+            result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的击剑不损失积分BUFF'
         elif ran < 95: # 双倍积分收益
-            tmp = random.randrange(0, 3) + 1
+            tmp = random.randrange(0, 10) + 1
             changeToDoubleGold(id, tmp)
             result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的双倍积分收益BUFF'
         elif ran < 98: # 三倍积分收益
-            tmp = random.randrange(0, 3) + 1
+            tmp = random.randrange(0, 5) + 1
             changeToTripleGold(id, tmp)
             result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的双倍积分收益BUFF'
         else: # 无敌模式
@@ -1594,6 +2246,42 @@ def viewBuff(id):
     else:
         return '不存在该用户'
 
+def giveGoods(id, name, number):
+    global user
+    global goods
+    if user.__contains__(id):
+        if goods.__contains__(name):
+            if getGooods(id, -1, name, number):
+                return '给予成功！'
+            else:
+                return '给予失败！'
+        else:
+            return '不存在该物品'
+    else:
+        return '不存在该用户'
+
+def giveAllGoods(name, number):
+    global user
+    global goods
+
+    for key, value in user.items():
+        getGooods(key, -1, name, number)
+    return '已将该物品发放给每个人'
+
+def giveAllGold(number):
+    global user
+
+    for key, value in user.items():
+        update(key, -2, number, 0)
+    return '已将积分发放给每个人'
+
+def giveAllStrength(number):
+    global user
+    global goods
+
+    for key, value in user.items():
+        update(key, -2, 0, number)
+    return '已将体力发放给每个人'
 
 # BUFF启用
 def viewGod():
@@ -1766,7 +2454,7 @@ def strengthenAttack(id):
         if times < times_target:
             return '你的场次不足' + str(times_target) + '不能强化'
 
-        user[id]['gold'] -= 100
+        update(id, -2, -100, 0)
         user[id]['attribute']['attack'] += 1
         return '强化成功！'
 
@@ -1781,6 +2469,6 @@ def strengthenDefense(id):
         if times < times_target:
             return '你的场次不足' + str(times_target) + '不能强化'
 
-        user[id]['gold'] -= 100
+        update(id, -2, -100, 0)
         user[id]['attribute']['defense'] += 1
         return '强化成功！'
