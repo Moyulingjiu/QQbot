@@ -1,7 +1,6 @@
 import re
 
 from plugins import tarot
-from plugins import game
 from plugins import smallFunction
 
 # ==========================================================
@@ -74,9 +73,6 @@ def function(code, member, app, groupId):
         result = tarot.tarotHexagram()
     elif code == 'tarot 凯尔特十字':
         result = tarot.tarotCelticCross()
-
-    elif code == 'game':
-        result = game.game()
 
     elif code == 'rd':
         result = smallFunction.rd(1, 100)

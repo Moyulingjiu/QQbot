@@ -7,7 +7,8 @@ from plugins import dataManage
 
 screenWords = []
 
-def reply(messages, beAt, botBaseInformation, app, nickname):
+def reply(messages, beAt, botBaseInformation, app, nickname, groupId, memberId):
+
     global screenWords
     screenWords = dataManage.load_obj('AIScreenWords')
 
@@ -18,6 +19,13 @@ def reply(messages, beAt, botBaseInformation, app, nickname):
     reply = ''
     isImage = ''
     
+    if groupId == 0:
+        if memberId in botBaseInformation['noAI']['friend']:
+            return (needReply, needAt, reply, isImage)
+    else:
+        if groupId in botBaseInformation['noAI']['group']:
+            return (needReply, needAt, reply, isImage)
+
     if beAt:
         AtMessage = messages.replace('@' + str(Bot_QQ) + ' ', '')
         AtMessage = messages.replace('@' + str(Bot_QQ), '')

@@ -1,0 +1,45 @@
+# 物品表
+
+破旧的木剑 attack=1 cost=10 sell=5 comments=一把勉强可以使用的木剑，攻击力+1 type=1
+破旧的木斧 attack=2 cost=30 sell=5 comments=一把勉强可以使用的木斧，攻击力+2 type=1
+破旧的布头盔 defense=1 cost=20 sell=5 comments=一顶勉强可以使用的头盔，护甲+1 type=2
+破旧的布甲 defense=1 cost=20 sell=5 comments=一件勉强可以使用的布甲，护甲+1 type=3
+破旧的布护腿 defense=1 cost=20 sell=5 comments=一件勉强可以使用的布护腿，护甲+1 type=4
+破旧的布靴 defense=1 cost=20 sell=5 comments=一双勉强可以使用的布靴，护甲+1 type=5
+
+攻击戒指 attack=3 cost=100 sell=20 comments=一个充斥着神奇力量的戒指，攻击力+3 type=6
+守护戒指 defense=1 cost=100 sell=20 comments=一个充斥着神奇力量的戒指，护甲+1 type=7
+贪婪戒指 gold=1 cost=100 sell=1 comments=一个充斥着神奇力量的戒指，每次收益积分+1 type=7
+
+木剑 attack=2 cost=30 sell=5 comments=一把可以使用的木剑，攻击力+2 type=1
+木斧 attack=3 cost=50 sell=10 comments=一把可以使用的木斧，攻击力+3 type=1
+布头盔 defense=2 cost=50 sell=10 comments=一顶可以使用的头盔，护甲+2 type=2
+布甲 defense=2 cost=50 sell=10 comments=一件可以使用的布甲，护甲+2 type=3
+布护腿 defense=2 cost=50 sell=10 comments=一件可以使用的布护腿，护甲+2 type=4
+布靴 defense=2 cost=50 sell=10 comments=一双可以使用的布靴，护甲+2 type=5
+
+制式长枪 attack=3 defense=-1 cost=100 sell=30 comments=人类军队的制式长枪，长武器带来极强的进攻性，但也削弱了防御，攻击力+3，护甲-1 type=1
+大鸡腿 attack=-1 cost=-1 sell=2 comments=这东西真的有杀伤力吗，攻击力-1 type=1
+
+#=========================================
+
+金粒 gold=5 cost=-1 sell=5 comments=看！那小小的金粒，积分+5 type=11
+金条 gold=10 cost=-1 sell=10 comments=闪闪发光！积分+10 type=11
+金块 gold=20 cost=-1 sell=20 comments=天啊！积分+20 type=11
+
+木板 cost=10 sell=7 comments=一块不知道有什么用的木板 type=13
+石头 cost=10 sell=7 comments=一块不知道有什么用的石头 type=13
+
+#=========================================
+
+体力药水 strength=5 cost=5 sell=4 comments=体力值+5 type=0
+生命药水 hp=10 cost=10 sell=7 comments=生命值+10 type=0
+精神药水 san=10 cost=5 sell=4 comments=san值+10 type=0
+积分药水 gold=5 cost=-1 sell=5 comments=积分+10 type=0
+
+体力补偿礼包 strength=5 cost=-1 sell=0 comments=体力值+5 type=10
+积分补偿礼包 gold=5 cost=-1 sell=0 comments=积分+5 type=10
+生命补偿礼包 hp=10 cost=-1 sell=0 comments=生命值+10 type=10
+san值补偿礼包 san=10 cost=-1 sell=0 comments=san值+10 type=10
+
+内测玩家纪念品 cost=-1 sell=30 comments=一个看起来没什么用的摆件 type=12

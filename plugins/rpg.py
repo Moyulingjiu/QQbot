@@ -1,5 +1,5 @@
 # 一个rpg游戏，附带在小柒上
-import asyncio # 异步
+import asyncio  # 异步
 from graia.application.entry import (
     GraiaMiraiApplication, Session,
     MessageChain, Group, Friend, Member, MemberInfo,
@@ -10,7 +10,6 @@ from graia.application.entry import (
 )
 from graia.broadcast import Broadcast
 
-
 import random
 import datetime
 import linecache
@@ -19,9 +18,7 @@ from plugins import dataManage
 from plugins import logManage
 from plugins import getNow
 
-maxStrength = 120 # 最大体力
-signStrength = 20 # 签到体力
-user = {} # 用户数据
+user = {}  # 用户数据
 systemData = {}
 init = True
 
@@ -40,167 +37,18 @@ init = True
 # 10：礼盒、宝箱
 # 11：矿石
 # 12：纪念品
+# 13: 材料
+# 14: 附加戒指
 # ）
 '''
+baseInformation = {}
 
-goods = {
-    '破旧的木剑': {
-        'attack': 1,
-        'cost': 10,
-        'sell': 5,
-        'comments': '一把勉强可以使用的木剑，攻击力+1',
-        'type': 1
-    },
-    '破旧的木斧': {
-        'attack': 2,
-        'cost': 30,
-        'sell': 5,
-        'comments': '一把勉强可以使用的木斧，攻击力+2',
-        'type': 1
-    },
-    '破旧的布头盔': {
-        'defense': 1,
-        'cost': 20,
-        'sell': 5,
-        'comments': '一顶勉强可以使用的头盔，护甲+1',
-        'type': 2
-    },
-    '破旧的布甲': {
-        'defense': 1,
-        'cost': 20,
-        'sell': 5,
-        'comments': '一件勉强可以使用的布甲，护甲+1',
-        'type': 3
-    },
-    '破旧的布护腿': {
-        'defense': 1,
-        'cost': 20,
-        'sell': 5,
-        'comments': '一件勉强可以使用的布护腿，护甲+1',
-        'type': 4
-    },
-    '破旧的布靴': {
-        'defense': 1,
-        'cost': 20,
-        'sell': 5,
-        'comments': '一双勉强可以使用的布靴，护甲+1',
-        'type': 5
-    },
-    '攻击戒指': {
-        'attack': 3,
-        'cost': 100,
-        'sell': 50,
-        'comments': '一个充斥着神奇力量的戒指，攻击力+3',
-        'type': 6
-    },
-    '守护戒指': {
-        'defense': 1,
-        'cost': 100,
-        'sell': 50,
-        'comments': '一个充斥着神奇力量的戒指，护甲+1',
-        'type': 7
-    },
-    '贪婪戒指': {
-        'gold': 1,
-        'cost': 100,
-        'sell': 50,
-        'comments': '一个充斥着神奇力量的戒指，每次收益积分+1',
-        'type': 7
-    },
+buff = {}
 
-    '制式长枪': {
-        'attack': 3,
-        'defense': -1,
-        'cost': 100,
-        'sell': 50,
-        'comments': '人类军队的制式长枪，长武器带来极强的进攻性，但也削弱了防御，攻击力+3，护甲-1',
-        'type': 1
-    },
-    '大鸡腿': {
-        'attack': -1,
-        'cost': -1,
-        'sell': 2,
-        'comments': '这东西真的有杀伤力吗，攻击力-1',
-        'type': 1
-    },
+goods = {}
 
-    '金粒': {
-        'gold': 5,
-        'cost': -1,
-        'sell': 5,
-        'comments': '看！那小小的金粒，积分+5',
-        'type': 0
-    },
-    '金条': {
-        'gold': 10,
-        'cost': -1,
-        'sell': 10,
-        'comments': '闪闪发光！积分+10',
-        'type': 0
-    },
+goodsAvailable = []
 
-    '体力药水': {
-        'strength': 5,
-        'cost': 5,
-        'sell': 4,
-        'comments': '体力值+5',
-        'type': 0
-    },
-    '生命药水': {
-        'hp': 10,
-        'cost': 5,
-        'sell': 4,
-        'comments': '生命值+10',
-        'type': 0
-    },
-    '精神药水': {
-        'san': 10,
-        'cost': 5,
-        'sell': 4,
-        'comments': 'san值+10',
-        'type': 0
-    },
-    '积分药水': {
-        'gold': 5,
-        'cost': -1,
-        'sell': 5,
-        'comments': '积分+5',
-        'type': 0
-    },
-
-    '体力补偿礼包': {
-        'strength': 5,
-        'cost': -1,
-        'sell': 0,
-        'comments': '体力值+5',
-        'type': 10
-    },
-    '积分补偿礼包': {
-        'gold': 5,
-        'cost': -1,
-        'sell': 0,
-        'comments': '积分+5',
-        'type': 10
-    },
-    '内测玩家纪念品': {
-        'cost': -1,
-        'sell': 30,
-        'comments': '一个看起来没什么用的摆件',
-        'type': 12
-    }
-}
-
-goodsAvailable = [
-    '破旧的木剑',
-    '破旧的木斧',
-    '破旧的布头盔',
-    '破旧的布甲',
-    '破旧的布护腿',
-    '破旧的布靴',
-    '攻击戒指',
-    '体力药水',
-    '精神药水'
-]
 
 async def menu(strMessage, groupId, member, app, botBaseInformation, messageChain):
     global user
@@ -212,6 +60,9 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
     needAt = False
     reply = ''
     isImage = ''
+
+    if groupId in botBaseInformation['gameOff']:  # 本群关闭了游戏
+        return (needReply, needAt, reply, isImage)
 
     memberName = ''
     if groupId != 0:
@@ -225,6 +76,9 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
         id = member.id
         reply = memberName + sign(id)
         needReply = True
+    elif strMessage[:2] == '介绍' or strMessage[:2] == '查询' or strMessage[:2] == '解释':
+        reply = getComments(strMessage.replace('介绍', '').strip())
+        needReply = True
     elif '击剑' in strMessage and groupId != 0:
         tmp = strMessage.replace('击剑', '').strip()
         if tmp[0] == '@' and tmp[1:].isdigit():
@@ -234,7 +88,7 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
             else:
                 replylist = [
                     '一把把你按在了地上',
-                    '敲了敲你的脑袋', 
+                    '敲了敲你的脑袋',
                     '摸了摸你的头说：“乖，一边去~”',
                     '白了你一眼',
                     '并不想理你',
@@ -260,12 +114,14 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
     elif strMessage == '兑换体力':
         reply = memberName + rechargeStrength(member.id)
         needReply = True
+
     elif strMessage == '模拟抽卡' or strMessage == '模拟单抽':
         reply = MRFZ_card()
         needReply = True
     elif strMessage == '模拟十连':
         reply = MRFZ_card10()
         needReply = True
+
     elif strMessage == '围攻榜首':
         await fencingTop(member, app, groupId)
         needReply = True
@@ -307,13 +163,13 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
     elif strMessage[:2] == '装备' or strMessage[:2] == '使用':
         strList = strMessage[2:].strip().split(' ')
         if len(strList) == 1:
-            reply = memberName + userGoods(member.id, strList[0], 1)
+            reply = memberName + useGoods(member.id, strList[0], 1)
             needReply = True
         elif len(strList) == 2:
             if strList[1].isdigit():
                 number = int(strList[1])
                 if number > 0:
-                    reply = memberName + userGoods(member.id, strList[0], number)
+                    reply = memberName + useGoods(member.id, strList[0], number)
                     needReply = True
     elif strMessage[:2] == '取下':
         strList = strMessage[2:].strip().split(' ')
@@ -322,9 +178,6 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
             needReply = True
     elif strMessage == '商店':
         reply = getShop()
-        needReply = True
-    elif '介绍' in strMessage:
-        reply = getComments(strMessage.replace('介绍', '').strip())
         needReply = True
     elif strMessage[:2] == '购买':
         strList = strMessage[2:].strip().split(' ')
@@ -337,7 +190,7 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if number > 0:
                     reply = memberName + purchase(member.id, strList[0], number)
                     needReply = True
-    elif strMessage[:2] == '出售':
+    elif strMessage[:2] == '出售' or strMessage[:2] == '卖出' or strMessage[:2] == '卖掉' or strMessage[:2] == '售出':
         strList = strMessage[2:].strip().split(' ')
         if len(strList) == 1:
             reply = memberName + sellGoods(member.id, strList[0], 1)
@@ -364,17 +217,21 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
         if tmp[0] == '@' and tmp[1:].isdigit():
             target = int(tmp[1:])
             if target != Bot_QQ:
-                await fencing(member, target, app) # 挑战
+                await duel(member, target, app)
+                pass
             else:
                 replylist = [
                     '一把把你按在了地上',
-                    '敲了敲你的脑袋', 
+                    '敲了敲你的脑袋',
                     '摸了摸你的头说：“乖，一边去~”',
                     '白了你一眼',
                     '并不想理你',
                     '对你感到了无语'
                 ]
                 reply = Bot_Name + random.choice(replylist)
+        needReply = True
+    elif strMessage == '挑战榜首':
+        await duelTop(member, app, groupId)
         needReply = True
     elif strMessage[:4] == '修改昵称' or strMessage[:4] == '修改名字' or strMessage[:4] == '修改姓名':
         tmpName = strMessage[4:].strip()
@@ -383,16 +240,14 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
     elif strMessage == '挑战BOSS' or strMessage == '挑战boss':
         needReply = True
 
-
-
-    if member.id ==  botBaseInformation['baseInformation']['Master_QQ']:
+    if member.id == botBaseInformation['baseInformation']['Master_QQ']:
         if strMessage == '重新加载游戏数据':
-            user = dataManage.load_obj('user/information')
+            reload()
             reply = '重新加载完成'
             needReply = True
         elif strMessage[:5] == '修改体力 ':
             strList = strMessage.split(' ')
-            
+
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = editStrength(member.id, int(strList[1]))
@@ -447,9 +302,9 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = viewBuff(int(strList[1]))
-                    needReply = True        
+                    needReply = True
 
-        elif strMessage[:5] == '给予物品 ':
+        elif strMessage[:5] == '给予物品 ' or strMessage[:5] == '给予装备 ':
             strList = strMessage.split(' ')
             if len(strList) == 2:
                 reply = giveGoods(member.id, strList[1], 1)
@@ -465,10 +320,10 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                     reply = giveAllGoods(strList[2], 1)
                     needReply = True
             elif len(strList) == 4:
-                if strList[1].isdigit() and strList[3].isdigit(): # 给指定人物品
+                if strList[1].isdigit() and strList[3].isdigit():  # 给指定人物品
                     reply = giveGoods(int(strList[1]), strList[2], int(strList[3]))
                     needReply = True
-                elif strList[1] == '*' and strList[3].isdigit(): # 给所有人物品
+                elif strList[1] == '*' and strList[3].isdigit():  # 给所有人物品
                     reply = giveAllGoods(strList[2], int(strList[3]))
                     needReply = True
 
@@ -518,7 +373,7 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
             elif len(strList) == 3:
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToDefense1(int(strList[1]), int(strList[2]))
-                    needReply = True 
+                    needReply = True
         elif strMessage[:7] == '开启2级防御 ':
             strList = strMessage.split(' ')
             if len(strList) == 2:
@@ -528,7 +383,7 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
             elif len(strList) == 3:
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToDefense2(int(strList[1]), int(strList[2]))
-                    needReply = True  
+                    needReply = True
         elif strMessage[:7] == '开启3级防御 ':
             strList = strMessage.split(' ')
             if len(strList) == 2:
@@ -539,6 +394,27 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToDefense3(int(strList[1]), int(strList[2]))
                     needReply = True
+        elif strMessage[:7] == '开启4级防御 ':
+            strList = strMessage.split(' ')
+            if len(strList) == 2:
+                if strList[1].isdigit():
+                    reply = changeToDefense4(member.id, int(strList[1]))
+                    needReply = True
+            elif len(strList) == 3:
+                if strList[1].isdigit() and strList[2].isdigit():
+                    reply = changeToDefense4(int(strList[1]), int(strList[2]))
+                    needReply = True
+        elif strMessage[:7] == '开启5级防御 ':
+            strList = strMessage.split(' ')
+            if len(strList) == 2:
+                if strList[1].isdigit():
+                    reply = changeToDefense5(member.id, int(strList[1]))
+                    needReply = True
+            elif len(strList) == 3:
+                if strList[1].isdigit() and strList[2].isdigit():
+                    reply = changeToDefense5(int(strList[1]), int(strList[2]))
+                    needReply = True
+
         elif strMessage[:7] == '开启1级进攻 ':
             strList = strMessage.split(' ')
             if len(strList) == 2:
@@ -548,7 +424,7 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
             elif len(strList) == 3:
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToRampage1(int(strList[1]), int(strList[2]))
-                    needReply = True 
+                    needReply = True
         elif strMessage[:7] == '开启2级进攻 ':
             strList = strMessage.split(' ')
             if len(strList) == 2:
@@ -558,7 +434,7 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
             elif len(strList) == 3:
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToRampage2(int(strList[1]), int(strList[2]))
-                    needReply = True  
+                    needReply = True
         elif strMessage[:7] == '开启3级进攻 ':
             strList = strMessage.split(' ')
             if len(strList) == 2:
@@ -569,6 +445,27 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToRampage3(int(strList[1]), int(strList[2]))
                     needReply = True
+        elif strMessage[:7] == '开启4级进攻 ':
+            strList = strMessage.split(' ')
+            if len(strList) == 2:
+                if strList[1].isdigit():
+                    reply = changeToRampage4(member.id, int(strList[1]))
+                    needReply = True
+            elif len(strList) == 3:
+                if strList[1].isdigit() and strList[2].isdigit():
+                    reply = changeToRampage4(int(strList[1]), int(strList[2]))
+                    needReply = True
+        elif strMessage[:7] == '开启5级进攻 ':
+            strList = strMessage.split(' ')
+            if len(strList) == 2:
+                if strList[1].isdigit():
+                    reply = changeToRampage5(member.id, int(strList[1]))
+                    needReply = True
+            elif len(strList) == 3:
+                if strList[1].isdigit() and strList[2].isdigit():
+                    reply = changeToRampage5(int(strList[1]), int(strList[2]))
+                    needReply = True
+
         elif strMessage[:9] == '开启积分收益减半 ':
             strList = strMessage.split(' ')
             if len(strList) == 2:
@@ -637,47 +534,129 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
         dataManage.save_obj(systemData, 'user/system')
     return (needReply, needAt, reply, isImage)
 
+
 # ============================================
 # 基础操作
 
+def getNumber(string):
+    if string[0] == '-' and string[1:].isdigit():
+        return -1 * int(string[1:])
+    elif string.isdigit():
+        return int(string)
+    else:
+        return 0
+
+
+# 重新加载文件
+def reload():
+    global systemData
+    global user
+    global goods
+    global goodsAvailable
+    global buff
+    global baseInformation
+
+    systemData = {}
+    user = {}
+    goods = {}
+    goodsAvailable = []
+    buff = {}
+    baseInformation = {}
+    # 获取物品
+    with open('data/user/goods.txt', 'r+', encoding='utf-8') as f:
+        text = f.readlines()
+        for i in text:
+            i = i.strip()
+            if len(i) > 0 and i[0] != '#':
+                datas = i.split(' ')
+                if len(datas) > 3: # 至少得有名字、简介、类型
+                    if not goods.__contains__(datas[0]):
+                        goods[datas[0]] = {}
+                        for j in datas:
+                            j_list = j.split('=')
+                            if len(j_list) == 2:
+                                if j_list[0] != 'comments':
+                                    goods[datas[0]][j_list[0]] = getNumber(j_list[1])
+                                else:
+                                    goods[datas[0]][j_list[0]] = j_list[1]
+
+    # 获取商店物品
+    with open('data/user/shop.txt', 'r+', encoding='utf-8') as f:
+        text = f.readlines()
+        for i in text:
+            i = i.strip()
+            if len(i) > 0 and i[0] != '#':
+                if goods.__contains__(i) and not i in goodsAvailable:
+                    goodsAvailable.append(i)
+
+    # 获取buff数据
+    with open('data/user/buff.txt', 'r+', encoding='utf-8') as f:
+        text = f.readlines()
+        for i in text:
+            i = i.strip()
+            if len(i) > 0 and i[0] != '#':
+                datas = i.split('=')
+                if len(datas) == 2:
+                    buff[datas[0]] = datas[1]
+
+
+    # 获取buff数据
+    with open('data/user/baseInformation.txt', 'r+', encoding='utf-8') as f:
+        text = f.readlines()
+        for i in text:
+            i = i.strip()
+            if len(i) > 0 and i[0] != '#':
+                datas = i.split('=')
+                if len(datas) == 2:
+                    baseInformation[datas[0]] = datas[1]
+
+    user = dataManage.load_obj('user/information')
+    systemData = dataManage.load_obj('user/system')
+
+    for key, value in user.items():
+        recalculateAttribute(key)
+
+    return True
+
 # 积分、体力值修改
-def update(id, mode, gold, strength): # mode值表示了该击剑由什么模式产生的（-2：交易操作、-1：管理员权限、0：击剑、1：探险、2：闲逛）
+def update(id, mode, gold, strength):  # mode值表示了该击剑由什么模式产生的（-2：交易操作、-1：管理员权限、0：击剑、1：探险、2：闲逛）
     global user
     global systemData
     if user.__contains__(id):
         if mode >= 0:
-            if gold > 0: # 增益buff
-                if systemData['halveGold'].__contains__(id): # 积分收益减半
+            if gold > 0:  # 增益buff
+                if systemData['halveGold'].__contains__(id):  # 积分收益减半
                     systemData['halveGold'][id]['number'] -= 1
                     if systemData['halveGold'][id]['number'] <= 0:
                         del systemData['halveGold'][id]
                     gold *= 0.5
                     gold = int(gold)
-                elif systemData['doubleGold'].__contains__(id): # 双倍积分收益
+                elif systemData['doubleGold'].__contains__(id):  # 双倍积分收益
                     systemData['doubleGold'][id]['number'] -= 1
                     if systemData['doubleGold'][id]['number'] <= 0:
                         del systemData['doubleGold'][id]
                     gold *= 2
-                elif systemData['tripleGold'].__contains__(id): # 三倍积分收益
+                elif systemData['tripleGold'].__contains__(id):  # 三倍积分收益
                     systemData['tripleGold'][id]['number'] -= 1
                     if systemData['tripleGold'][id]['number'] <= 0:
                         del systemData['tripleGold'][id]
                     gold *= 3
-                elif systemData['fixedGold'].__contains__(id): # 固定增减积分收益
+                elif systemData['fixedGold'].__contains__(id):  # 固定增减积分收益
                     systemData['fixedGold'][id]['number'] -= 1
                     gold += systemData['fixedGold'][id]['gold']
-                    if gold < 0: # 收益不能减少为负数
+                    if gold < 0:  # 收益不能减少为负数
                         gold = 0
                     if systemData['fixedGold'][id]['number'] <= 0:
                         del systemData['fixedGold'][id]
-            elif gold < 0: # 负收益buff
-                if systemData['noLoss'].__contains__(id): # 击剑不掉积分
+            elif gold < 0:  # 负收益buff
+                if systemData['noLoss'].__contains__(id):  # 击剑不掉积分
                     if mode == 0:
                         systemData['noLoss'][id]['number'] -= 1
                         if systemData['noLoss'][id]['number'] <= 0:
                             del systemData['noLoss'][id]
                         gold = 0
-            
+
+        # 数值修改
         user[id]['attribute']['strength'] += strength
         if user[id]['attribute']['strength'] < 0:
             user[id]['attribute']['strength'] = 0
@@ -689,63 +668,73 @@ def update(id, mode, gold, strength): # mode值表示了该击剑由什么模式
         # ===============================
         # 排行榜更新
         times = user[id]['match']['win'] + user[id]['match']['lose']
-        rate = float(user[id]['match']['win']) / float(user[id]['match']['win'] + user[id]['match']['lose']) if (user[id]['match']['win'] + user[id]['match']['lose'] > 0) else 0.0
-        
-        if times > systemData['rank']['field']['number']: # 场次第一
+        rate = float(user[id]['match']['win']) / float(user[id]['match']['win'] + user[id]['match']['lose']) if (
+                user[id]['match']['win'] + user[id]['match']['lose'] > 0) else 0.0
+
+        if times > systemData['rank']['field']['number']:  # 场次第一
             systemData['rank']['field']['number'] = times
             systemData['rank']['field']['id'] = id
-        if rate > systemData['rank']['rate']['rate']: # 胜率第一
+
+        if rate > systemData['rank']['rate']['rate']:  # 胜率第一
             systemData['rank']['rate']['rate'] = rate
             systemData['rank']['rate']['id'] = id
+        elif id == systemData['rank']['rate']['id']:  # 如果本身就是胜率第一，更新胜率
+            systemData['rank']['rate']['rate'] = rate
+
         if times > 50:
-            if rate > systemData['rank']['rate50']['rate']: # 胜率第一（大于50场）
+            if rate > systemData['rank']['rate50']['rate']:  # 胜率第一（大于50场）
                 systemData['rank']['rate50']['rate'] = rate
                 systemData['rank']['rate50']['id'] = id
-        if user[id]['match']['lostTopTimes'] > systemData['rank']['loser']['number']: # 被击剑的次数
+            elif systemData['rank']['rate50']['id'] == id:
+                systemData['rank']['rate50']['rate'] = rate
+
+        if user[id]['match']['lostTopTimes'] > systemData['rank']['loser']['number']:  # 被击剑的次数
             systemData['rank']['loser']['number'] = user[id]['match']['lostTopTimes']
             systemData['rank']['loser']['id'] = id
 
-
-        if gold > 0: # 增加收入
-            if user[id]['gold'] > systemData['rank']['gold-1']['gold']: # 登顶
-                if id == systemData['rank']['gold-1']['id']: # 本来就是榜首，那么就更新数据
+        if gold > 0:  # 增加收入
+            if user[id]['gold'] > systemData['rank']['gold-1']['gold']:  # 登顶
+                if id == systemData['rank']['gold-1']['id']:  # 本来就是榜首，那么就更新数据
                     systemData['rank']['gold-1']['gold'] = user[id]['gold']
                 else:
-                    user[id]['match']['topTimes'] += 1 # 登顶次数+1
+                    user[id]['match']['topTimes'] += 1  # 登顶次数+1
                     if user[id]['match']['topTimes'] > systemData['rank']['challenger']['number']:
                         systemData['rank']['challenger']['number'] = user[id]['match']['topTimes']
                         systemData['rank']['challenger']['id'] = id
 
-                    if id == systemData['rank']['gold-2']['id']:
+                    if id == systemData['rank']['gold-2']['id']:  # 如果登顶之前是第二名
                         systemData['rank']['gold-2']['gold'] = systemData['rank']['gold-1']['gold']
                         systemData['rank']['gold-2']['id'] = systemData['rank']['gold-1']['id']
-                        
+
                         systemData['rank']['gold-1']['gold'] = user[id]['gold']
                         systemData['rank']['gold-1']['id'] = id
-                    else:
+                    else:  # 如果不是第二名，那么就是一样的操作逻辑
                         systemData['rank']['gold-3']['gold'] = systemData['rank']['gold-2']['gold']
                         systemData['rank']['gold-3']['id'] = systemData['rank']['gold-2']['id']
-                        
+
                         systemData['rank']['gold-2']['gold'] = systemData['rank']['gold-1']['gold']
                         systemData['rank']['gold-2']['id'] = systemData['rank']['gold-1']['id']
-                        
+
                         systemData['rank']['gold-1']['gold'] = user[id]['gold']
                         systemData['rank']['gold-1']['id'] = id
-            elif user[id]['gold'] > systemData['rank']['gold-2']['gold'] and id != systemData['rank']['gold-1']['id']: # 大于第二，并且不是榜首
-                if id == systemData['rank']['gold-2']['id']: # 本来就是第二，那么就更新数据
+            elif user[id]['gold'] > systemData['rank']['gold-2']['gold'] and id != systemData['rank']['gold-1'][
+                'id']:  # 大于第二，并且不是榜首
+                if id == systemData['rank']['gold-2']['id']:  # 本来就是第二，那么就更新数据
                     systemData['rank']['gold-2']['gold'] = user[id]['gold']
                 else:
                     systemData['rank']['gold-3']['gold'] = systemData['rank']['gold-2']['gold']
                     systemData['rank']['gold-3']['id'] = systemData['rank']['gold-2']['id']
-                    
+
                     systemData['rank']['gold-2']['gold'] = user[id]['gold']
                     systemData['rank']['gold-2']['id'] = id
-            elif user[id]['gold'] > systemData['rank']['gold-3']['gold'] and id != systemData['rank']['gold-1']['id'] and id != systemData['rank']['gold-2']['id']: # 大于第三，并且不是榜首和第二
+            elif user[id]['gold'] > systemData['rank']['gold-3']['gold'] and id != systemData['rank']['gold-1'][
+                'id'] and id != systemData['rank']['gold-2']['id']:  # 大于第三，并且不是榜首和第二
                 systemData['rank']['gold-3']['gold'] = user[id]['gold']
-                systemData['rank']['gold-3']['id'] = id # 这里就算它本来是第三仍旧没有影响
-                
-        elif gold < 0: # 收入减少
-            if id == systemData['rank']['gold-1']['id'] or id == systemData['rank']['gold-2']['id'] or id == systemData['rank']['gold-3']['id']: # 榜上有名（如果榜上无名，那么他的积分减少对排行榜就没有任何影响）
+                systemData['rank']['gold-3']['id'] = id  # 这里就算它本来是第三仍旧没有影响
+
+        elif gold < 0:  # 收入减少
+            if id == systemData['rank']['gold-1']['id'] or id == systemData['rank']['gold-2']['id'] or id == \
+                    systemData['rank']['gold-3']['id']:  # 榜上有名（如果榜上无名，那么他的积分减少对排行榜就没有任何影响）
                 goldId = 0
                 goldId2 = 0
                 goldId3 = 0
@@ -759,31 +748,32 @@ def update(id, mode, gold, strength): # mode值表示了该击剑由什么模式
                             goldId = key
                         elif goldId2 == 0 or value['gold'] > user[goldId2]['gold']:
                             goldId3 = goldId2
-                            goldId2 = key 
+                            goldId2 = key
                         elif goldId3 == 0 or value['gold'] > user[goldId3]['gold']:
                             goldId3 = key
                 if goldId != systemData['rank']['gold-1']['id']:
-                    user[goldId]['match']['topTimes'] += 1 # 登顶次数+1
+                    user[goldId]['match']['topTimes'] += 1  # 登顶次数+1
                     if user[goldId]['match']['topTimes'] > systemData['rank']['challenger']['number']:
                         systemData['rank']['challenger']['number'] = user[goldId]['match']['topTimes']
                         systemData['rank']['challenger']['id'] = goldId
 
                 systemData['rank']['gold-1']['id'] = goldId
                 systemData['rank']['gold-1']['gold'] = user[goldId]['gold']
-                
+
                 systemData['rank']['gold-2']['id'] = goldId2
                 systemData['rank']['gold-2']['gold'] = user[goldId2]['gold'] if goldId2 != 0 else 0
-                
+
                 systemData['rank']['gold-3']['id'] = goldId3
                 systemData['rank']['gold-3']['gold'] = user[goldId3]['gold'] if goldId3 != 0 else 0
 
+
 # 获得商品
-def getGooods(id, mode, name, number): #（-1：系统补偿,0：购买所得，1：探险、闲逛获得）
+def getGooods(id, mode, name, number):  # （-1：系统补偿,0：购买所得，1：探险、闲逛获得）
     global user
     if user[id]['warehouse'].__contains__(name):
         user[id]['warehouse'][name]['number'] += number
         return True
-    elif len(user[id]['warehouse']) < 10:
+    elif len(user[id]['warehouse']) < user[id]['attribute']['knapsack-max'] + user[id]['attribute']['knapsack-up']:
         user[id]['warehouse'][name] = {
             'number': number
         }
@@ -791,6 +781,38 @@ def getGooods(id, mode, name, number): #（-1：系统补偿,0：购买所得，
     else:
         return False
 
+
+
+# 重新计算装备的属性值
+def recalculateAttribute(id):
+    user[id]['attribute']['attack-up'] = 0
+    user[id]['attribute']['defense-up'] = 0
+    user[id]['attribute']['hp-up'] = 0
+    user[id]['attribute']['san-up'] = 0
+    user[id]['attribute']['strength-up'] = 0
+    user[id]['attribute']['strength-sign-up'] = 0
+    user[id]['attribute']['knapsack-up'] = 0
+
+    if user[id]['equipment']['arms'] != '':
+        apllyAttribute(id, user[id]['equipment']['arms'])
+    if user[id]['equipment']['jacket'] != '':
+        apllyAttribute(id, user[id]['equipment']['hat'])
+    if user[id]['equipment']['jacket'] != '':
+        apllyAttribute(id, user[id]['equipment']['jacket'])
+    if user[id]['equipment']['trousers'] != '':
+        apllyAttribute(id, user[id]['equipment']['trousers'])
+    if user[id]['equipment']['shoes'] != '':
+        apllyAttribute(id, user[id]['equipment']['shoes'])
+
+    if user[id]['equipment']['ring-left'] != '':
+        apllyAttribute(id, user[id]['equipment']['ring-left'])
+    if user[id]['equipment']['ring-right'] != '':
+        apllyAttribute(id, user[id]['equipment']['ring-right'])
+    if user[id]['equipment']['knapsack'] != '':
+        apllyAttribute(id, user[id]['equipment']['knapsack'])
+
+
+# 脱下物品
 def getOffGoods(id, name):
     global goods
     global user
@@ -820,13 +842,10 @@ def getOffGoods(id, name):
     elif user[id]['equipment']['knapsack'] == name:
         flag = 8
         user[id]['equipment']['knapsack'] = ''
-    
+
     if flag > 0:
         if getGooods(id, 0, name, 1):
-            if goods[name].__contains__('attack'):
-                user[id]['attribute']['attack'] -= goods[name]['attack']
-            if goods[name].__contains__('defense'):
-                user[id]['attribute']['defense'] -= goods[name]['defense']
+            cancelAttribute(id, name)
             return '已将' + name + '放入背包'
         else:
             if flag == 1:
@@ -849,23 +868,58 @@ def getOffGoods(id, name):
     else:
         return '你的装备不存在该物品'
 
+
+# 应用属性值
 def apllyAttribute(id, name):
+    global goods
+    global user
+    if not goods.__contains__(name):
+        return
+
+    if goods[name].__contains__('attack'):
+        user[id]['attribute']['attack-up'] += goods[name]['attack']
+    if goods[name].__contains__('defense'):
+        user[id]['attribute']['defense-up'] += goods[name]['defense']
+    if goods[name].__contains__('hp'):
+        user[id]['attribute']['hp-up'] += goods[name]['hp']
+    if goods[name].__contains__('san'):
+        user[id]['attribute']['san-up'] += goods[name]['san']
+    if goods[name].__contains__('strength'):
+        user[id]['attribute']['strength-up'] += goods[name]['strength']
+    if goods[name].__contains__('strength-sign'):
+        user[id]['attribute']['strength-sign-up'] += goods[name]['strength-sign']
+    if goods[name].__contains__('knapsack'):
+        user[id]['attribute']['knapsack-up'] += goods[name]['knapsack']
+
+# 取消应用属性值
+def cancelAttribute(id, name):
     global goods
     global user
 
     if goods[name].__contains__('attack'):
-        user[id]['attribute']['attack'] += goods[name]['attack']
+        user[id]['attribute']['attack-up'] -= goods[name]['attack']
     if goods[name].__contains__('defense'):
-        user[id]['attribute']['defense'] += goods[name]['defense']
+        user[id]['attribute']['defense-up'] -= goods[name]['defense']
+    if goods[name].__contains__('hp'):
+        user[id]['attribute']['hp-up'] -= goods[name]['hp']
+    if goods[name].__contains__('san'):
+        user[id]['attribute']['san-up'] -= goods[name]['san']
+    if goods[name].__contains__('strength'):
+        user[id]['attribute']['strength-up'] -= goods[name]['strength']
+    if goods[name].__contains__('strength-sign'):
+        user[id]['attribute']['strength-sign-up'] -= goods[name]['strength-sign']
+    if goods[name].__contains__('knapsack'):
+        user[id]['attribute']['knapsack-up'] -= goods[name]['knapsack']
 
-def userGoods(id, name, number):
+# 使用商品
+def useGoods(id, name, number):
     global user
     global goods
-    global maxStrength
+    maxStrength = user[id]['attribute']['strength-max'] + user[id]['attribute']['strength-up']
 
     if user[id]['warehouse'].__contains__(name):
         # 武器装备
-        if goods[name]['type'] > 0 and goods[name]['type'] < 8:
+        if (0 < goods[name]['type'] < 8) or goods[name]['type'] == 14:
             if goods[name]['type'] == 1:
                 if user[id]['equipment']['arms'] != '':
                     discard(id, name, 1)
@@ -971,41 +1025,69 @@ def userGoods(id, name, number):
                     user[id]['equipment']['ring-right'] = name
                     apllyAttribute(id, name)
                     return '装备成功！'
+            elif goods[name]['type'] == 8:
+                if user[id]['equipment']['knapsack'] != '':
+                    discard(id, name, 1)
+                    if '放入背包' in getOffGoods(id, user[id]['equipment']['knapsack']):
+                        user[id]['equipment']['knapsack'] = name
+                        apllyAttribute(id, name)
+                        return '装备成功！'
+                    else:
+                        getGooods(id, -1, name, 1)
+                        return '背包无法给其腾出空间'
+                else:
+                    discard(id, name, 1)
+                    user[id]['equipment']['knapsack'] = name
+                    apllyAttribute(id, name)
+                    return '装备成功！'
         # 消耗品
         else:
             if goods[name]['type'] == 12:
                 return '纪念品不可以使用，只可以出售和丢弃'
+            elif goods[name]['type'] == 13:
+                return '材料不可以使用，只可以出售、丢弃、修补强化装备'
+            elif goods[name]['type'] > 14:
+                return '未知物品暂时不可以使用哦~'
 
             if number > user[id]['warehouse'][name]['number']:
                 number = user[id]['warehouse'][name]['number']
             countWord = ''
-            if goods[name]['type'] == 0:
+            if goods[name]['type'] == 0: # 药水
                 countWord = '瓶'
-            elif goods[name]['type'] == 9:
+            elif goods[name]['type'] == 9: # 卷轴
                 countWord = '张'
-            elif goods[name]['type'] == 10:
+            elif goods[name]['type'] == 10: # 宝箱、礼包
                 countWord = '个'
-            
+            elif goods[name]['type'] == 11: # 矿石
+                countWord = '个'
 
+            # 积分、体力
             gold = 0
             strength = 0
             if goods[name].__contains__('gold'):
                 gold = goods[name]['gold'] * number
             if goods[name].__contains__('strength'):
+
                 if user[id]['attribute']['strength'] + goods[name]['strength'] * number > maxStrength:
                     return '体力值已满，无法使用'
                 strength = goods[name]['strength'] * number
             update(id, -2, gold, strength)
 
+            # 血量、san值
             if goods[name].__contains__('san'):
                 user[id]['attribute']['san'] += goods[name]['san'] * number
+
             if goods[name].__contains__('hp'):
-                user[id]['attribute']['hp'] += goods[name]['san'] * number
+                maxHp = user[id]['attribute']['hp-max'] + user[id]['attribute']['hp-up']
+                user[id]['attribute']['hp'] += goods[name]['hp'] * number
+                if user[id]['attribute']['hp'] > maxHp:
+                    user[id]['attribute']['hp'] = maxHp
 
             discard(id, name, number)
             return '你成功使用' + str(number) + countWord + name
     else:
         return '你没有该物品'
+
 
 def typeToString(number):
     if number == 0:
@@ -1030,12 +1112,21 @@ def typeToString(number):
         return '卷轴'
     elif number == 10:
         return '宝箱'
+    elif number == 11:
+        return '矿石'
     elif number == 12:
         return '纪念品'
+    elif number == 13:
+        return '材料'
+    elif number == 14:
+        return '附加戒指'
+    return '（未知）'
+
 
 # ============================================
 # 操作
 
+# 签到
 def sign(id):
     global user
     today = str(datetime.date.today())
@@ -1047,20 +1138,26 @@ def sign(id):
     else:
         return '你今天已经签到过了哦~'
 
+
+# 获取积分
 def getGold(id):
     global user
-    
+
     return '你的积分为：' + str(user[id]['gold'])
-  
+
+
+# 获取体力
 def getStrength(id):
     global user
-    global maxStrength
+    maxStrength = user[id]['attribute']['strength-max'] + user[id]['attribute']['strength-up']
     return '你的体力为：' + str(user[id]['attribute']['strength']) + '/' + str(maxStrength)
 
+
+# 获取胜率
 def getRate(id):
     global user
     if user[id]['match']['win'] + user[id]['match']['lose'] == 0:
-        return  '你还暂未进行任何对决'
+        return '你还暂未进行任何对决'
     rate = float(user[id]['match']['win']) / float(user[id]['match']['win'] + user[id]['match']['lose'])
     rate = round(rate, 2) * 100
     result = '\n总计场次：' + str(user[id]['match']['win'] + user[id]['match']['lose'])
@@ -1069,6 +1166,8 @@ def getRate(id):
     result += '\n登顶次数：' + str(user[id]['match']['topTimes'])
     return result
 
+
+# 获取数据
 def getMyData(id):
     global user
     result = '昵称：' + user[id]['name']
@@ -1076,18 +1175,36 @@ def getMyData(id):
         result += '（自动获取）'
     result += '\n'
     result += '积分：' + str(user[id]['gold']) + '\n'
-    result += '攻击力：' + str(user[id]['attribute']['attack']) + '\n'
-    result += '护甲：' + str(user[id]['attribute']['defense']) + '\n'
-    result += 'San值：' + str(user[id]['attribute']['san']) + '\n'
+
+    maxStrength = user[id]['attribute']['strength-max'] + user[id]['attribute']['strength-up']
     result += '体力：' + str(user[id]['attribute']['strength']) + '/' + str(maxStrength) + '\n'
+
+    maxHp = user[id]['attribute']['hp-max'] + user[id]['attribute']['hp-up']
+    result += '生命值：' + str(user[id]['attribute']['hp']) + '/' + str(maxHp) + '\n'
+
+    attack = user[id]['attribute']['attack'] + user[id]['attribute']['attack-up']
+    result += '攻击力：' + str(attack) + '（' + str(user[id]['attribute']['attack-up']) + '）\n'
+
+    defense = user[id]['attribute']['defense'] + user[id]['attribute']['defense-up']
+    result += '护甲：' + str(defense) + '（' + str(user[id]['attribute']['defense-up']) + '）\n'
+
+    maxSan = user[id]['attribute']['san-max'] + user[id]['attribute']['san-up']
+    result += 'San值：' + str(user[id]['attribute']['san']) + '/' + str(maxSan) + '\n'
+
     result += '总计场次：' + str(user[id]['match']['win'] + user[id]['match']['lose'])
     if user[id]['match']['win'] + user[id]['match']['lose'] != 0:
         rate = float(user[id]['match']['win']) / float(user[id]['match']['win'] + user[id]['match']['lose'])
         rate = round(rate, 2) * 100
         result += '（' + str(int(rate)) + '%）'
-    result += '\n背包物品数：' + str(len(user[id]['warehouse']))
+
+    maxKnapsack = user[id]['attribute']['knapsack-max'] + user[id]['attribute']['knapsack-up']
+    result += '\n背包物品数：' + str(len(user[id]['warehouse'])) + '/' + str(maxKnapsack)
+
+    result += '\n强化次数：' + str(user[id]['attribute']['strengthen']) + '次'
     return result
-    
+
+
+# 获取仓库
 def getWarehouse(id):
     global user
     result = '你的背包：'
@@ -1101,60 +1218,79 @@ def getWarehouse(id):
                 result += 'X' + str(value['number'])
     return result
 
+
+# 获取装备
 def getEquipment(id):
     global user
     result = '你的装备：\n'
     result += '武器：' + (user[id]['equipment']['arms'] if len(user[id]['equipment']['arms']) > 0 else '（暂无）') + '\n'
     result += '头盔：' + (user[id]['equipment']['hat'] if len(user[id]['equipment']['hat']) > 0 else '（暂无）') + '\n'
     result += '胸甲：' + (user[id]['equipment']['jacket'] if len(user[id]['equipment']['jacket']) > 0 else '（暂无）') + '\n'
-    result += '护腿：' + (user[id]['equipment']['trousers'] if len(user[id]['equipment']['trousers']) > 0 else '（暂无）') + '\n'
+    result += '护腿：' + (
+        user[id]['equipment']['trousers'] if len(user[id]['equipment']['trousers']) > 0 else '（暂无）') + '\n'
     result += '鞋子：' + (user[id]['equipment']['shoes'] if len(user[id]['equipment']['shoes']) > 0 else '（暂无）') + '\n'
-    result += '戒指（左）：' + (user[id]['equipment']['ring-left'] if len(user[id]['equipment']['ring-left']) > 0 else '（暂无）') + '\n'
-    result += '戒指（右）：' + (user[id]['equipment']['ring-right'] if len(user[id]['equipment']['ring-right']) > 0 else '（暂无）') + '\n'
+    result += '戒指（左）：' + (
+        user[id]['equipment']['ring-left'] if len(user[id]['equipment']['ring-left']) > 0 else '（暂无）') + '\n'
+    result += '戒指（右）：' + (
+        user[id]['equipment']['ring-right'] if len(user[id]['equipment']['ring-right']) > 0 else '（暂无）') + '\n'
     result += '背包：' + (user[id]['equipment']['knapsack'] if len(user[id]['equipment']['knapsack']) > 0 else '（暂无）')
     return result
 
+
+# 获取buff
 def getBuff(id):
     global systemData
 
     result = '你的BUFF如下：'
-    if id in systemData['god']: # 用户是无敌模式
+    if id in systemData['god']:  # 用户是无敌模式
         result += '\n永久无敌模式'
-    if systemData['tmpGod'].__contains__(id): # 用户是无敌模式
+    if systemData['tmpGod'].__contains__(id):  # 用户是无敌模式
         result += '\n临时无敌模式：' + str(systemData['tmpGod'][id]['number']) + '次'
 
-    if systemData['defense-3'].__contains__(id): # 3级防御
+    if systemData['defense-5'].__contains__(id):  # 5级防御
+        result += '\n5级防御：' + str(systemData['defense-5'][id]['number']) + '次'
+    if systemData['defense-4'].__contains__(id):  # 4级防御
+        result += '\n4级防御：' + str(systemData['defense-4'][id]['number']) + '次'
+    if systemData['defense-3'].__contains__(id):  # 3级防御
         result += '\n3级防御：' + str(systemData['defense-3'][id]['number']) + '次'
-    if systemData['defense-2'].__contains__(id): # 2级防御
+    if systemData['defense-2'].__contains__(id):  # 2级防御
         result += '\n2级防御：' + str(systemData['defense-2'][id]['number']) + '次'
-    if systemData['defense-1'].__contains__(id): # 1级防御
+    if systemData['defense-1'].__contains__(id):  # 1级防御
         result += '\n1级防御：' + str(systemData['defense-1'][id]['number']) + '次'
 
-    if systemData['rampage-3'].__contains__(id): # 3级暴走
+    if systemData['rampage-5'].__contains__(id):  # 5级暴走
+        result += '\n5级进攻：' + str(systemData['rampage-5'][id]['number']) + '次'
+    if systemData['rampage-4'].__contains__(id):  # 4级暴走
+        result += '\n4级进攻：' + str(systemData['rampage-4'][id]['number']) + '次'
+    if systemData['rampage-3'].__contains__(id):  # 3级暴走
         result += '\n3级进攻：' + str(systemData['rampage-3'][id]['number']) + '次'
-    if systemData['rampage-2'].__contains__(id): # 2级暴走
+    if systemData['rampage-2'].__contains__(id):  # 2级暴走
         result += '\n2级进攻：' + str(systemData['rampage-2'][id]['number']) + '次'
-    if systemData['rampage-1'].__contains__(id): # 1级暴走
+    if systemData['rampage-1'].__contains__(id):  # 1级暴走
         result += '\n1级进攻：' + str(systemData['rampage-1'][id]['number']) + '次'
-    
-    if systemData['halveGold'].__contains__(id): # 积分收益减半
+
+    if systemData['halveGold'].__contains__(id):  # 积分收益减半
         result += '\n积分收益减半：' + str(systemData['halveGold'][id]['number']) + '次'
-    elif systemData['doubleGold'].__contains__(id): # 双倍积分收益
+    if systemData['doubleGold'].__contains__(id):  # 双倍积分收益
         result += '\n积分收益双倍：' + str(systemData['doubleGold'][id]['number']) + '次'
-    elif systemData['tripleGold'].__contains__(id): # 三倍积分收益
+    if systemData['tripleGold'].__contains__(id):  # 三倍积分收益
         result += '\n积分收益三倍：' + str(systemData['tripleGold'][id]['number']) + '次'
-    elif systemData['fixedGold'].__contains__(id): # 固定增减积分收益
+    if systemData['fixedGold'].__contains__(id):  # 固定增减积分收益
         if systemData['fixedGold'][id]['gold'] > 0:
-            result += '\n收益增减固定积分：' + str(systemData['fixedGold'][id]['number']) + '次（积分+' + str(systemData['fixedGold'][id]['gold']) + '）'
+            result += '\n收益增减固定积分：' + str(systemData['fixedGold'][id]['number']) + '次（积分+' + str(
+                systemData['fixedGold'][id]['gold']) + '）'
         else:
-            result += '\n收益增减固定积分：' + str(systemData['fixedGold'][id]['number']) + '次（积分' + str(systemData['fixedGold'][id]['gold']) + '）'
-    elif systemData['noLoss'].__contains__(id): # 击剑不掉积分
+            result += '\n收益增减固定积分：' + str(systemData['fixedGold'][id]['number']) + '次（积分' + str(
+                systemData['fixedGold'][id]['gold']) + '）'
+    if systemData['noLoss'].__contains__(id):  # 击剑不掉积分
         result += '\n击剑免掉积分：' + str(systemData['noLoss'][id]['number']) + '次'
-    
+
     if result == '你的BUFF如下：':
         result = '你的BUFF如下：暂无'
     return result
 
+
+# 获取商店
 def getShop():
     global goodsAvailable
     global goods
@@ -1163,21 +1299,38 @@ def getShop():
         result += '\n' + i + '：' + str(goods[i]['cost']) + '积分'
     return result
 
+
+# 介绍物品
 def getComments(name):
     global goods
+    global buff
     if goods.__contains__(name):
-        result ='名字：' + name
+        result = '名字：' + name
         result += '\n类型：' + typeToString(goods[name]['type'])
-        if goods[name]['cost'] > 0:
+        if goods[name]['cost'] >= 0:
             result += '\n购买：' + str(goods[name]['cost']) + '积分'
         else:
             result += '\n购买：无法购买'
-        result += '\n出售：' + str(goods[name]['sell']) + '积分'
+        if goods[name]['sell'] >= 0:
+            result += '\n出售：' + str(goods[name]['sell']) + '积分'
+        else:
+            result += '\n出售：无法出售'
         result += '\n介绍：' + str(goods[name]['comments'])
+        return result
+    elif buff.__contains__(name):
+        result = '名字：' + name
+        result += '\n类型：buff'
+        result += '\n介绍：' + str(buff[name]['comments'])
+        return result
+    elif baseInformation.__contains__(name):
+        result = '名字：' + name
+        result += '\n介绍：' + str(baseInformation[name]['comments'])
         return result
     else:
         return '不存在该物品'
 
+
+# 改变名字
 def changeName(id, name):
     global user
     flag = True
@@ -1189,75 +1342,112 @@ def changeName(id, name):
     user[id]['initName'] = True
     return name + '修改成功~'
 
+# 新用戶
 def newUser(id, name):
     global user
-    global init 
+    global init
     global systemData
-    global maxStrength # 最大体力
-    global signStrength # 签到体力
+
     if init:
-        user = dataManage.load_obj('user/information')
-        systemData = dataManage.load_obj('user/system')
+        reload()
         init = False
     today = str(datetime.date.today())
-    
+
     if not user.__contains__(id):
         user[id] = {
             'name': name,
             'initName': False,
             'gold': 0,
             'sign-date': '',
-            'warehouse': {}, # 背包
-            'match': { # 比赛场次
-                'win': 0,
-                'lose': 0,
-                'monster': 0,
-                'legend': 0,
-                'topTimes': 0,
-                'lostTopTimes': 0
+            'warehouse': {},  # 背包
+            'match': {  # 比赛场次
+                'win': 0,  # 胜利
+                'lose': 0,  # 失败
+                'monster': 0,  # 怪物击杀数
+                'legend': 0,  # boss击杀数
+                'topTimes': 0,  # 登顶次数
+                'lostTopTimes': 0  # 被击剑次数
             },
-            'equipment': { # 装备
-                'arms': '', # 武器
-                'hat': '', # 头部
-                'jacket': '', # 身体
-                'trousers': '', # 裤子
-                'shoes': '', # 鞋子
-                'ring-left': '', # 左戒指
-                'ring-right': '', # 右戒指
-                'knapsack': '' # 背包
+            'equipment': {  # 装备
+                'arms': '',  # 武器
+                'hat': '',  # 头部
+                'jacket': '',  # 身体
+                'trousers': '',  # 裤子
+                'shoes': '',  # 鞋子
+                'ring-left': '',  # 左戒指
+                'ring-right': '',  # 右戒指
+                'ring': [],  # 附加戒指（只有一半收益，但是可以弄8个）
+                'knapsack': ''  # 背包
             },
             'attribute': {
-                'attack': 5, # 攻击力
-                'hp': 100, # 生命值
-                'defense': 0, # 防御值
-                'san': 100, # 精神力
-                'strength': 20 # 体力
+                'strengthen': 0,  # 强化次数
+
+                'attack': 5,  # 攻击力
+                "attack-up": 0,  # 装备的攻击力附加
+
+                'hp': 100,  # 生命值
+                'hp-max': 100,  # 最大生命值
+                'hp-up': 0,  # 装备的最大生命值附加
+
+                'defense': 0,  # 防御值
+                'defense-up': 0,  # 装备的防御力附加
+
+                'san': 100,  # 精神力
+                'san-max': 100,  # 最大精神力
+                'san-up': 0,  # 装备的最大精神力附加
+
+                'strength': 20,  # 体力
+                'strength-max': 120,  # 最大体力值
+                'strength-sign': 20,  # 每天的体力恢复量
+                'strength-up': 0,  # 装备的最大体力附加
+                'strength-sign-up': 0,  # 装备的签到体力恢复
+
+                'knapsack-max': 10,  # 最大背包容量
+                'knapsack-up': 0,  # 装备提升的最大背包容量
+
+                'gold-income': 0,  # 每次积分收益的增加积分
+                'gold-expenditure': 0,  # 每次积分支出减少
+                'gold-income-shop': 0,  # 每次商店积分收益的增加积分
+                'gold-expenditure-shop': 0,  # 每次商店积分支出减少
             },
             'last-operate-date': today
         }
     else:
         if user[id]['last-operate-date'] != today:
             # 体力值修改
+            maxStrength = user[id]['attribute']['strength-max'] + user[id]['attribute']['strength-up']
+            signStrength = user[id]['attribute']['strength-sign'] + user[id]['attribute']['strength-sign-up']
+
             if user[id]['attribute']['strength'] < maxStrength - signStrength:
                 user[id]['attribute']['strength'] += signStrength
             elif user[id]['attribute']['strength'] < maxStrength:
                 user[id]['attribute']['strength'] = maxStrength
+
             # san值
+            maxSan = user[id]['attribute']['san-max'] + user[id]['attribute']['san-up']
             user[id]['attribute']['san'] += 100
-            if user[id]['attribute']['san'] > 100:
-                user[id]['attribute']['san'] = 100
+            if user[id]['attribute']['san'] > maxSan:
+                user[id]['attribute']['san'] = maxSan
+
+            # hp值
+            maxHp = user[id]['attribute']['hp-max'] + user[id]['attribute']['hp-up']
+            user[id]['attribute']['hp'] += 100
+            if user[id]['attribute']['hp'] > maxHp:
+                user[id]['attribute']['hp'] = maxHp
+
             user[id]['last-operate-date'] = today
             if not user[id]['initName']:
                 user[id]['name'] = name
 
+
 def rechargeStrength(id):
     global user
-    global maxStrength # 最大体力
+    maxStrength = user[id]['attribute']['strength-max'] + user[id]['attribute']['strength-up']
     cost = 4
     gain = 5
     if user[id]['gold'] < cost:
         return '你的积分小于' + str(cost) + '不能兑换体力'
-    
+
     if user[id]['attribute']['strength'] >= maxStrength:
         return '你的体力值已满不能兑换体力'
     elif user[id]['attribute']['strength'] >= maxStrength - gain:
@@ -1269,6 +1459,7 @@ def rechargeStrength(id):
         user[id]['attribute']['strength'] += gain
         return '你消耗了' + str(cost) + '积分，获得了' + str(gain) + '点体力'
 
+# 击剑
 async def fencing(member, id2, app):
     if member.id == id2:
         await app.sendGroupMessage(member.group, MessageChain.create([
@@ -1303,74 +1494,75 @@ async def fencing(member, id2, app):
         user[other.id]['attribute']['san'] -= 1
         user[other.id]['match']['lostTopTimes'] += 1
 
-
         ran = random.randrange(0, 1000)
         # 获胜概率为 你的攻击 - 对方防御力 + 你的san值 - 对方san值
-        winPoint = 500 + ((user[member.id]['attribute']['attack'] - user[other.id]['attribute']['defense']) * 10 + user[member.id]['attribute']['san'] - user[other.id]['attribute']['san'])
+        attack = user[member.id]['attribute']['attack'] + user[member.id]['attribute']['attack-up']
+        defense = user[other.id]['attribute']['defense'] + user[member.id]['attribute']['defense-up']
+        winPoint = 500 + ((attack - defense) * 10 + user[member.id]['attribute']['san'] - user[other.id]['attribute']['san'])
 
         # BUFF启用
-        if member.id in systemData['god']: # 用户是无敌模式
+        if member.id in systemData['god']:  # 用户是无敌模式
             winPoint = 1000
-        elif other.id in systemData['god']: # 被击剑对象是无敌模式
+        elif other.id in systemData['god']:  # 被击剑对象是无敌模式
             winPoint = 0
-        elif systemData['tmpGod'].__contains__(member.id): # 用户是无敌模式
+        elif systemData['tmpGod'].__contains__(member.id):  # 用户是无敌模式
             winPoint = 1000
             systemData['tmpGod'][member.id]['number'] -= 1
             if systemData['tmpGod'][member.id]['number'] <= 0:
                 del systemData['tmpGod'][member.id]
-        elif systemData['tmpGod'].__contains__(other.id): # 被击剑对象是无敌模式
+        elif systemData['tmpGod'].__contains__(other.id):  # 被击剑对象是无敌模式
             winPoint = 0
             systemData['tmpGod'][other.id]['number'] -= 1
             if systemData['tmpGod'][other.id]['number'] <= 0:
                 del systemData['tmpGod'][other.id]
         else:
-            if systemData['defense-5'].__contains__(other.id): # 5级防御
+            if systemData['defense-5'].__contains__(other.id):  # 5级防御
                 winPoint -= 500
                 systemData['defense-5'][other.id]['number'] -= 1
                 if systemData['defense-5'][other.id]['number'] <= 0:
                     del systemData['defense-5'][other.id]
-            elif systemData['defense-4'].__contains__(other.id): # 4级防御
+            elif systemData['defense-4'].__contains__(other.id):  # 4级防御
                 winPoint -= 400
                 systemData['defense-4'][other.id]['number'] -= 1
                 if systemData['defense-4'][other.id]['number'] <= 0:
                     del systemData['defense-4'][other.id]
-            elif systemData['defense-3'].__contains__(other.id): # 3级防御
+            elif systemData['defense-3'].__contains__(other.id):  # 3级防御
                 winPoint -= 300
                 systemData['defense-3'][other.id]['number'] -= 1
                 if systemData['defense-3'][other.id]['number'] <= 0:
                     del systemData['defense-3'][other.id]
-            elif systemData['defense-2'].__contains__(other.id): # 2级防御
+            elif systemData['defense-2'].__contains__(other.id):  # 2级防御
                 winPoint -= 200
                 systemData['defense-2'][other.id]['number'] -= 1
                 if systemData['defense-2'][other.id]['number'] <= 0:
                     del systemData['defense-2'][other.id]
-            elif systemData['defense-1'].__contains__(other.id): # 1级防御
+            elif systemData['defense-1'].__contains__(other.id):  # 1级防御
                 winPoint -= 100
                 systemData['defense-1'][other.id]['number'] -= 1
                 if systemData['defense-1'][other.id]['number'] <= 0:
                     del systemData['defense-1'][other.id]
 
-            if systemData['rampage-5'].__contains__(member.id): # 5级暴走
+            if systemData['rampage-5'].__contains__(member.id):  # 5级暴走
                 winPoint += 500
                 systemData['rampage-5'][member.id]['number'] -= 1
                 if systemData['rampage-5'][member.id]['number'] <= 0:
                     del systemData['rampage-5'][member.id]
-            elif systemData['rampage-4'].__contains__(member.id): # 4级暴走
+            elif systemData['rampage-4'].__contains__(member.id):  # 4级暴走
                 winPoint += 400
                 systemData['rampage-4'][member.id]['number'] -= 1
                 if systemData['rampage-4'][member.id]['number'] <= 0:
                     del systemData['rampage-4'][member.id]
-            elif systemData['rampage-3'].__contains__(member.id): # 3级暴走
+            elif systemData['rampage-3'].__contains__(member.id):  # 3级暴走
                 winPoint += 300
                 systemData['rampage-3'][member.id]['number'] -= 1
                 if systemData['rampage-3'][member.id]['number'] <= 0:
                     del systemData['rampage-3'][member.id]
-            elif systemData['rampage-2'].__contains__(member.id): # 2级暴走
+            elif systemData['rampage-2'].__contains__(member.id):  # 2级暴走
                 winPoint += 200
                 systemData['rampage-2'][member.id]['number'] -= 1
                 if systemData['rampage-2'][member.id]['number'] <= 0:
                     del systemData['rampage-2'][member.id]
-            elif systemData['rampage-1'].__contains__(member.id): # 1级暴走
+            elif systemData['rampage-1'].__contains__(member.id):  # 1级暴走
                 winPoint += 100
                 systemData['rampage-1'][member.id]['number'] -= 1
                 if systemData['rampage-1'][member.id]['number'] <= 0:
@@ -1388,7 +1580,7 @@ async def fencing(member, id2, app):
             getGold = random.randrange(0, maxGetGold) + 1
             user[member.id]['match']['win'] += 1
             user[other.id]['match']['lose'] += 1
-            result = member.name + '你击剑打败了'+ loser + '，夺走了对方' + str(getGold) + '点节操（积分值）'
+            result = member.name + '你击剑打败了' + loser + '，夺走了对方' + str(getGold) + '点节操（积分值）'
             update(member.id, 0, getGold, 0)
             update(other.id, 0, -getGold, 0)
         else:
@@ -1403,7 +1595,6 @@ async def fencing(member, id2, app):
             update(member.id, 0, -getGold, 0)
             update(other.id, 0, getGold, 0)
 
-        
         maxLine = int(linecache.getline(r'data/user/fencing.txt', 1))
         x = random.randrange(0, maxLine)
         lineNumber = linecache.getline(r'data/user/fencing.txt', x * 2 + 3)
@@ -1415,12 +1606,13 @@ async def fencing(member, id2, app):
             Plain(result)
         ]))
 
+# 挑战榜首
 async def fencingTop(member, app, groupId):
     global user
     global systemData
 
     goldId = systemData['rank']['gold-1']['id']
-    
+
     if goldId == member.id:
         if groupId != 0:
             await app.sendGroupMessage(member.group, MessageChain.create([
@@ -1451,74 +1643,76 @@ async def fencingTop(member, app, groupId):
         user[member.id]['attribute']['strength'] -= 1
         user[goldId]['attribute']['san'] -= 1
         user[goldId]['match']['lostTopTimes'] += 1
- 
+
         ran = random.randrange(0, 1000)
         # 获胜概率为 你的攻击 - 对方防御力 + 你的san值 - 对方san值
-        winPoint = 500 + ((user[member.id]['attribute']['attack'] - user[goldId]['attribute']['defense']) * 10 + user[member.id]['attribute']['san'] - user[goldId]['attribute']['san'])
+        attack = user[member.id]['attribute']['attack'] + user[member.id]['attribute']['attack-up']
+        defense = user[goldId]['attribute']['defense'] + user[member.id]['attribute']['defense-up']
+        winPoint = 500 + ((attack - defense) * 10 + user[member.id]['attribute']['san'] - user[goldId]['attribute']['san'])
 
         # BUFF启用
-        if member.id in systemData['god']: # 用户是无敌模式
+        if member.id in systemData['god']:  # 用户是无敌模式
             winPoint = 1000
-        elif goldId in systemData['god']: # 被击剑对象是无敌模式
+        elif goldId in systemData['god']:  # 被击剑对象是无敌模式
             winPoint = 0
-        elif systemData['tmpGod'].__contains__(member.id): # 用户是无敌模式
+        elif systemData['tmpGod'].__contains__(member.id):  # 用户是无敌模式
             winPoint = 1000
             systemData['tmpGod'][member.id]['number'] -= 1
             if systemData['tmpGod'][member.id]['number'] <= 0:
                 del systemData['tmpGod'][member.id]
-        elif systemData['tmpGod'].__contains__(goldId): # 被击剑对象是无敌模式
+        elif systemData['tmpGod'].__contains__(goldId):  # 被击剑对象是无敌模式
             winPoint = 0
             systemData['tmpGod'][goldId]['number'] -= 1
             if systemData['tmpGod'][goldId]['number'] <= 0:
                 del systemData['tmpGod'][goldId]
         else:
-            if systemData['defense-5'].__contains__(goldId): # 5级防御
+            if systemData['defense-5'].__contains__(goldId):  # 5级防御
                 winPoint -= 500
                 systemData['defense-5'][goldId]['number'] -= 1
                 if systemData['defense-5'][goldId]['number'] <= 0:
                     del systemData['defense-5'][goldId]
-            elif systemData['defense-4'].__contains__(goldId): # 4级防御
+            elif systemData['defense-4'].__contains__(goldId):  # 4级防御
                 winPoint -= 400
                 systemData['defense-4'][goldId]['number'] -= 1
                 if systemData['defense-4'][goldId]['number'] <= 0:
                     del systemData['defense-4'][goldId]
-            elif systemData['defense-3'].__contains__(goldId): # 3级防御
+            elif systemData['defense-3'].__contains__(goldId):  # 3级防御
                 winPoint -= 300
                 systemData['defense-3'][goldId]['number'] -= 1
                 if systemData['defense-3'][goldId]['number'] <= 0:
                     del systemData['defense-3'][goldId]
-            elif systemData['defense-2'].__contains__(goldId): # 2级防御
+            elif systemData['defense-2'].__contains__(goldId):  # 2级防御
                 winPoint -= 200
                 systemData['defense-2'][goldId]['number'] -= 1
                 if systemData['defense-2'][goldId]['number'] <= 0:
                     del systemData['defense-2'][goldId]
-            elif systemData['defense-1'].__contains__(goldId): # 1级防御
+            elif systemData['defense-1'].__contains__(goldId):  # 1级防御
                 winPoint -= 100
                 systemData['defense-1'][goldId]['number'] -= 1
                 if systemData['defense-1'][goldId]['number'] <= 0:
                     del systemData['defense-1'][goldId]
 
-            if systemData['rampage-5'].__contains__(member.id): # 5级暴走
+            if systemData['rampage-5'].__contains__(member.id):  # 5级暴走
                 winPoint += 500
                 systemData['rampage-5'][member.id]['number'] -= 1
                 if systemData['rampage-5'][member.id]['number'] <= 0:
                     del systemData['rampage-5'][member.id]
-            elif systemData['rampage-4'].__contains__(member.id): # 4级暴走
+            elif systemData['rampage-4'].__contains__(member.id):  # 4级暴走
                 winPoint += 400
                 systemData['rampage-4'][member.id]['number'] -= 1
                 if systemData['rampage-4'][member.id]['number'] <= 0:
                     del systemData['rampage-4'][member.id]
-            elif systemData['rampage-3'].__contains__(member.id): # 3级暴走
+            elif systemData['rampage-3'].__contains__(member.id):  # 3级暴走
                 winPoint += 300
                 systemData['rampage-3'][member.id]['number'] -= 1
                 if systemData['rampage-3'][member.id]['number'] <= 0:
                     del systemData['rampage-3'][member.id]
-            elif systemData['rampage-2'].__contains__(member.id): # 2级暴走
+            elif systemData['rampage-2'].__contains__(member.id):  # 2级暴走
                 winPoint += 200
                 systemData['rampage-2'][member.id]['number'] -= 1
                 if systemData['rampage-2'][member.id]['number'] <= 0:
                     del systemData['rampage-2'][member.id]
-            elif systemData['rampage-1'].__contains__(member.id): # 1级暴走
+            elif systemData['rampage-1'].__contains__(member.id):  # 1级暴走
                 winPoint += 100
                 systemData['rampage-1'][member.id]['number'] -= 1
                 if systemData['rampage-1'][member.id]['number'] <= 0:
@@ -1527,30 +1721,35 @@ async def fencingTop(member, app, groupId):
         winner = ''
         loser = ''
         result = ''
+        memberName = ''
+        if groupId == 0:
+            memberName = member.nickname
+        else:
+            memberName = member.name
         maxGetGold = 8
         if ran < winPoint:
-            winner = member.name
+            winner = memberName
             loser = user[goldId]['name']
             if user[goldId]['gold'] < maxGetGold:
                 maxGetGold = user[goldId]['gold']
             getGold = random.randrange(0, maxGetGold) + 1
             user[member.id]['match']['win'] += 1
             user[goldId]['match']['lose'] += 1
-            result = member.name + '你击剑打败了'+ loser + '，夺走了对方' + str(getGold) + '点节操（积分值）'
+            result = memberName + '你击剑打败了' + loser + '，夺走了对方' + str(getGold) + '点节操（积分值）'
             update(member.id, 0, getGold, 0)
             update(goldId, 0, -getGold, 0)
         else:
             winner = user[goldId]['name']
-            loser = member.name
+            loser = memberName
             if user[member.id]['gold'] < maxGetGold:
                 maxGetGold = user[member.id]['gold']
             getGold = random.randrange(0, maxGetGold) + 1
             user[member.id]['match']['lose'] += 1
             user[goldId]['match']['win'] += 1
-            result = member.name + '你击剑输给了' + winner + '，被夺走了' + str(getGold) + '点节操（积分值）'
+            result = memberName + '你击剑输给了' + winner + '，被夺走了' + str(getGold) + '点节操（积分值）'
             update(member.id, 0, -getGold, 0)
             update(goldId, 0, getGold, 0)
-        
+
         maxLine = int(linecache.getline(r'data/user/fencing.txt', 1))
         x = random.randrange(0, maxLine)
         lineNumber = linecache.getline(r'data/user/fencing.txt', x * 2 + 3)
@@ -1568,8 +1767,304 @@ async def fencingTop(member, app, groupId):
                 Plain('------------\n'),
                 Plain(result)
             ]))
-            
-        
+
+# 决斗
+
+async def duel(member, id2, app):
+    if member.id == id2:
+        await app.sendGroupMessage(member.group, MessageChain.create([
+            Plain('好家伙，和自己决斗呢？')
+        ]))
+        return
+
+    other = await app.getMember(member.group.id, id2)
+
+    if other != None:
+        newUser(other.id, other.name)
+        global user
+        global systemData
+
+        # 体力值与积分判断
+        if user[other.id]['gold'] <= 1:
+            await app.sendGroupMessage(member.group, MessageChain.create([
+                Plain(other.name + '的积分值小于等于1，不能进行决斗')
+            ]))
+            return
+        if user[member.id]['gold'] <= 0:
+            await app.sendGroupMessage(member.group, MessageChain.create([
+                Plain('你暂无积分值不可以决斗')
+            ]))
+            return
+        if user[member.id]['attribute']['strength'] <= 0:
+            await app.sendGroupMessage(member.group, MessageChain.create([
+                Plain('你今日的体力值已经为0了，不能再决斗啦~')
+            ]))
+            return
+        user[member.id]['attribute']['strength'] -= 1
+        user[other.id]['attribute']['san'] -= 1
+        user[other.id]['match']['lostTopTimes'] += 1
+
+        ran = random.randrange(0, 1000)
+        # 获胜概率为 你的攻击 - 对方防御力 + 你的san值 - 对方san值
+        attack = user[member.id]['attribute']['attack'] + user[member.id]['attribute']['attack-up']
+        defense = user[other.id]['attribute']['defense'] + user[member.id]['attribute']['defense-up']
+        winPoint = 500 + (attack - defense + user[member.id]['attribute']['san'] - user[other.id]['attribute']['san']) * 10
+
+        # BUFF启用
+        if member.id in systemData['god']:  # 用户是无敌模式
+            winPoint = 1000
+        elif other.id in systemData['god']:  # 被决斗对象是无敌模式
+            winPoint = 0
+        elif systemData['tmpGod'].__contains__(member.id):  # 用户是无敌模式
+            winPoint = 1000
+            systemData['tmpGod'][member.id]['number'] -= 1
+            if systemData['tmpGod'][member.id]['number'] <= 0:
+                del systemData['tmpGod'][member.id]
+        elif systemData['tmpGod'].__contains__(other.id):  # 被决斗对象是无敌模式
+            winPoint = 0
+            systemData['tmpGod'][other.id]['number'] -= 1
+            if systemData['tmpGod'][other.id]['number'] <= 0:
+                del systemData['tmpGod'][other.id]
+        else:
+            if systemData['defense-5'].__contains__(other.id):  # 5级防御
+                winPoint -= 500
+                systemData['defense-5'][other.id]['number'] -= 1
+                if systemData['defense-5'][other.id]['number'] <= 0:
+                    del systemData['defense-5'][other.id]
+            elif systemData['defense-4'].__contains__(other.id):  # 4级防御
+                winPoint -= 400
+                systemData['defense-4'][other.id]['number'] -= 1
+                if systemData['defense-4'][other.id]['number'] <= 0:
+                    del systemData['defense-4'][other.id]
+            elif systemData['defense-3'].__contains__(other.id):  # 3级防御
+                winPoint -= 300
+                systemData['defense-3'][other.id]['number'] -= 1
+                if systemData['defense-3'][other.id]['number'] <= 0:
+                    del systemData['defense-3'][other.id]
+            elif systemData['defense-2'].__contains__(other.id):  # 2级防御
+                winPoint -= 200
+                systemData['defense-2'][other.id]['number'] -= 1
+                if systemData['defense-2'][other.id]['number'] <= 0:
+                    del systemData['defense-2'][other.id]
+            elif systemData['defense-1'].__contains__(other.id):  # 1级防御
+                winPoint -= 100
+                systemData['defense-1'][other.id]['number'] -= 1
+                if systemData['defense-1'][other.id]['number'] <= 0:
+                    del systemData['defense-1'][other.id]
+
+            if systemData['rampage-5'].__contains__(member.id):  # 5级暴走
+                winPoint += 500
+                systemData['rampage-5'][member.id]['number'] -= 1
+                if systemData['rampage-5'][member.id]['number'] <= 0:
+                    del systemData['rampage-5'][member.id]
+            elif systemData['rampage-4'].__contains__(member.id):  # 4级暴走
+                winPoint += 400
+                systemData['rampage-4'][member.id]['number'] -= 1
+                if systemData['rampage-4'][member.id]['number'] <= 0:
+                    del systemData['rampage-4'][member.id]
+            elif systemData['rampage-3'].__contains__(member.id):  # 3级暴走
+                winPoint += 300
+                systemData['rampage-3'][member.id]['number'] -= 1
+                if systemData['rampage-3'][member.id]['number'] <= 0:
+                    del systemData['rampage-3'][member.id]
+            elif systemData['rampage-2'].__contains__(member.id):  # 2级暴走
+                winPoint += 200
+                systemData['rampage-2'][member.id]['number'] -= 1
+                if systemData['rampage-2'][member.id]['number'] <= 0:
+                    del systemData['rampage-2'][member.id]
+            elif systemData['rampage-1'].__contains__(member.id):  # 1级暴走
+                winPoint += 100
+                systemData['rampage-1'][member.id]['number'] -= 1
+                if systemData['rampage-1'][member.id]['number'] <= 0:
+                    del systemData['rampage-1'][member.id]
+
+        winner = ''
+        loser = ''
+        result = ''
+        maxGetGold = 8
+        if ran < winPoint:
+            winner = member.name
+            loser = other.name
+            if user[other.id]['gold'] < maxGetGold:
+                maxGetGold = user[other.id]['gold']
+            getGold = random.randrange(0, maxGetGold) + 1
+            user[member.id]['match']['win'] += 1
+            user[other.id]['match']['lose'] += 1
+            result = member.name + '你决斗打败了' + loser + '，夺走了对方' + str(getGold) + '点积分值'
+            update(member.id, 0, getGold, 0)
+            update(other.id, 0, -getGold, 0)
+        else:
+            winner = other.name
+            loser = member.name
+            if user[member.id]['gold'] < maxGetGold:
+                maxGetGold = user[member.id]['gold']
+            getGold = random.randrange(0, maxGetGold) + 1
+            user[member.id]['match']['lose'] += 1
+            user[other.id]['match']['win'] += 1
+            result = member.name + '你决斗输给了' + winner + '，被夺走了' + str(getGold) + '点积分值'
+            update(member.id, 0, -getGold, 0)
+            update(other.id, 0, getGold, 0)
+
+
+        await app.sendGroupMessage(member.group, MessageChain.create([
+            Plain(result)
+        ]))
+
+
+# 决斗榜首
+async def duelTop(member, app, groupId):
+    global user
+    global systemData
+
+    goldId = systemData['rank']['gold-1']['id']
+
+    if goldId == member.id:
+        if groupId != 0:
+            await app.sendGroupMessage(member.group, MessageChain.create([
+                Plain('自己也要打自己吗？')
+            ]))
+            return
+        else:
+            await app.sendFriendMessage(member, MessageChain.create([
+                Plain('自己也要打自己吗？~')
+            ]))
+            return
+    else:
+        if user[goldId]['gold'] <= 1:
+            await app.sendGroupMessage(member.group, MessageChain.create([
+                Plain(user[goldId]['name'] + '的积分值小于等于1，不能进行决斗')
+            ]))
+            return
+        if user[member.id]['gold'] <= 0:
+            await app.sendGroupMessage(member.group, MessageChain.create([
+                Plain('你暂无积分值不可以决斗')
+            ]))
+            return
+        if user[member.id]['attribute']['strength'] <= 0:
+            await app.sendGroupMessage(member.group, MessageChain.create([
+                Plain('你今日的体力值已经为0了，不能再决斗啦~')
+            ]))
+            return
+        user[member.id]['attribute']['strength'] -= 1
+        user[goldId]['attribute']['san'] -= 1
+        user[goldId]['match']['lostTopTimes'] += 1
+
+        ran = random.randrange(0, 1000)
+        # 获胜概率为 你的攻击 - 对方防御力 + 你的san值 - 对方san值
+        attack = user[member.id]['attribute']['attack'] + user[member.id]['attribute']['attack-up']
+        defense = user[goldId]['attribute']['defense'] + user[member.id]['attribute']['defense-up']
+        winPoint = 500 + ((attack - defense) * 10 + user[member.id]['attribute']['san'] - user[goldId]['attribute']['san'])
+
+        # BUFF启用
+        if member.id in systemData['god']:  # 用户是无敌模式
+            winPoint = 1000
+        elif goldId in systemData['god']:  # 被决斗对象是无敌模式
+            winPoint = 0
+        elif systemData['tmpGod'].__contains__(member.id):  # 用户是无敌模式
+            winPoint = 1000
+            systemData['tmpGod'][member.id]['number'] -= 1
+            if systemData['tmpGod'][member.id]['number'] <= 0:
+                del systemData['tmpGod'][member.id]
+        elif systemData['tmpGod'].__contains__(goldId):  # 被决斗对象是无敌模式
+            winPoint = 0
+            systemData['tmpGod'][goldId]['number'] -= 1
+            if systemData['tmpGod'][goldId]['number'] <= 0:
+                del systemData['tmpGod'][goldId]
+        else:
+            if systemData['defense-5'].__contains__(goldId):  # 5级防御
+                winPoint -= 500
+                systemData['defense-5'][goldId]['number'] -= 1
+                if systemData['defense-5'][goldId]['number'] <= 0:
+                    del systemData['defense-5'][goldId]
+            elif systemData['defense-4'].__contains__(goldId):  # 4级防御
+                winPoint -= 400
+                systemData['defense-4'][goldId]['number'] -= 1
+                if systemData['defense-4'][goldId]['number'] <= 0:
+                    del systemData['defense-4'][goldId]
+            elif systemData['defense-3'].__contains__(goldId):  # 3级防御
+                winPoint -= 300
+                systemData['defense-3'][goldId]['number'] -= 1
+                if systemData['defense-3'][goldId]['number'] <= 0:
+                    del systemData['defense-3'][goldId]
+            elif systemData['defense-2'].__contains__(goldId):  # 2级防御
+                winPoint -= 200
+                systemData['defense-2'][goldId]['number'] -= 1
+                if systemData['defense-2'][goldId]['number'] <= 0:
+                    del systemData['defense-2'][goldId]
+            elif systemData['defense-1'].__contains__(goldId):  # 1级防御
+                winPoint -= 100
+                systemData['defense-1'][goldId]['number'] -= 1
+                if systemData['defense-1'][goldId]['number'] <= 0:
+                    del systemData['defense-1'][goldId]
+
+            if systemData['rampage-5'].__contains__(member.id):  # 5级暴走
+                winPoint += 500
+                systemData['rampage-5'][member.id]['number'] -= 1
+                if systemData['rampage-5'][member.id]['number'] <= 0:
+                    del systemData['rampage-5'][member.id]
+            elif systemData['rampage-4'].__contains__(member.id):  # 4级暴走
+                winPoint += 400
+                systemData['rampage-4'][member.id]['number'] -= 1
+                if systemData['rampage-4'][member.id]['number'] <= 0:
+                    del systemData['rampage-4'][member.id]
+            elif systemData['rampage-3'].__contains__(member.id):  # 3级暴走
+                winPoint += 300
+                systemData['rampage-3'][member.id]['number'] -= 1
+                if systemData['rampage-3'][member.id]['number'] <= 0:
+                    del systemData['rampage-3'][member.id]
+            elif systemData['rampage-2'].__contains__(member.id):  # 2级暴走
+                winPoint += 200
+                systemData['rampage-2'][member.id]['number'] -= 1
+                if systemData['rampage-2'][member.id]['number'] <= 0:
+                    del systemData['rampage-2'][member.id]
+            elif systemData['rampage-1'].__contains__(member.id):  # 1级暴走
+                winPoint += 100
+                systemData['rampage-1'][member.id]['number'] -= 1
+                if systemData['rampage-1'][member.id]['number'] <= 0:
+                    del systemData['rampage-1'][member.id]
+
+        winner = ''
+        loser = ''
+        result = ''
+        memberName = ''
+        if groupId == 0:
+            memberName = member.nickname
+        else:
+            memberName = member.name
+        maxGetGold = 8
+        if ran < winPoint:
+            winner = memberName
+            loser = user[goldId]['name']
+            if user[goldId]['gold'] < maxGetGold:
+                maxGetGold = user[goldId]['gold']
+            getGold = random.randrange(0, maxGetGold) + 1
+            user[member.id]['match']['win'] += 1
+            user[goldId]['match']['lose'] += 1
+            result = memberName + '你决斗打败了' + loser + '，夺走了对方' + str(getGold) + '点积分值'
+            update(member.id, 0, getGold, 0)
+            update(goldId, 0, -getGold, 0)
+        else:
+            winner = user[goldId]['name']
+            loser = memberName
+            if user[member.id]['gold'] < maxGetGold:
+                maxGetGold = user[member.id]['gold']
+            getGold = random.randrange(0, maxGetGold) + 1
+            user[member.id]['match']['lose'] += 1
+            user[goldId]['match']['win'] += 1
+            result = memberName + '你决斗输给了' + winner + '，被夺走了' + str(getGold) + '点积分值'
+            update(member.id, 0, -getGold, 0)
+            update(goldId, 0, getGold, 0)
+
+        if groupId != 0:
+            await app.sendGroupMessage(member.group, MessageChain.create([
+                Plain(result)
+            ]))
+        else:
+            await app.sendFriendMessage(member, MessageChain.create([
+                Plain(result)
+            ]))
+
+
 # 获取排行榜
 def getRank():
     global user
@@ -1580,12 +2075,15 @@ def getRank():
 
     result = '排行榜\n'
     result += '----------------\n'
-    result += '积分第一：' + user[systemData['rank']['gold-1']['id']]['name'] + '（' + str(user[systemData['rank']['gold-1']['id']]['gold']) + '）\n'
+    result += '积分第一：' + user[systemData['rank']['gold-1']['id']]['name'] + '（' + str(
+        user[systemData['rank']['gold-1']['id']]['gold']) + '）\n'
     if systemData['rank']['gold-2']['id'] != 0:
-        result += '积分第二：' + user[systemData['rank']['gold-2']['id']]['name'] + '（' + str(user[systemData['rank']['gold-2']['id']]['gold']) + '）\n'
+        result += '积分第二：' + user[systemData['rank']['gold-2']['id']]['name'] + '（' + str(
+            user[systemData['rank']['gold-2']['id']]['gold']) + '）\n'
     if systemData['rank']['gold-3']['id'] != 0:
-        result += '积分第三：' + user[systemData['rank']['gold-3']['id']]['name'] + '（' + str(user[systemData['rank']['gold-3']['id']]['gold']) + '）\n'
-    
+        result += '积分第三：' + user[systemData['rank']['gold-3']['id']]['name'] + '（' + str(
+            user[systemData['rank']['gold-3']['id']]['gold']) + '）\n'
+
     rate = round(systemData['rank']['rate']['rate'], 2) * 100
     result += '胜率第一：' + user[systemData['rank']['rate']['id']]['name'] + '（' + str(int(rate)) + '%）'
     rateValue = round(systemData['rank']['rate50']['rate'], 2) * 100
@@ -1593,13 +2091,17 @@ def getRank():
         result += '\n胜率第一（大于50场）：' + user[systemData['rank']['rate50']['id']]['name'] + '（' + str(int(rateValue)) + '%）'
 
     if systemData['rank']['field']['id'] != 0:
-        result += '\n击剑达人：' + user[systemData['rank']['field']['id']]['name'] + '（' + str(systemData['rank']['field']['number']) + '场）'
+        result += '\n击剑达人：' + user[systemData['rank']['field']['id']]['name'] + '（' + str(
+            systemData['rank']['field']['number']) + '场）'
     if systemData['rank']['challenger']['id'] != 0:
-        result += '\n登顶次数最多：' + user[systemData['rank']['challenger']['id']]['name'] + '（' + str(systemData['rank']['challenger']['number']) + '次）'
+        result += '\n登顶次数最多：' + user[systemData['rank']['challenger']['id']]['name'] + '（' + str(
+            systemData['rank']['challenger']['number']) + '次）'
     if systemData['rank']['loser']['id'] != 0:
-        result += '\n被击剑次数最多：' + user[systemData['rank']['loser']['id']]['name'] + '（' + str(systemData['rank']['loser']['number']) + '次）'
+        result += '\n被击剑次数最多：' + user[systemData['rank']['loser']['id']]['name'] + '（' + str(
+            systemData['rank']['loser']['number']) + '次）'
 
     return result
+
 
 # 购买商品
 def purchase(id, name, number):
@@ -1618,6 +2120,7 @@ def purchase(id, name, number):
     else:
         return '不存在该物品或者不可购买'
 
+
 # 丢弃商品
 def discard(id, name, number):
     global user
@@ -1628,6 +2131,7 @@ def discard(id, name, number):
         return '丢弃成功！'
     else:
         return '你没有该物品~'
+
 
 # 出售商品
 def sellGoods(id, name, number):
@@ -1665,7 +2169,7 @@ def MRFZ_card():
     card5 = []
     card6 = []
     information = []
-    with open('data/明日方舟/PersonaCard.txt', 'r+', encoding = 'utf-8') as f:
+    with open('data/明日方舟/PersonaCard.txt', 'r+', encoding='utf-8') as f:
         information = f.readlines()
     for i in information:
         i = i.strip()
@@ -1703,6 +2207,7 @@ def MRFZ_card():
     result += '-------------\n以上数据由夜煞提供，如有错误，请使用命令\"*send 错误内容\"告知'
     return result
 
+
 def MRFZ_card10():
     botBaseInformation = dataManage.load_obj('baseInformation')
     if not botBaseInformation['reply'].__contains__('cards'):
@@ -1719,7 +2224,7 @@ def MRFZ_card10():
     card5 = []
     card6 = []
     information = []
-    with open('data/明日方舟/PersonaCard.txt', 'r+', encoding = 'utf-8') as f:
+    with open('data/明日方舟/PersonaCard.txt', 'r+', encoding='utf-8') as f:
         information = f.readlines()
     for i in information:
         i = i.strip()
@@ -1759,6 +2264,7 @@ def MRFZ_card10():
     result += '-------------\n以上数据由夜煞提供，如有错误，请使用命令\"*send 错误内容\"告知'
     return result
 
+
 def starProbability():
     ran = random.randrange(0, 100)
     if ran < 2:
@@ -1769,6 +2275,7 @@ def starProbability():
         return 4
     else:
         return 3
+
 
 def star2string(star):
     if star == 1:
@@ -1784,20 +2291,25 @@ def star2string(star):
     elif star == 6:
         return '★★★★★★'
 
+
 # ============================================
 def touch(id, name):
     global user
     if user[id]['attribute']['strength'] < 1 or user[id]['gold'] > 1:
         return '对' + name + '不屑一顾'
-    update(id, -2, random.randint(1, 5), 0)
+    gold = random.randint(1, 3)
+    if user[id]['gold'] + gold < 0:
+        gold = -user[id]['gold'] + 1
+    update(id, -2, gold, 0)
     return '看' + name + '太可怜，于是给了你一些积分'
+
 
 '''
 消耗体力：1
 
 40% 啥也没有
-15% BUFF
-25% 1点体力 | 1点积分
+10% BUFF
+20% 1点体力 | 1点积分
 15% 2点体力 | 2点积分
 4.5% 3点积分
 0.4% 4点积分
@@ -1805,6 +2317,8 @@ def touch(id, name):
 
 E = 0.711
 '''
+
+
 def fishing(id, name):
     global user
     if user[id]['attribute']['strength'] < 1:
@@ -1814,12 +2328,12 @@ def fishing(id, name):
     ran2 = random.randrange(0, 2)
 
     describe_dict = [
-        '你来到了一个黑漆漆的山洞，四周十分安静，一番探索之后', 
-        '你来到一个遗迹，一番探索之后', 
-        '你发现了一个宝箱', 
-        '在亚马逊的原始森林里，你被讨厌的虫子烦的要死', 
-        '你在古玩市场一番搜索之后', 
-        '你在一个古代陵墓里，一番探索之后', 
+        '你来到了一个黑漆漆的山洞，四周十分安静，一番探索之后',
+        '你来到一个遗迹，一番探索之后',
+        '你发现了一个宝箱',
+        '在亚马逊的原始森林里，你被讨厌的虫子烦的要死',
+        '你在古玩市场一番搜索之后',
+        '你在一个古代陵墓里，一番探索之后',
         '你来到了南极，冰天雪地之中，一番探索之后',
         '你在狂风骤雨的大海上航行，遇见了一个廖无人烟的小岛，一番探索之后',
         '你在沙哈拉沙漠中，孤独的一个人前行',
@@ -1842,9 +2356,9 @@ def fishing(id, name):
 
     if ran < 400:
         result = '什么也没有获得'
-    elif ran < 450:
+    elif ran < 500:
         ran = random.randrange(0, 100)
-        if ran < 40: # 进攻模式
+        if ran < 40:  # 进攻模式
             ran2 = random.randrange(0, 100)
             if ran2 < 60:
                 tmp = random.randrange(0, 10) + 1
@@ -1858,7 +2372,7 @@ def fishing(id, name):
                 tmp = random.randrange(0, 3) + 1
                 changeToRampage3(id, tmp)
                 result += '获得了一个' + str(tmp) + '次的3级进攻BUFF'
-        elif ran < 80: # 防御模式
+        elif ran < 80:  # 防御模式
             ran2 = random.randrange(0, 100)
             if ran2 < 60:
                 tmp = random.randrange(0, 10) + 1
@@ -1872,15 +2386,15 @@ def fishing(id, name):
                 tmp = random.randrange(0, 3) + 1
                 changeToDefense3(id, tmp)
                 result += '获得了一个' + str(tmp) + '次的3级防御BUFF'
-        elif ran < 88: # 减半积分收益
+        elif ran < 88:  # 减半积分收益
             tmp = random.randrange(0, 10) + 1
             changeToHalveGold(id, tmp)
             result += '获得了一个' + str(tmp) + '次的收益减半BUFF'
-        elif ran < 96: # 双倍积分收益
+        elif ran < 96:  # 双倍积分收益
             tmp = random.randrange(0, 10) + 1
             changeToDoubleGold(id, tmp)
             result += '获得了一个' + str(tmp) + '次的双倍积分收益BUFF'
-        else: # 固定增减积分收益
+        else:  # 固定增减积分收益
             tmp = random.randrange(0, 3) + 1
             tmp2 = random.randrange(0, 11) - 5
             changeToFixedGold(id, tmp, tmp2)
@@ -1917,8 +2431,9 @@ def fishing(id, name):
             gold = 10
             result = '获得了10点积分值'
 
-    update(id, 1, gold, strength) # 更新数据
+    update(id, 1, gold, strength)  # 更新数据
     return name + describe + '，' + result
+
 
 '''
 20% 一无所获
@@ -1946,112 +2461,180 @@ def fishing(id, name):
 2%   超级坏
 '''
 
+
 def hangOut(id):
     global user
     if user[id]['gold'] < 1:
         return '你的积分小于1，不能闲逛了'
+    if user[id]['attribute']['strength'] < 1:
+        return '你的体力值小于1，不能闲逛了'
 
     probability = random.randrange(0, 1000)
     result = ''
     gold = 0
     strength = 0
 
-    if probability < 200: # 一无所获
+    if probability < 200:  # 一无所获
         describe_dict = [
             '你闲逛了一圈，啥也没有发生',
             '你在闲逛的时候逛回去了，啥也没获得',
-            '你在闲逛的时候踩了一坨便便并且坚信明天会走狗屎运'
+            '你在闲逛的时候踩了一坨便便并且坚信明天会走狗屎运',
+            '你在闲逛的时候遇见了好朋友，他叫你回家开黑，于是你又回去了',
+            '你在闲逛的时候想起了还有原神没有肝于是返回了',
+            '你在闲逛的时候想起方舟的活动还没有打，于是回家了'
         ]
         result = random.choice(describe_dict)
 
-    elif probability < 350: #BUFF
+    elif probability < 300:  # BUFF
         ran = random.randrange(0, 100)
-        if ran < 10: # 装备
-            ran2 = random.randrange(0, 100)
-            if ran2 < 40:
+        if ran < 10:  # 装备
+            ran2 = random.randrange(0, 1000)
+            if ran2 < 550:
                 if getGooods(id, 1, '金粒', 1):
                     result = '你闲逛时获得了金粒'
                 else:
                     result = '你闲逛时获得了金粒，但是背包满了'
-            elif ran2 < 60:
+            elif ran2 < 650:
                 if getGooods(id, 1, '金条', 1):
                     result = '你闲逛时获得了金条'
                 else:
                     result = '你闲逛时获得了金条，但是背包满了'
-            elif ran2 < 80:
+            elif ran2 < 700:
+                if getGooods(id, 1, '金块', 1):
+                    result = '你闲逛时获得了金块'
+                else:
+                    result = '你闲逛时获得了金块，但是背包满了'
+            elif ran2 < 800:
+                if getGooods(id, 1, '石头', 1):
+                    result = '你闲逛时获得了石头'
+                else:
+                    result = '你闲逛时获得了石头，但是背包满了'
+            elif ran2 < 900:
+                if getGooods(id, 1, '木板', 1):
+                    result = '你闲逛时获得了木板'
+                else:
+                    result = '你闲逛时获得了木板，但是背包满了'
+
+            elif ran2 < 910:
+                if getGooods(id, 1, '破旧的木剑', 1):
+                    result = '你闲逛时获得了破旧的木剑'
+                else:
+                    result = '你闲逛时获得了破旧的木剑，但是背包满了'
+            elif ran2 < 920:
+                if getGooods(id, 1, '破旧的木斧', 1):
+                    result = '你闲逛时获得了破旧的木斧'
+                else:
+                    result = '你闲逛时获得了破旧的木斧，但是背包满了'
+            elif ran2 < 930:
+                if getGooods(id, 1, '破旧的布头盔', 1):
+                    result = '你闲逛时获得了破旧的布头盔'
+                else:
+                    result = '你闲逛时获得了破旧的布头盔，但是背包满了'
+            elif ran2 < 940:
+                if getGooods(id, 1, '破旧的布甲', 1):
+                    result = '你闲逛时获得了破旧的布甲'
+                else:
+                    result = '你闲逛时获得了破旧的布头盔，但是背包满了'
+            elif ran2 < 950:
+                if getGooods(id, 1, '破旧的布护腿', 1):
+                    result = '你闲逛时获得了破旧的布护腿'
+                else:
+                    result = '你闲逛时获得了破旧的布护腿，但是背包满了'
+            elif ran2 < 960:
+                if getGooods(id, 1, '破旧的布靴', 1):
+                    result = '你闲逛时获得了破旧的布靴'
+                else:
+                    result = '你闲逛时获得了破旧的布靴，但是背包满了'
+
+            elif ran2 < 965:
                 if getGooods(id, 1, '守护戒指', 1):
                     result = '你闲逛时获得了守护戒指'
                 else:
                     result = '你闲逛时获得了守护戒指，但是背包满了'
-            elif ran2 < 90:
+            elif ran2 < 970:
+                if getGooods(id, 1, '攻击戒指', 1):
+                    result = '你闲逛时获得了攻击戒指'
+                else:
+                    result = '你闲逛时获得了攻击戒指，但是背包满了'
+            elif ran2 < 980:
                 if getGooods(id, 1, '大鸡腿', 1):
                     result = '你闲逛时获得了大鸡腿'
                 else:
                     result = '你闲逛时获得了大鸡腿，但是背包满了'
-            else:
+            elif ran2 < 990:
                 if getGooods(id, 1, '制式长枪', 1):
                     result = '你闲逛时获得了制式长枪'
                 else:
                     result = '你闲逛时获得了制式长枪，但是背包满了'
-        elif ran < 45: # 进攻模式
+            elif ran2 < 995:
+                if getGooods(id, 1, '木剑', 1):
+                    result = '你闲逛时获得了木剑'
+                else:
+                    result = '你闲逛时获得了木剑，但是背包满了'
+            elif ran2 < 1000:
+                if getGooods(id, 1, '布甲', 1):
+                    result = '你闲逛时获得了布甲'
+                else:
+                    result = '你闲逛时获得了布甲，但是背包满了'
+        elif ran < 45:  # 进攻模式
             ran2 = random.randrange(0, 100)
             if ran2 < 50:
-                tmp = random.randrange(0, 10) + 1
+                tmp = random.randrange(0, 5) + 1
                 changeToRampage1(id, tmp)
                 result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的1级进攻BUFF'
             elif ran2 < 80:
-                tmp = random.randrange(0, 5) + 1
+                tmp = random.randrange(0, 3) + 1
                 changeToRampage2(id, tmp)
                 result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的2级进攻BUFF'
             elif ran2 < 100:
-                tmp = random.randrange(0, 3) + 1
+                tmp = random.randrange(0, 2) + 1
                 changeToRampage3(id, tmp)
                 result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的3级进攻BUFF'
-        elif ran < 80: # 防御模式
+        elif ran < 80:  # 防御模式
             ran2 = random.randrange(0, 100)
             if ran2 < 50:
-                tmp = random.randrange(0, 10) + 1
+                tmp = random.randrange(0, 5) + 1
                 changeToDefense1(id, tmp)
                 result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的1级防御BUFF'
             elif ran2 < 80:
-                tmp = random.randrange(0, 5) + 1
+                tmp = random.randrange(0, 3) + 1
                 changeToDefense2(id, tmp)
                 result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的2级防御BUFF'
             elif ran2 < 100:
-                tmp = random.randrange(0, 3) + 1
+                tmp = random.randrange(0, 2) + 1
                 changeToDefense3(id, tmp)
                 result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的3级防御BUFF'
-        elif ran < 85: # 减半积分收益
+        elif ran < 85:  # 减半积分收益
             tmp = random.randrange(0, 10) + 1
             changeToHalveGold(id, tmp)
             result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的收益减半BUFF'
-        elif ran < 87: # 固定增减积分收益
-            tmp = random.randrange(0, 3) + 1
+        elif ran < 87:  # 固定增减积分收益
+            tmp = random.randrange(0, 5) + 1
             tmp2 = random.randrange(0, 11) - 5
             changeToFixedGold(id, tmp, tmp2)
             if tmp2 > 0:
-                result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的收益积分+' + str(tmp2) + '的BUFF'
+                result = '你在闲逛的时候，获得了一个' + str(tmp) + '次的收益积分+' + str(tmp2) + '的BUFF'
             else:
-                result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的收益积分' + str(tmp2) + '的BUFF'
-        elif ran < 90: # 击剑不损失积分
+                result = '你在闲逛的时候，获得了一个' + str(tmp) + '次的收益积分' + str(tmp2) + '的BUFF'
+        elif ran < 90:  # 击剑不损失积分
             tmp = random.randrange(0, 5) + 1
             changeToNoLoss(id, tmp)
-            result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的击剑不损失积分BUFF'
-        elif ran < 95: # 双倍积分收益
+            result = '你在闲逛的时候，获得了一个' + str(tmp) + '次的击剑不损失积分BUFF'
+        elif ran < 95:  # 双倍积分收益
             tmp = random.randrange(0, 10) + 1
             changeToDoubleGold(id, tmp)
             result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的双倍积分收益BUFF'
-        elif ran < 98: # 三倍积分收益
+        elif ran < 98:  # 三倍积分收益
             tmp = random.randrange(0, 5) + 1
             changeToTripleGold(id, tmp)
             result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的双倍积分收益BUFF'
-        else: # 无敌模式
+        else:  # 无敌模式
             tmp = random.randrange(0, 3) + 1
             changeToTmpGod(id, tmp)
             result += '你在闲逛的时候，获得了一个' + str(tmp) + '次的临时击剑无敌BUFF'
 
 
-    elif probability < 400: # 不好不坏
+    elif probability < 400:  # 不好不坏
         ran = random.randrange(0, 3)
 
         if ran == 0:
@@ -2067,7 +2650,7 @@ def hangOut(id):
             gold = -2
             strength = 2
 
-    elif probability < 550: # 一般好
+    elif probability < 550:  # 一般好
         ran = random.randrange(0, 10)
 
         if ran == 0:
@@ -2104,7 +2687,7 @@ def hangOut(id):
             result = '你在闲逛的时候遇见了一个要自杀的女孩，将其救下后，她的家人奖励了你一些钱，积分+1'
             gold = 1
 
-    elif probability < 800: # 一般坏
+    elif probability < 800:  # 一般坏
         ran = random.randrange(0, 8)
 
         if ran == 0:
@@ -2132,8 +2715,8 @@ def hangOut(id):
         elif ran == 7:
             result = '你闲逛的时候被狗追，于是选择在树上卡了一天，体力-3'
             strength = -3
-            
-    elif probability < 880: # 比较好
+
+    elif probability < 880:  # 比较好
         ran = random.randrange(0, 4)
 
         if ran == 0:
@@ -2151,9 +2734,9 @@ def hangOut(id):
             gold = 5
             strength = -1
 
-    elif probability < 960: # 比较坏
+    elif probability < 960:  # 比较坏
         ran = random.randrange(0, 4)
-        
+
         if ran == 0:
             result = '你在闲逛的时候遇见了一个可怜的乞丐，给了他一些钱，积分-5'
             gold = -5
@@ -2169,7 +2752,7 @@ def hangOut(id):
             result = '你在闲逛的时候，遇见了一个歹徒正在欺负一个女孩，你立马飞奔而去打走歹徒，却发现原来他们是在拍戏，只好赔偿医疗费，积分-5'
             gold = -5
 
-    elif probability < 980: # 超级好
+    elif probability < 980:  # 超级好
         ran = random.randrange(0, 2)
 
         if ran == 0:
@@ -2179,7 +2762,7 @@ def hangOut(id):
             result = '你的好朋友成了首富，请你大吃了一顿，体力+10'
             strength = 10
 
-    elif probability < 1000: # 超级坏
+    elif probability < 1000:  # 超级坏
         ran = random.randrange(0, 2)
 
         if ran == 0:
@@ -2189,9 +2772,10 @@ def hangOut(id):
             result = '你在闲逛的时候遇见了阿拉灯神丁，他说实现你三个愿望然后趁你不注意摸偷了你的钱包转身就跑，积分-10'
             gold = -10
 
-    update(id, 2, gold, strength) # 更新数据
+    update(id, 2, gold, strength)  # 更新数据
     return result
-    
+
+
 # ============================================
 # 管理操作
 
@@ -2203,6 +2787,7 @@ def editGold(id, gold):
     else:
         return '不存在该用户'
 
+
 def editStrength(id, strength):
     global user
     if user.__contains__(id):
@@ -2211,12 +2796,14 @@ def editStrength(id, strength):
     else:
         return '不存在该用户'
 
+
 def viewUser(id):
     global user
     if user.__contains__(id):
         return getMyData(id)
     else:
         return '不存在该用户'
+
 
 def viewRate(id):
     global user
@@ -2225,12 +2812,14 @@ def viewRate(id):
     else:
         return '不存在该用户'
 
+
 def viewWarehouse(id):
     global user
     if user.__contains__(id):
         return user[id]['name'] + getWarehouse(id)[1:]
     else:
         return '不存在该用户'
+
 
 def viewEquipment(id):
     global user
@@ -2239,12 +2828,14 @@ def viewEquipment(id):
     else:
         return '不存在该用户'
 
+
 def viewBuff(id):
     global user
     if user.__contains__(id):
         return user[id]['name'] + getBuff(id)[1:]
     else:
         return '不存在该用户'
+
 
 def giveGoods(id, name, number):
     global user
@@ -2260,6 +2851,7 @@ def giveGoods(id, name, number):
     else:
         return '不存在该用户'
 
+
 def giveAllGoods(name, number):
     global user
     global goods
@@ -2268,12 +2860,14 @@ def giveAllGoods(name, number):
         getGooods(key, -1, name, number)
     return '已将该物品发放给每个人'
 
+
 def giveAllGold(number):
     global user
 
     for key, value in user.items():
         update(key, -2, number, 0)
     return '已将积分发放给每个人'
+
 
 def giveAllStrength(number):
     global user
@@ -2283,14 +2877,20 @@ def giveAllStrength(number):
         update(key, -2, 0, number)
     return '已将体力发放给每个人'
 
+
 # BUFF启用
 def viewGod():
     global systemData
+    global user
     result = '无敌的人：' + str(systemData['god'])
     result += '\n临时无敌模式：'
     for key, value in systemData['tmpGod'].items():
-        result += '\n\t' + str(key) + '：' + str(value['number']) + '次'
+        if user.__contains__(key):
+            result += '\n\t' + str(key) + '/' + user[key]['name'] + '：' + str(value['number']) + '次'
+        else:
+            result += '\n\t' + str(key) + '：' + str(value['number']) + '次'
     return result
+
 
 def closeGod(id):
     global systemData
@@ -2300,6 +2900,7 @@ def closeGod(id):
         del systemData['tmpGod'][id]
     return '关闭成功！'
 
+
 def changeToGod(id):
     global systemData
     if id in systemData['god']:
@@ -2307,6 +2908,7 @@ def changeToGod(id):
     else:
         systemData['god'].append(id)
         return '开启无敌模式成功'
+
 
 def changeToTmpGod(id, number):
     global systemData
@@ -2319,6 +2921,7 @@ def changeToTmpGod(id, number):
         del systemData['tmpGod'][id]
     return '已经为其开启' + str(number) + '次无敌模式'
 
+
 def changeToRampage1(id, number):
     global systemData
     if systemData['rampage-1'].__contains__(id):
@@ -2329,6 +2932,7 @@ def changeToRampage1(id, number):
     if systemData['rampage-1'][id]['number'] <= 0:
         del systemData['rampage-1'][id]
     return '已经为其开启' + str(number) + '次1级进攻'
+
 
 def changeToRampage2(id, number):
     global systemData
@@ -2341,6 +2945,7 @@ def changeToRampage2(id, number):
         del systemData['rampage-2'][id]
     return '已经为其开启' + str(number) + '次2级进攻'
 
+
 def changeToRampage3(id, number):
     global systemData
     if systemData['rampage-3'].__contains__(id):
@@ -2351,7 +2956,32 @@ def changeToRampage3(id, number):
     if systemData['rampage-3'][id]['number'] <= 0:
         del systemData['rampage-3'][id]
     return '已经为其开启' + str(number) + '次3级进攻'
-    
+
+
+def changeToRampage4(id, number):
+    global systemData
+    if systemData['rampage-4'].__contains__(id):
+        systemData['rampage-4'][id]['number'] += number
+    else:
+        systemData['rampage-4'][id] = {}
+        systemData['rampage-4'][id]['number'] = number
+    if systemData['rampage-4'][id]['number'] <= 0:
+        del systemData['rampage-4'][id]
+    return '已经为其开启' + str(number) + '次4级进攻'
+
+
+def changeToRampage5(id, number):
+    global systemData
+    if systemData['rampage-5'].__contains__(id):
+        systemData['rampage-5'][id]['number'] += number
+    else:
+        systemData['rampage-5'][id] = {}
+        systemData['rampage-5'][id]['number'] = number
+    if systemData['rampage-5'][id]['number'] <= 0:
+        del systemData['rampage-5'][id]
+    return '已经为其开启' + str(number) + '次5级进攻'
+
+
 def changeToDefense1(id, number):
     global systemData
     if systemData['defense-1'].__contains__(id):
@@ -2362,6 +2992,7 @@ def changeToDefense1(id, number):
     if systemData['defense-1'][id]['number'] <= 0:
         del systemData['defense-1'][id]
     return '已经为其开启' + str(number) + '次1级防御'
+
 
 def changeToDefense2(id, number):
     global systemData
@@ -2374,6 +3005,7 @@ def changeToDefense2(id, number):
         del systemData['defense-2'][id]
     return '已经为其开启' + str(number) + '次2级防御'
 
+
 def changeToDefense3(id, number):
     global systemData
     if systemData['defense-3'].__contains__(id):
@@ -2384,6 +3016,31 @@ def changeToDefense3(id, number):
     if systemData['defense-3'][id]['number'] <= 0:
         del systemData['defense-3'][id]
     return '已经为其开启' + str(number) + '次3级防御'
+
+
+def changeToDefense4(id, number):
+    global systemData
+    if systemData['defense-4'].__contains__(id):
+        systemData['defense-4'][id]['number'] += number
+    else:
+        systemData['defense-4'][id] = {}
+        systemData['defense-4'][id]['number'] = number
+    if systemData['defense-4'][id]['number'] <= 0:
+        del systemData['defense-4'][id]
+    return '已经为其开启' + str(number) + '次4级防御'
+
+
+def changeToDefense5(id, number):
+    global systemData
+    if systemData['defense-5'].__contains__(id):
+        systemData['defense-5'][id]['number'] += number
+    else:
+        systemData['defense-5'][id] = {}
+        systemData['defense-5'][id]['number'] = number
+    if systemData['defense-5'][id]['number'] <= 0:
+        del systemData['defense-3'][id]
+    return '已经为其开启' + str(number) + '次5级防御'
+
 
 def changeToNoLoss(id, number):
     global systemData
@@ -2396,6 +3053,7 @@ def changeToNoLoss(id, number):
         del systemData['noLoss'][id]
     return '已经为其开启' + str(number) + '次击剑不掉积分'
 
+
 def changeToHalveGold(id, number):
     global systemData
     if systemData['halveGold'].__contains__(id):
@@ -2406,6 +3064,7 @@ def changeToHalveGold(id, number):
     if systemData['halveGold'][id]['number'] <= 0:
         del systemData['halveGold'][id]
     return '已经为其开启' + str(number) + '次积分收益减半'
+
 
 def changeToDoubleGold(id, number):
     global systemData
@@ -2418,6 +3077,7 @@ def changeToDoubleGold(id, number):
         del systemData['doubleGold'][id]
     return '已经为其开启' + str(number) + '次双倍积分收益'
 
+
 def changeToTripleGold(id, number):
     global systemData
     if systemData['tripleGold'].__contains__(id):
@@ -2428,6 +3088,7 @@ def changeToTripleGold(id, number):
     if systemData['tripleGold'][id]['number'] <= 0:
         del systemData['tripleGold'][id]
     return '已经为其开启' + str(number) + '次三倍积分收益'
+
 
 def changeToFixedGold(id, number, gold):
     global systemData
@@ -2456,7 +3117,10 @@ def strengthenAttack(id):
 
         update(id, -2, -100, 0)
         user[id]['attribute']['attack'] += 1
+        user[id]['attribute']['strengthen'] += 1
+
         return '强化成功！'
+
 
 def strengthenDefense(id):
     if user[id]['attribute']['defense'] >= 20:
@@ -2471,4 +3135,5 @@ def strengthenDefense(id):
 
         update(id, -2, -100, 0)
         user[id]['attribute']['defense'] += 1
+        user[id]['attribute']['strengthen'] += 1
         return '强化成功！'

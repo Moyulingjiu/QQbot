@@ -75,7 +75,6 @@ async def reply(botBaseInformation, messages, app, friend, messageChain):
                 needReply = True
             elif messages == '游戏帮助':
                 isImage = command.helpGame()
-                reply = '这部分命令，只支持群聊哦~'
                 needReply = True
 
 
@@ -123,6 +122,6 @@ async def reply(botBaseInformation, messages, app, friend, messageChain):
         if not needReply: # rpg游戏
             (needReply, needAt, reply, isImage) = await rpg.menu(messages, 0, friend, app, botBaseInformation, messageChain)
         if not needReply:
-            (needReply, needAt, reply, isImage) = autoReply.reply(messages, True, botBaseInformation, app, friend.nickname)
+            (needReply, needAt, reply, isImage) = autoReply.reply(messages, True, botBaseInformation, app, friend.nickname, 0, friend.id)
     
     return (needReply, reply, isImage)

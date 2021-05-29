@@ -213,10 +213,10 @@ async def reply(botBaseInformation, messages, app, member, messageChain):
         # 此处为整活
         if not needReply: # rpg游戏
             (needReply, needAt, reply, isImage) = await rpg.menu(messages, groupId, member, app, botBaseInformation, messageChain)
-        if not needReply:
+        if not needReply: # 关键词回复
             (needReply, needAt, reply, AtId) = keyReply.reply(messages, member, botBaseInformation)
-        if not needReply:
-            (needReply, needAt, reply, isImage) = autoReply.reply(messages, beAt, botBaseInformation, app, member.name)
+        if not needReply: # 智能回复
+            (needReply, needAt, reply, isImage) = autoReply.reply(messages, beAt, botBaseInformation, app, member.name, member.group.id, memberId)
             
 
         # +1部分

@@ -147,7 +147,7 @@ async def friend_message_listener(app: GraiaMiraiApplication, friend: Friend, so
         master = await app.getFriend(botBaseInformation['baseInformation']['Master_QQ'])
 
         if master != None and len(strMessage) > 5:
-            await app.sendFriendMessage(friend, MessageChain.create([
+            await app.sendFriendMessage(master, MessageChain.create([
                 Plain(friend.nickname + '(' + str(friend.id) + ')：' + strMessage[5:])
             ]))
             await app.sendFriendMessage(friend, MessageChain.create([
@@ -155,7 +155,22 @@ async def friend_message_listener(app: GraiaMiraiApplication, friend: Friend, so
             ]))
             needReply = True
         return
-
+    elif strMessage == '*ai on':
+        if friend.id in botBaseInformation['noAI']['friend']:
+            botBaseInformation['noAI']['friend'].remove(friend.id)
+            dataManage.save_obj(botBaseInformation, 'baseInformation')
+            await app.sendFriendMessage(friend, MessageChain.create([
+                Plain('已开启智能回复~')
+            ]))
+        return
+    elif strMessage == '*ai off':
+        if not friend.id in botBaseInformation['noAI']['friend']:
+            botBaseInformation['noAI']['friend'].append(friend.id)
+            dataManage.save_obj(botBaseInformation, 'baseInformation')
+            await app.sendFriendMessage(friend, MessageChain.create([
+                Plain('已关闭智能回复~')
+            ]))
+        return
 
     (needReply, reply, isImage) = await friendReply.reply(botBaseInformation, strMessage, app, friend, getMessage.messageChain)
 
@@ -207,6 +222,38 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
                     Plain('呜呜呜，憋死我了，终于可以说话了')
                 ]))
             logManage.groupLog(getNow.toString(), member.id, member.group.id, member.group.name, strMessage + '; 小柒解出禁言！')
+            return
+        elif strMessage == '*game on':
+            if member.group.id in botBaseInformation['gameOff']:
+                botBaseInformation['gameOff'].remove(member.group.id)
+                dataManage.save_obj(botBaseInformation, 'baseInformation')
+                await app.sendGroupMessage(member.group, MessageChain.create([
+                    Plain('本群已开启游戏功能~')
+                ]))
+            return
+        elif strMessage == '*game off':
+            if not member.group.id in botBaseInformation['gameOff']:
+                botBaseInformation['gameOff'].append(member.group.id)
+                dataManage.save_obj(botBaseInformation, 'baseInformation')
+                await app.sendGroupMessage(member.group, MessageChain.create([
+                    Plain('本群已关闭游戏功能~')
+                ]))
+            return
+        elif strMessage == '*ai on':
+            if member.group.id in botBaseInformation['noAI']['group']:
+                botBaseInformation['noAI']['group'].remove(member.group.id)
+                dataManage.save_obj(botBaseInformation, 'baseInformation')
+                await app.sendGroupMessage(member.group, MessageChain.create([
+                    Plain('本群已开启艾特的智能回复~')
+                ]))
+            return
+        elif strMessage == '*ai off':
+            if not member.group.id in botBaseInformation['noAI']['group']:
+                botBaseInformation['noAI']['group'].append(member.group.id)
+                dataManage.save_obj(botBaseInformation, 'baseInformation')
+                await app.sendGroupMessage(member.group, MessageChain.create([
+                    Plain('本群已关闭艾特的智能回复~')
+                ]))
             return
     if strMessage[:5] == '*send':
         friend = await app.getFriend(botBaseInformation['baseInformation']['Master_QQ'])
@@ -265,7 +312,7 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
 
 # 临时消息
 @bcc.receiver("TempMessage")
-async def group_message_listener(app: GraiaMiraiApplication, member: Member, source: Source):
+async def groupTemp_message_listener(app: GraiaMiraiApplication, member: Member, source: Source):
     global botBaseInformation
     botBaseInformation = dataManage.load_obj('baseInformation')
 
@@ -328,6 +375,16 @@ async def group_message_listener(app: GraiaMiraiApplication, member: Member, sou
             await app.sendTempMessage(member.group.id, member.id, MessageChain.create([
                 Plain(reply)
             ]))
+
+# 好友邀请
+@bcc.receiver("NewFriendRequestEvent")
+async def newFriend(app: GraiaMiraiApplication):
+    master = await app.getFriend(botBaseInformation['baseInformation']['Master_QQ'])
+
+    if master != None:
+        await app.sendFriendMessage(master, MessageChain.create([
+            Plain('有新的好友申请！')
+        ]))
 
 # ======================
 # @sche.schedule(timers.every_custom_seconds(60))
