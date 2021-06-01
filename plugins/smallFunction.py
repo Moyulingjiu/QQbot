@@ -63,24 +63,30 @@ def sta(attribute, groupId, memberId):
         coc[groupId] = {}
     if not coc[groupId].__contains__(memberId):
         coc[groupId][memberId] = {}
-    attributeList = attribute.split(' ')
-    for i in attributeList:
-        i = i.strip()
-        if len(i) > 0:
-            a = ''
-            number = 0
-            for j in range(0, len(i)):
-                if i[j].isdigit():
-                    if i[j:].isdigit():
-                        a = i[:j]
-                        number = int(i[j:])
-                        if number > 100:
-                            number = 100
-                        elif number < 0:
-                            number = 0
+
+    name = ''
+    number = 0
+    lenghth = len(attribute)
+    i = 0
+    while i < lenghth:
+        if attribute[i].isdigit():
+            while attribute[i].isdigit():
+                number = number * 10 + int(attribute[i])
+                i += 1
+                if i >= lenghth:
                     break
-            if len(a) > 0:
-                coc[groupId][memberId][a] = number
+            if number > 100:
+                number = 100
+            name = name.strip()
+            if len(name) > 0:
+                coc[groupId][memberId][name] = number
+            name = ''
+            number = 0
+
+        if i >= lenghth:
+            break
+        name += attribute[i]
+        i += 1
             
     dataManage.save_obj(coc, 'coc')
     return '追加成功！目前有属性个数：' + str(len(coc[groupId][memberId]))
@@ -91,28 +97,35 @@ def stc(attribute, groupId, memberId):
         return '不存在该属性'
     if not coc[groupId].__contains__(memberId):
         return '不存在该属性'
-        
-    attributeList = attribute.split(' ')
+
+
+    name = ''
+    number = 0
+    lenghth = len(attribute)
+    i = 0
     index = 0
-    for i in attributeList:
-        i = i.strip()
-        if len(i) > 0:
-            a = ''
-            number = 0
-            for j in range(0, len(i)):
-                if i[j].isdigit():
-                    if i[j:].isdigit():
-                        a = i[:j]
-                        number = int(i[j:])
-                        if number > 100:
-                            number = 100
-                        elif number < 0:
-                            number = 0
+    while i < lenghth:
+        if attribute[i].isdigit():
+            while attribute[i].isdigit():
+                number = number * 10 + int(attribute[i])
+                i += 1
+                if i >= lenghth:
                     break
-            if len(a) > 0:
-                if coc[groupId][memberId].__contains__(a):
-                    coc[groupId][memberId][a] = number
+            if number > 100:
+                number = 100
+            name = name.strip()
+            if len(name) > 0:
+                if coc[groupId][memberId].__contains__(name):
+                    coc[groupId][memberId][name] = number
                     index += 1
+            name = ''
+            number = 0
+
+        if i >= lenghth:
+            break
+        name += attribute[i]
+        i += 1
+
     dataManage.save_obj(coc, 'coc')
     return '成功修改' + str(index) + '个属性'
 

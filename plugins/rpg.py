@@ -39,15 +39,20 @@ init = True
 # 12：纪念品
 # 13: 材料
 # 14: 附加戒指
+# 15：食物
 # ）
 '''
-baseInformation = {}
+baseInformation = {}  # 基本介绍
 
-buff = {}
+buff = {}  # buff表
 
-goods = {}
+goods = {}  # 物品表
 
-goodsAvailable = []
+goodsAvailable = []  # 商店
+
+decompose = {}  # 分解
+
+synthesis = {}  # 合成
 
 
 async def menu(strMessage, groupId, member, app, botBaseInformation, messageChain):
@@ -76,8 +81,14 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
         id = member.id
         reply = memberName + sign(id)
         needReply = True
+    elif strMessage[:4] == '查询合成' or strMessage[:4] == '介绍合成':
+        reply = getSynthesis(strMessage[4:].strip())
+        needReply = True
+    elif strMessage[:4] == '查询分解' or strMessage[:4] == '介绍分解':
+        reply = getDecompose(strMessage[4:].strip())
+        needReply = True
     elif strMessage[:2] == '介绍' or strMessage[:2] == '查询' or strMessage[:2] == '解释':
-        reply = getComments(strMessage.replace('介绍', '').strip())
+        reply = getComments(strMessage[2:].strip())
         needReply = True
     elif '击剑' in strMessage and groupId != 0:
         tmp = strMessage.replace('击剑', '').strip()
@@ -130,6 +141,9 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
         needReply = True
     elif strMessage == '闲逛':
         reply = memberName + hangOut(member.id)
+        needReply = True
+    elif strMessage == '挖矿':
+        reply = memberName + dig(member.id)
         needReply = True
     elif '摸摸' in strMessage and groupId != 0:
         tmp = strMessage.replace('摸摸', '').strip()
@@ -237,7 +251,15 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
         tmpName = strMessage[4:].strip()
         reply = changeName(member.id, tmpName)
         needReply = True
+
+
     elif strMessage == '挑战BOSS' or strMessage == '挑战boss':
+        needReply = True
+    elif strMessage[:2] == '合成':
+        reply = memberName + '，' + synthesisGoods(member.id, strMessage[2:].strip())
+        needReply = True
+    elif strMessage[:2] == '分解':
+        reply = memberName + '，' + decomposeGoods(member.id, strMessage[2:].strip())
         needReply = True
 
     if member.id == botBaseInformation['baseInformation']['Master_QQ']:
@@ -555,6 +577,8 @@ def reload():
     global goodsAvailable
     global buff
     global baseInformation
+    global decompose
+    global synthesis
 
     systemData = {}
     user = {}
@@ -600,7 +624,7 @@ def reload():
                     buff[datas[0]] = datas[1]
 
 
-    # 获取buff数据
+    # 获取基本数据
     with open('data/user/baseInformation.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
         for i in text:
@@ -609,6 +633,42 @@ def reload():
                 datas = i.split('=')
                 if len(datas) == 2:
                     baseInformation[datas[0]] = datas[1]
+
+
+    # 获取合成数据
+    with open('data/user/synthesis.txt', 'r+', encoding='utf-8') as f:
+        text = f.readlines()
+        for i in text:
+            i = i.strip()
+            if len(i) > 0 and i[0] != '#':
+                datas = i.split(' ')
+                if len(datas) > 1: # 至少得有名字、合成物品
+                    if goods.__contains__(datas[0]):
+                        synthesis[datas[0]] = {}  # 如果拥有该物品才可以合成
+                        for j in datas:
+                            j_list = j.split('=')
+                            if len(j_list) == 2 and j_list[1].isdigit() and goods.__contains__(j_list[0]):
+                                synthesis[datas[0]][j_list[0]] = int(j_list[1])
+                        if len(synthesis[datas[0]]) == 0:
+                            del synthesis[datas[0]]
+
+
+    # 获取分解数据
+    with open('data/user/decompose.txt', 'r+', encoding='utf-8') as f:
+        text = f.readlines()
+        for i in text:
+            i = i.strip()
+            if len(i) > 0 and i[0] != '#':
+                datas = i.split(' ')
+                if len(datas) > 1: # 至少得有名字、分解物品
+                    if goods.__contains__(datas[0]):
+                        decompose[datas[0]] = {}  # 如果拥有该物品才可以合成
+                        for j in datas:
+                            j_list = j.split('=')
+                            if len(j_list) == 2 and j_list[1].isdigit() and goods.__contains__(j_list[0]):
+                                decompose[datas[0]][j_list[0]] = int(j_list[1])
+                        if len(decompose[datas[0]]) == 0:
+                            del decompose[datas[0]]
 
     user = dataManage.load_obj('user/information')
     systemData = dataManage.load_obj('user/system')
@@ -919,7 +979,7 @@ def useGoods(id, name, number):
 
     if user[id]['warehouse'].__contains__(name):
         # 武器装备
-        if (0 < goods[name]['type'] < 8) or goods[name]['type'] == 14:
+        if (0 < goods[name]['type'] < 9) or goods[name]['type'] == 14:
             if goods[name]['type'] == 1:
                 if user[id]['equipment']['arms'] != '':
                     discard(id, name, 1)
@@ -1046,7 +1106,7 @@ def useGoods(id, name, number):
                 return '纪念品不可以使用，只可以出售和丢弃'
             elif goods[name]['type'] == 13:
                 return '材料不可以使用，只可以出售、丢弃、修补强化装备'
-            elif goods[name]['type'] > 14:
+            elif goods[name]['type'] > 15:
                 return '未知物品暂时不可以使用哦~'
 
             if number > user[id]['warehouse'][name]['number']:
@@ -1060,6 +1120,9 @@ def useGoods(id, name, number):
                 countWord = '个'
             elif goods[name]['type'] == 11: # 矿石
                 countWord = '个'
+            elif goods[name]['type'] == 15: # 食物
+                countWord = '个'
+
 
             # 积分、体力
             gold = 0
@@ -1082,6 +1145,15 @@ def useGoods(id, name, number):
                 user[id]['attribute']['hp'] += goods[name]['hp'] * number
                 if user[id]['attribute']['hp'] > maxHp:
                     user[id]['attribute']['hp'] = maxHp
+
+            if name == '5级防御卷轴':
+                changeToDefense5(id, number)
+            elif name == '4级防御卷轴':
+                changeToDefense4(id, number)
+            elif name == '5级进攻卷轴':
+                changeToRampage5(id, number)
+            elif name == '4级进攻卷轴':
+                changeToRampage4(id, number)
 
             discard(id, name, number)
             return '你成功使用' + str(number) + countWord + name
@@ -1120,8 +1192,70 @@ def typeToString(number):
         return '材料'
     elif number == 14:
         return '附加戒指'
+    elif number == 15:
+        return '食物'
     return '（未知）'
 
+
+# 分解与合成
+def decomposeGoods(id, name):
+    if not goods.__contains__(name):
+        return '不存在该物品！'
+    if not decompose.__contains__(name):
+        return '该物品不可以分解！'
+    if not user[id]['warehouse'].__contains__(name):
+        return '你的背包不存在该物品！'
+
+    discard(id, name, 1) # 丢弃物品
+    operate = {}  # 记录每一步的操作，以便于恢复操作
+    flag = True  # 分解是否成功
+    for key, value in decompose[name].items():
+        if not getGooods(id, -1, key, value):
+            flag = False
+            break
+
+        if operate.__contains__(key): # 记录操作
+            operate[key] += value
+        else:
+            operate[key] = value
+
+    if flag:
+        return '分解成功！'
+    else:
+        for key, value in operate:
+            discard(id, key, value)
+        getGooods(id, -1, name, 1)
+        return '背包已满！'
+
+
+def synthesisGoods(id, name):
+    if not goods.__contains__(name):
+        return '不存在该物品！'
+    if not synthesis.__contains__(name):
+        return '该物品无法合成！'
+
+    operate = {}  # 记录每一步的操作，以便于恢复操作
+    flag = True  # 合成是否成功
+    for key, value in synthesis[name].items():
+        if user[id]['warehouse'].__contains__(key) and user[id]['warehouse'][key]['number'] >= value:
+            discard(id, key, value)
+            if operate.__contains__(key): # 记录操作
+                operate[key] += value
+            else:
+                operate[key] = value
+        else:
+            flag = False
+            break
+
+    if flag and not getGooods(id, -1, name, 1): # 获取合成后的物品
+        flag = False
+
+    if flag:
+        return '合成成功！'
+    else:
+        for key, value in operate:
+            getGooods(id, -1, key, value)
+        return '背包已满或材料不足，合成失败！'
 
 # ============================================
 # 操作
@@ -1207,7 +1341,8 @@ def getMyData(id):
 # 获取仓库
 def getWarehouse(id):
     global user
-    result = '你的背包：'
+    maxKnapsack = user[id]['attribute']['knapsack-max'] + user[id]['attribute']['knapsack-up']
+    result = '你的背包：' + str(len(user[id]['warehouse'])) + '/' + str(maxKnapsack)
     if len(user[id]['warehouse']) == 0:
         result += '无'
     else:
@@ -1315,6 +1450,24 @@ def getComments(name):
             result += '\n出售：' + str(goods[name]['sell']) + '积分'
         else:
             result += '\n出售：无法出售'
+        if synthesis.__contains__(name):
+            result += '\n合成路径：'
+            flag = True
+            for key, value in synthesis[name].items():
+                if not flag:
+                    result += '，'
+                else:
+                    flag = False
+                result += key + 'X' + str(value)
+        if decompose.__contains__(name):
+            result += '\n可分解为：'
+            flag = True
+            for key, value in decompose[name].items():
+                if not flag:
+                    result += '，'
+                else:
+                    flag = False
+                result += key + 'X' + str(value)
         result += '\n介绍：' + str(goods[name]['comments'])
         return result
     elif buff.__contains__(name):
@@ -1329,6 +1482,78 @@ def getComments(name):
     else:
         return '不存在该物品'
 
+# 查询合成路线
+def getSynthesis(name):
+    if goods.__contains__(name):
+        result = '物品：' + name
+        result += '\n合成路径：'
+        if synthesis.__contains__(name):
+            flag = True
+            for key, value in synthesis[name].items():
+                if not flag:
+                    result += '，'
+                else:
+                    flag = False
+                result += key + 'X' + str(value)
+        else:
+            result += '无'
+
+        result += '\n可分解为：'
+        if decompose.__contains__(name):
+            flag = True
+            for key, value in decompose[name].items():
+                if not flag:
+                    result += '，'
+                else:
+                    flag = False
+                result += key + 'X' + str(value)
+        else:
+            result += '无'
+
+        result += '\n参与合成路径：'
+        synthesis_list = []
+
+        for key, value in synthesis.items():
+            for key2, value2 in value.items():
+                if key2 == name:
+                    synthesis_list.append(key)
+                    break
+
+        if len(synthesis_list) == 0:
+            result += '无'
+        else:
+            for i in synthesis_list:
+                result += '\n' + i + '<-'
+                flag = True
+                for key, value in synthesis[i].items():
+                    if not flag:
+                        result += '，'
+                    else:
+                        flag = False
+                    result += key + 'X' + str(value)
+
+        return result
+
+    else:
+        return '不存在该物品'
+
+# 查询分解路线
+def getDecompose(name):
+    if goods.__contains__(name):
+        result = '物品：' + name
+        if decompose.__contains__(name):
+            result += '\n可分解为：'
+            flag = True
+            for key, value in decompose[name].items():
+                if not flag:
+                    result += '，'
+                else:
+                    flag = False
+                result += key + 'X' + str(value)
+            return result
+        return '该物品不可分解'
+    else:
+        return '不存在该物品'
 
 # 改变名字
 def changeName(id, name):
@@ -2303,6 +2528,152 @@ def touch(id, name):
     update(id, -2, gold, 0)
     return '看' + name + '太可怜，于是给了你一些积分'
 
+'''
+消耗体力：2
+
+50% 一无所获
+40% 石头
+8% 皮革
+1% 破旧的装备
+    0.10% 其余装备
+    0.50% 一期装备
+    0.30% 二期装备
+    0.10% 三期装备
+    
+0.9% 铁
+0.009% 黄金
+0.0009% 钻石
+0.00009% 合金
+0.00001% 下界合金
+'''
+def dig(id):
+    global user
+    if user[id]['attribute']['strength'] < 2:
+        return '你的体力值不足不能挖矿'
+    user[id]['attribute']['strength'] -= 2
+
+    result = '你一番挖掘之后，'
+    p = random.randrange(0, 10000)
+    if p < 1000:
+        result += '一无所获'
+    elif p < 1050:
+        ran = random.randrange(0, 4) + 1
+        result += '获得了' + str(ran) + '块燧石'
+        getGooods(id, 1, '燧石', ran)
+    elif p < 5000:
+        ran = random.randrange(0, 4) + 1
+        result += '获得了' + str(ran) + '块碎石'
+        getGooods(id, 1, '碎石', ran)
+    elif p < 9000:
+        ran = random.randrange(0, 3) + 1
+        result += '获得了' + str(ran) + '块石头'
+        getGooods(id, 1, '石头', ran)
+    elif p < 9800:
+        result += '获得了1块皮革'
+        getGooods(id, 1, '皮革', 1)
+    elif p < 9900:  # 装备
+        p2 = random.randrange(0, 100)
+
+        if p2 < 50:
+            ran = random.randrange(0, 6)
+            if ran == 0:
+                result += '获得了破旧的木剑X1'
+                getGooods(id, 1, '破旧的木剑', 1)
+            elif ran == 1:
+                result += '获得了破旧的木斧X1'
+                getGooods(id, 1, '破旧的木斧', 1)
+            elif ran == 2:
+                result += '获得了破旧的布头盔X1'
+                getGooods(id, 1, '破旧的布头盔', 1)
+            elif ran == 3:
+                result += '获得了破旧的布甲X1'
+                getGooods(id, 1, '破旧的布甲', 1)
+            elif ran == 4:
+                result += '获得了破旧的布护腿X1'
+                getGooods(id, 1, '破旧的布护腿', 1)
+            elif ran == 5:
+                result += '获得了破旧的布靴X1'
+                getGooods(id, 1, '破旧的布靴', 1)
+        elif p2 < 80:
+            ran = random.randrange(0, 6)
+            if ran == 0:
+                result += '获得了破旧的石剑X1'
+                getGooods(id, 1, '破旧的石剑', 1)
+            elif ran == 1:
+                result += '获得了破旧的石斧X1'
+                getGooods(id, 1, '破旧的石斧', 1)
+            elif ran == 2:
+                result += '获得了破旧的皮革头盔X1'
+                getGooods(id, 1, '破旧的皮革头盔', 1)
+            elif ran == 3:
+                result += '获得了破旧的皮革甲X1'
+                getGooods(id, 1, '破旧的皮革甲', 1)
+            elif ran == 4:
+                result += '获得了破旧的皮革护腿X1'
+                getGooods(id, 1, '破旧的皮革护腿', 1)
+            elif ran == 5:
+                result += '获得了破旧的皮革靴X1'
+                getGooods(id, 1, '破旧的皮革靴', 1)
+        elif p2 < 90:
+            ran = random.randrange(0, 6)
+            if ran == 0:
+                result += '获得了破旧的铁剑X1'
+                getGooods(id, 1, '破旧的铁剑', 1)
+            elif ran == 1:
+                result += '获得了破旧的铁斧X1'
+                getGooods(id, 1, '破旧的铁斧', 1)
+            elif ran == 2:
+                result += '获得了破旧的铁头盔X1'
+                getGooods(id, 1, '破旧的铁头盔', 1)
+            elif ran == 3:
+                result += '获得了破旧的铁甲X1'
+                getGooods(id, 1, '破旧的铁甲', 1)
+            elif ran == 4:
+                result += '获得了破旧的铁护腿X1'
+                getGooods(id, 1, '破旧的铁护腿', 1)
+            elif ran == 5:
+                result += '获得了破旧的铁靴X1'
+                getGooods(id, 1, '破旧的铁靴', 1)
+        else:
+            ran = random.randrange(0, 6)
+            if ran == 0:
+                result += '获得了攻击戒指X1'
+                getGooods(id, 1, '攻击戒指', 1)
+            elif ran == 1:
+                result += '获得了守护戒指X1'
+                getGooods(id, 1, '守护戒指', 1)
+            elif ran == 2:
+                result += '获得了制式长枪X1'
+                getGooods(id, 1, '制式长枪', 1)
+            elif ran == 3:
+                result += '获得了铁制长枪X1'
+                getGooods(id, 1, '铁制长枪', 1)
+            elif ran == 4:
+                result += '获得了大鸡腿X1'
+                getGooods(id, 1, '大鸡腿', 1)
+            elif ran == 5:
+                result += '获得了布背包X1'
+                getGooods(id, 1, '布背包', 1)
+
+    elif p < 9990:
+        result += '获得了1块铁锭'
+        getGooods(id, 1, '铁锭', 1)
+    elif p < 9999:
+        result += '获得了1块金锭'
+        getGooods(id, 1, '金锭', 1)
+    else:
+        p2 = random.randrange(0, 1000)
+        if p2 < 900:
+            result += '获得了1颗钻石'
+            getGooods(id, 1, '钻石', 1)
+        elif p2 < 990:
+            result += '获得了1块合金'
+            getGooods(id, 1, '合金', 1)
+        else:
+            result += '获得了1块下界合金'
+            getGooods(id, 1, '下界合金', 1)
+
+    return result
 
 '''
 消耗体力：1
@@ -2346,7 +2717,9 @@ def fishing(id, name):
         '你走在大路上发现了一个人手里拿着宝箱，于是你来骗、来偷袭，获得了这个宝箱',
         '你乘坐飞船抵达了月球，探索一番后',
         '你来到了九龙城，这里乌烟瘴气，一番探索之后',
-        '你乘坐宇宙飞船抵达了火星，一番探索之后'
+        '你乘坐宇宙飞船抵达了火星，一番探索之后',
+        '你在寒冷的北极圈与北极熊作伴，一番探索之后',
+        '你在大街上，在别人奇怪的目光里，一番搜寻之后'
     ]
 
     describe = random.choice(describe_dict)
@@ -2356,7 +2729,7 @@ def fishing(id, name):
 
     if ran < 400:
         result = '什么也没有获得'
-    elif ran < 500:
+    elif ran < 450:
         ran = random.randrange(0, 100)
         if ran < 40:  # 进攻模式
             ran2 = random.randrange(0, 100)
@@ -2485,9 +2858,9 @@ def hangOut(id):
         ]
         result = random.choice(describe_dict)
 
-    elif probability < 300:  # BUFF
+    elif probability < 300:  # BUFF & 装备
         ran = random.randrange(0, 100)
-        if ran < 10:  # 装备
+        if ran < 20:  # 装备
             ran2 = random.randrange(0, 1000)
             if ran2 < 550:
                 if getGooods(id, 1, '金粒', 1):
@@ -2556,11 +2929,21 @@ def hangOut(id):
                     result = '你闲逛时获得了攻击戒指'
                 else:
                     result = '你闲逛时获得了攻击戒指，但是背包满了'
+            elif ran2 < 975:
+                if getGooods(id, 1, '体力戒指', 1):
+                    result = '你闲逛时获得了体力戒指'
+                else:
+                    result = '你闲逛时获得了体力戒指，但是背包满了'
             elif ran2 < 980:
                 if getGooods(id, 1, '大鸡腿', 1):
                     result = '你闲逛时获得了大鸡腿'
                 else:
                     result = '你闲逛时获得了大鸡腿，但是背包满了'
+            elif ran2 < 985:
+                if getGooods(id, 1, '铁制长枪', 1):
+                    result = '你闲逛时获得了铁制长枪'
+                else:
+                    result = '你闲逛时获得了铁制长枪，但是背包满了'
             elif ran2 < 990:
                 if getGooods(id, 1, '制式长枪', 1):
                     result = '你闲逛时获得了制式长枪'

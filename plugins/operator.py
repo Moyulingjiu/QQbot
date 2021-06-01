@@ -66,6 +66,15 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
             needReply = True
         elif strMessage == Bot_Name + '关机':
             logManage.log(getNow.toString(), 0, Bot_Name + '关机！')
+            if groupId == 0:
+                await app.sendFriendMessage(member, MessageChain.create([
+                    Plain('小柒已关机~请手动重新启动小柒')
+                ]))
+            else:
+                await app.sendGroupMessage(member.group, MessageChain.create([
+                    Plain('小柒已关机~请手动重新启动小柒')
+                ]))
+
             print('退出')
             sys.exit()
         elif strMessage[:5] == '删除文摘 ':
