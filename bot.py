@@ -9,6 +9,7 @@ from graia.application.entry import (
 from graia.application.entry import (
     BotMuteEvent, BotGroupPermissionChangeEvent
 )
+from graia.application.event.mirai import NewFriendRequestEvent
 from graia.broadcast import Broadcast
 
 # from graia.template import Template     # 模板功能
@@ -18,6 +19,7 @@ from graia.broadcast import Broadcast
 # 以下为附加功能头文件
 
 import os
+import time
 
 # =============================================================
 # 附加功能类
@@ -378,13 +380,30 @@ async def groupTemp_message_listener(app: GraiaMiraiApplication, member: Member,
 
 # 好友邀请
 @bcc.receiver("NewFriendRequestEvent")
-async def newFriend(app: GraiaMiraiApplication):
+async def newFriend(app: GraiaMiraiApplication, event:NewFriendRequestEvent):
     master = await app.getFriend(botBaseInformation['baseInformation']['Master_QQ'])
 
     if master != None:
         await app.sendFriendMessage(master, MessageChain.create([
             Plain('有新的好友申请！')
         ]))
+    await event.accept()
+
+    time.sleep(10)
+
+    id = event.supplicant
+    member = await app.getFriend(id)
+    print(member)
+    if member != None:
+        reply = '你好呀！' + member.nickname + '\n'
+        reply += '小柒的快速上手指南：\n'
+        reply += '可以通过输入“帮助”来获取所有的指令帮助；如果只是为了刷游戏，记得先输入指令“*ai off”；如果是骰娘呢，请先输入“骰娘帮助”；'
+        reply += '；如果有任何疑问可以加小柒的官方Q群：479504567，在群聊里可以告诉主人通过群邀请，以及获取到管理员权限解锁一些新功能\n'
+        reply += '特别申明：不要将小柒踢出任何群聊，或者在任何群聊禁言小柒，这些都有专门的指令代替！！！'
+        await app.sendFriendMessage(member, MessageChain.create([
+            Plain(reply)
+        ]))
+
 
 # ======================
 # @sche.schedule(timers.every_custom_seconds(60))

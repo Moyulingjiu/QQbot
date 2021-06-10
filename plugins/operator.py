@@ -337,8 +337,8 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
             reply = editKeyProbability(strMessage[8:], member)
             needReply = True
 
-        elif strMessage[:5] == '发起活动 ' and groupId != 0:
-            stringList = strMessage[5:].strip().split(' ')
+        elif strMessage[:4] == '发起活动' and groupId != 0:
+            stringList = strMessage[4:].strip().split(' ')
             if len(stringList) != 2:
                 reply = '参数错误'
                 needReply = True
@@ -363,16 +363,16 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
                 else:
                     reply = addActivity(groupId, memberId, activityName, lastMinute)
                     needReply = True
-        elif strMessage[:5] == '删除活动 ' and groupId != 0:
-            activityName = strMessage[5:].strip()
+        elif strMessage[:4] == '删除活动' and groupId != 0:
+            activityName = strMessage[4:].strip()
             if len(activityName) == 0:
                 reply = '活动名不能为空'
                 needReply = True
             else:
                 reply = delActivity(groupId, memberId, activityName)
                 needReply = True
-        elif strMessage[:7] == '查看活动名单 ' and groupId != 0:
-            activityName = strMessage[7:].strip()
+        elif strMessage[:6] == '查看活动名单' and groupId != 0:
+            activityName = strMessage[6:].strip()
             if len(activityName) == 0:
                 reply = '活动名不能为空'
                 needReply = True

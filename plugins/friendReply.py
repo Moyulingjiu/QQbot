@@ -33,12 +33,19 @@ async def reply(botBaseInformation, messages, app, friend, messageChain):
 
     if (not blacklist) and (len(messages) != 0):
         if messages[0] == '*':
-            (reply, needAt) = command.function(messages[1:], friend, app, 0)
+            (reply, needAt, isImage) = command.function(messages[1:], friend, app, 0)
             needReply = True
         else:
-            if messages[:3] == '天气 ':
-                reply = weather.getWeather(messages[3:])
+            if messages[:2] == '天气':  # 开始的天气
+                reply = weather.getWeather(messages[2:].strip())
                 needReply = True
+            elif messages[-2:] == '天气':  # 结尾的天气
+                reply = weather.getWeather(messages[:-2].strip())
+                needReply = True
+            elif messages[-3:] == '的天气':  # 结尾的天气
+                reply = weather.getWeather(messages[:-3].strip())
+                needReply = True
+
             elif messages == '色子' or messages == '骰子':
                 reply = smallFunction.dick()
                 needReply = True
@@ -91,21 +98,21 @@ async def reply(botBaseInformation, messages, app, friend, messageChain):
                 reply = '我在！'
                 needReply = True
 
-            elif messages == '四级词汇' or messages == '四级单词':
+            elif messages == '四级词汇' or messages == '四级单词' or messages == '4级词汇' or messages == '4级单词':
                 vocabularyNumber = 1
                 reply = vocabulary.getVocabulary4(vocabularyNumber)
                 needReply = True
-            elif messages[:5] == '四级词汇 ' or messages[:5] == '四级单词 ':
+            elif messages[:5] == '四级词汇 ' or messages[:5] == '四级单词 ' or messages[:5] == '4级词汇 ' or messages[:5] == '4级单词 ':
                 vocabularyNumber = int(messages[5:].strip())
                 if vocabularyNumber <= 0:
                     vocabularyNumber = 1
                 reply = vocabulary.getVocabulary4(vocabularyNumber)
                 needReply = True
-            elif messages == '六级词汇' or messages == '六级单词':
+            elif messages == '六级词汇' or messages == '六级单词' or messages == '6级词汇' or messages == '6级单词':
                 vocabularyNumber = 1
                 reply = vocabulary.getVocabulary6(vocabularyNumber)
                 needReply = True
-            elif messages[:5] == '六级词汇 ' or messages[:5] == '六级单词 ':
+            elif messages[:5] == '六级词汇 ' or messages[:5] == '六级单词 ' or messages[:5] == '6级词汇 ' or messages[:5] == '6级单词 ':
                 vocabularyNumber = int(messages[5:].strip())
                 if vocabularyNumber <= 0:
                     vocabularyNumber = 1

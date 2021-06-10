@@ -22,26 +22,6 @@ user = {}  # 用户数据
 systemData = {}
 init = True
 
-'''
-# type（
-# 0：药水
-# 1:武器
-# 2：头盔
-# 3：胸甲
-# 4：护腿
-# 5：靴子
-# 6：左戒指
-# 7：右戒指
-# 8：背包
-# 9：卷轴
-# 10：礼盒、宝箱
-# 11：矿石
-# 12：纪念品
-# 13: 材料
-# 14: 附加戒指
-# 15：食物
-# ）
-'''
 baseInformation = {}  # 基本介绍
 
 buff = {}  # buff表
@@ -81,13 +61,13 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
         id = member.id
         reply = memberName + sign(id)
         needReply = True
-    elif strMessage[:4] == '查询合成' or strMessage[:4] == '介绍合成':
+    elif strMessage[:4] == '查询合成' or strMessage[:4] == '介绍合成' or strMessage[:4] == '查看合成' or strMessage[:4] == '解释合成' or strMessage[:4] == '合成路线':
         reply = getSynthesis(strMessage[4:].strip())
         needReply = True
-    elif strMessage[:4] == '查询分解' or strMessage[:4] == '介绍分解':
+    elif strMessage[:4] == '查询分解' or strMessage[:4] == '介绍分解' or strMessage[:4] == '查看分解' or strMessage[:4] == '解释分解':
         reply = getDecompose(strMessage[4:].strip())
         needReply = True
-    elif strMessage[:2] == '介绍' or strMessage[:2] == '查询' or strMessage[:2] == '解释':
+    elif strMessage[:2] == '介绍' or strMessage[:2] == '查询' or strMessage[:2] == '查看' or strMessage[:2] == '解释':
         reply = getComments(strMessage[2:].strip())
         needReply = True
     elif '击剑' in strMessage and groupId != 0:
@@ -185,7 +165,7 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if number > 0:
                     reply = memberName + useGoods(member.id, strList[0], number)
                     needReply = True
-    elif strMessage[:2] == '取下':
+    elif strMessage[:2] == '取下' or strMessage[:2] == '卸下':
         strList = strMessage[2:].strip().split(' ')
         if len(strList) == 1:
             reply = memberName + getOffGoods(member.id, strList[0])
@@ -252,15 +232,51 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
         reply = changeName(member.id, tmpName)
         needReply = True
 
+    elif ('赠送' in strMessage or '送' in strMessage) and '@' in strMessage:
+        message = strMessage.replace('赠送', '').replace('送', '')
+        i = message.find('@')
+        last = i + 1
+        length = len(message)
+        while message[last].isdigit() and last < length:
+            last += 1
+        if (last != i + 1):
+            id2 = int(message[i + 1: last])
+            tmp = message.replace('@' + message[i + 1: last], '')
+            if len(tmp) > 0:
+                tmplist = tmp.strip().split(' ')
+                if len(tmplist) == 1:
+                    reply = giveOtherGoods(member.id, id2, tmplist[0], 1)
+                    needReply = True
+                elif len(tmplist) == 2 and tmplist[1].isdigit():
+                    reply = giveOtherGoods(member.id, id2, tmplist[0], int(tmplist[1]))
+                    needReply = True
 
-    elif strMessage == '挑战BOSS' or strMessage == '挑战boss':
-        needReply = True
+
+
+    # elif strMessage == '挑战BOSS' or strMessage == '挑战boss':
+    #     needReply = True
     elif strMessage[:2] == '合成':
-        reply = memberName + '，' + synthesisGoods(member.id, strMessage[2:].strip())
-        needReply = True
+        strList = strMessage[2:].strip().split(' ')
+        if len(strList) == 1:
+            reply = memberName + '，' + synthesisGoods(member.id, strList[0], 1)
+            needReply = True
+        elif len(strList) == 2:
+            if strList[1].isdigit():
+                number = int(strList[1])
+                if number > 0:
+                    reply = memberName + synthesisGoods(member.id, strList[0], number)
+                    needReply = True
     elif strMessage[:2] == '分解':
-        reply = memberName + '，' + decomposeGoods(member.id, strMessage[2:].strip())
-        needReply = True
+        strList = strMessage[2:].strip().split(' ')
+        if len(strList) == 1:
+            reply = memberName + '，' + decomposeGoods(member.id, strList[0], 1)
+            needReply = True
+        elif len(strList) == 2:
+            if strList[1].isdigit():
+                number = int(strList[1])
+                if number > 0:
+                    reply = memberName + decomposeGoods(member.id, strList[0], number)
+                    needReply = True
 
     if member.id == botBaseInformation['baseInformation']['Master_QQ']:
         if strMessage == '重新加载游戏数据':
@@ -568,6 +584,22 @@ def getNumber(string):
     else:
         return 0
 
+def giveOtherGoods(from_id, to_id, name, number):
+    global user
+    global goods
+    if not goods.__contains__(name):
+        return '你没有该物品'
+    if not user[from_id]['warehouse'].__contains__(name):
+        return '你没有该物品'
+    if user[from_id]['warehouse'][name]['number'] < number:
+        return '你没有足够的物品'
+    newUser(to_id, '(无名)')
+
+    if getGooods(to_id, 2, name, number):
+        discard(from_id, name, number)
+        return '赠送成功！'
+    else:
+        return '对方背包已满！'
 
 # 重新加载文件
 def reload():
@@ -586,6 +618,7 @@ def reload():
     goodsAvailable = []
     buff = {}
     baseInformation = {}
+    index = 1
     # 获取物品
     with open('data/user/goods.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
@@ -595,7 +628,10 @@ def reload():
                 datas = i.split(' ')
                 if len(datas) > 3: # 至少得有名字、简介、类型
                     if not goods.__contains__(datas[0]):
-                        goods[datas[0]] = {}
+                        goods[datas[0]] = {
+                            'id': index  # 编号
+                        }
+                        index += 1
                         for j in datas:
                             j_list = j.split('=')
                             if len(j_list) == 2:
@@ -723,7 +759,14 @@ def update(id, mode, gold, strength):  # mode值表示了该击剑由什么模�
         if mode != -1:
             user[id]['gold'] += gold
         else:
-            user[id]['gold'] = gold
+            tmp = gold  # 修改积分也要进行排序检验
+            if user[id]['gold'] > gold:
+                gold = 1
+            elif user[id]['gold'] < gold:
+                gold = -1
+            else:
+                gold = 0
+            user[id]['gold'] = tmp
 
         # ===============================
         # 排行榜更新
@@ -826,10 +869,14 @@ def update(id, mode, gold, strength):  # mode值表示了该击剑由什么模�
                 systemData['rank']['gold-3']['id'] = goldId3
                 systemData['rank']['gold-3']['gold'] = user[goldId3]['gold'] if goldId3 != 0 else 0
 
-
 # 获得商品
-def getGooods(id, mode, name, number):  # （-1：系统补偿,0：购买所得，1：探险、闲逛获得）
+def getGooods(id, mode, name, number):  # （-1：系统补偿,0：购买所得，1：探险、闲逛获得,2：赠送所得）
     global user
+
+    b = type(number)
+    if str(b) != '<class \'int\'>':
+        return False
+    
     if user[id]['warehouse'].__contains__(name):
         user[id]['warehouse'][name]['number'] += number
         return True
@@ -840,7 +887,6 @@ def getGooods(id, mode, name, number):  # （-1：系统补偿,0：购买所得�
         return True
     else:
         return False
-
 
 
 # 重新计算装备的属性值
@@ -1194,11 +1240,13 @@ def typeToString(number):
         return '附加戒指'
     elif number == 15:
         return '食物'
+    elif number == 16:
+        return '道具'
     return '（未知）'
 
 
 # 分解与合成
-def decomposeGoods(id, name):
+def decomposeGoods(id, name, number):
     if not goods.__contains__(name):
         return '不存在该物品！'
     if not decompose.__contains__(name):
@@ -1206,29 +1254,32 @@ def decomposeGoods(id, name):
     if not user[id]['warehouse'].__contains__(name):
         return '你的背包不存在该物品！'
 
-    discard(id, name, 1) # 丢弃物品
+    if number > user[id]['warehouse'][name]['number']:
+        number = user[id]['warehouse'][name]['number']
+
+    discard(id, name, number) # 丢弃物品
     operate = {}  # 记录每一步的操作，以便于恢复操作
     flag = True  # 分解是否成功
     for key, value in decompose[name].items():
-        if not getGooods(id, -1, key, value):
+        if not getGooods(id, -1, key, value * number):
             flag = False
             break
 
         if operate.__contains__(key): # 记录操作
-            operate[key] += value
+            operate[key] += value * number
         else:
-            operate[key] = value
+            operate[key] = value * number
 
     if flag:
-        return '分解成功！'
+        return '成功分解' + str(number) + '个物品！'
     else:
-        for key, value in operate:
+        for key, value in operate.items():
             discard(id, key, value)
-        getGooods(id, -1, name, 1)
+        getGooods(id, -1, name, number)
         return '背包已满！'
 
 
-def synthesisGoods(id, name):
+def synthesisGoods(id, name, number):
     if not goods.__contains__(name):
         return '不存在该物品！'
     if not synthesis.__contains__(name):
@@ -1237,23 +1288,23 @@ def synthesisGoods(id, name):
     operate = {}  # 记录每一步的操作，以便于恢复操作
     flag = True  # 合成是否成功
     for key, value in synthesis[name].items():
-        if user[id]['warehouse'].__contains__(key) and user[id]['warehouse'][key]['number'] >= value:
-            discard(id, key, value)
+        if user[id]['warehouse'].__contains__(key) and user[id]['warehouse'][key]['number'] >= value * number:
+            discard(id, key, value * number)
             if operate.__contains__(key): # 记录操作
-                operate[key] += value
+                operate[key] += value * number
             else:
-                operate[key] = value
+                operate[key] = value * number
         else:
             flag = False
             break
 
-    if flag and not getGooods(id, -1, name, 1): # 获取合成后的物品
+    if flag and not getGooods(id, -1, name, number): # 获取合成后的物品
         flag = False
 
     if flag:
-        return '合成成功！'
+        return '成功合成' + str(number) + '个物品！'
     else:
-        for key, value in operate:
+        for key, value in operate.items():
             getGooods(id, -1, key, value)
         return '背包已满或材料不足，合成失败！'
 
@@ -1440,7 +1491,7 @@ def getComments(name):
     global goods
     global buff
     if goods.__contains__(name):
-        result = '名字：' + name
+        result = '名字：' + name + '（id:' + str(goods[name]['id']) + '）'
         result += '\n类型：' + typeToString(goods[name]['type'])
         if goods[name]['cost'] >= 0:
             result += '\n购买：' + str(goods[name]['cost']) + '积分'
@@ -1479,6 +1530,43 @@ def getComments(name):
         result = '名字：' + name
         result += '\n介绍：' + str(baseInformation[name]['comments'])
         return result
+    elif name.isdigit() or (name[3:].isdigit() and (name[:3] == 'id:'or name[:3] == 'id：')) :
+        if not name.isdigit():
+            name = name[3:]
+        goodsId = int(name)
+        for key, value in goods.items():
+            if value['id'] == goodsId:
+                result = '名字：' + key + '（id:' + str(goods[key]['id']) + '）'
+                result += '\n类型：' + typeToString(goods[key]['type'])
+                if goods[key]['cost'] >= 0:
+                    result += '\n购买：' + str(goods[key]['cost']) + '积分'
+                else:
+                    result += '\n购买：无法购买'
+                if goods[key]['sell'] >= 0:
+                    result += '\n出售：' + str(goods[key]['sell']) + '积分'
+                else:
+                    result += '\n出售：无法出售'
+                if synthesis.__contains__(key):
+                    result += '\n合成路径：'
+                    flag = True
+                    for key2, value2 in synthesis[key].items():
+                        if not flag:
+                            result += '，'
+                        else:
+                            flag = False
+                        result += key2 + 'X' + str(value2)
+                if decompose.__contains__(key):
+                    result += '\n可分解为：'
+                    flag = True
+                    for key2, value2 in decompose[key].items():
+                        if not flag:
+                            result += '，'
+                        else:
+                            flag = False
+                        result += key2 + 'X' + str(value2)
+                result += '\n介绍：' + str(goods[key]['comments'])
+                return result
+        return '不存在该物品'
     else:
         return '不存在该物品'
 
@@ -1668,7 +1756,7 @@ def newUser(id, name):
 def rechargeStrength(id):
     global user
     maxStrength = user[id]['attribute']['strength-max'] + user[id]['attribute']['strength-up']
-    cost = 4
+    cost = 5
     gain = 5
     if user[id]['gold'] < cost:
         return '你的积分小于' + str(cost) + '不能兑换体力'
@@ -1676,11 +1764,11 @@ def rechargeStrength(id):
     if user[id]['attribute']['strength'] >= maxStrength:
         return '你的体力值已满不能兑换体力'
     elif user[id]['attribute']['strength'] >= maxStrength - gain:
-        user[id]['gold'] -= cost
+        update(id, -2, -cost, 0)
         user[id]['attribute']['strength'] = maxStrength
         return '你消耗了' + str(cost) + '积分，获得了' + str(gain) + '点体力'
     else:
-        user[id]['gold'] -= cost
+        update(id, -2, -cost, 0)
         user[id]['attribute']['strength'] += gain
         return '你消耗了' + str(cost) + '积分，获得了' + str(gain) + '点体力'
 
@@ -2529,22 +2617,39 @@ def touch(id, name):
     return '看' + name + '太可怜，于是给了你一些积分'
 
 '''
+消耗体力 2
+
+90% 木板
+10% 苹果
+'''
+def cutDown(id):
+    global user
+    if user[id]['attribute']['strength'] < 1:
+        return '你的体力值不足不能砍树'
+    user[id]['attribute']['strength'] -= 1
+
+    p = random.randrange(1000)
+
+
+'''
 消耗体力：2
 
-50% 一无所获
-40% 石头
-8% 皮革
+10% 一无所获
+0.5% 燧石
+64.5% 碎石
+12% 石头
+7% 皮革
 1% 破旧的装备
     0.10% 其余装备
     0.50% 一期装备
     0.30% 二期装备
     0.10% 三期装备
     
-0.9% 铁
-0.009% 黄金
-0.0009% 钻石
-0.00009% 合金
-0.00001% 下界合金
+1% 铁
+0.9% 黄金
+0.09% 钻石
+0.009% 合金
+0.001% 下界合金
 '''
 def dig(id):
     global user
@@ -2554,13 +2659,13 @@ def dig(id):
 
     result = '你一番挖掘之后，'
     p = random.randrange(0, 10000)
-    if p < 1000:
+    if p < 2000:
         result += '一无所获'
-    elif p < 1050:
+    elif p < 2050:
         ran = random.randrange(0, 4) + 1
         result += '获得了' + str(ran) + '块燧石'
         getGooods(id, 1, '燧石', ran)
-    elif p < 5000:
+    elif p < 8500:
         ran = random.randrange(0, 4) + 1
         result += '获得了' + str(ran) + '块碎石'
         getGooods(id, 1, '碎石', ran)
@@ -2568,10 +2673,16 @@ def dig(id):
         ran = random.randrange(0, 3) + 1
         result += '获得了' + str(ran) + '块石头'
         getGooods(id, 1, '石头', ran)
-    elif p < 9800:
+    elif p < 9700:
+        result += '获得了1个沙子'
+        getGooods(id, 1, '沙子', 1)
+    elif p < 9710:
+        result += '获得了1块下品灵石'
+        getGooods(id, 1, '下品灵石', 1)
+    elif p < 9750:
         result += '获得了1块皮革'
         getGooods(id, 1, '皮革', 1)
-    elif p < 9900:  # 装备
+    elif p < 9800:  # 装备
         p2 = random.randrange(0, 100)
 
         if p2 < 50:
@@ -2655,10 +2766,10 @@ def dig(id):
                 result += '获得了布背包X1'
                 getGooods(id, 1, '布背包', 1)
 
-    elif p < 9990:
+    elif p < 9970:
         result += '获得了1块铁锭'
         getGooods(id, 1, '铁锭', 1)
-    elif p < 9999:
+    elif p < 9990:
         result += '获得了1块金锭'
         getGooods(id, 1, '金锭', 1)
     else:

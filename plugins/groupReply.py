@@ -101,10 +101,19 @@ async def reply(botBaseInformation, messages, app, member, messageChain):
                     (reply, needAt, isImage) = command.function(messages[1:], member, app, groupId)
                     needReply = True
                 else:
-                    if messages[:3] == '天气 ':
-                        reply = weather.getWeather(messages[3:])
+                    if messages[:2] == '天气':  # 开始的天气
+                        reply = weather.getWeather(messages[2:].strip())
                         needAt = False
                         needReply = True
+                    elif messages[-2:] == '天气':  # 结尾的天气
+                        reply = weather.getWeather(messages[:-2].strip())
+                        needAt = False
+                        needReply = True
+                    elif messages[-3:] == '的天气':  # 结尾的天气
+                        reply = weather.getWeather(messages[:-3].strip())
+                        needAt = False
+                        needReply = True
+
                     elif messages == '色子' or messages == '骰子':
                         reply = smallFunction.dick()
                         needAt = True
@@ -159,8 +168,8 @@ async def reply(botBaseInformation, messages, app, member, messageChain):
                         reply = '我在！'
                         needReply = True
 
-                    elif messages[:5] == '参加活动 ' or messages[:5] == '参与活动 ':
-                        activityName = messages[5:].strip()
+                    elif messages[:4] == '参加活动' or messages[:4] == '参与活动':
+                        activityName = messages[4:].strip()
                         if len(activityName) == 0:
                             reply = '活动名不能为空'
                             needReply = True
@@ -168,8 +177,8 @@ async def reply(botBaseInformation, messages, app, member, messageChain):
                             reply = operator.joinActivity(groupId, memberId, activityName)
                             needAt = True
                             needReply = True
-                    elif messages[:5] == '退出活动 ':
-                        activityName = messages[5:].strip()
+                    elif messages[:4] == '退出活动':
+                        activityName = messages[4:].strip()
                         if len(activityName) == 0:
                             reply = '活动名不能为空'
                             needReply = True
@@ -177,25 +186,25 @@ async def reply(botBaseInformation, messages, app, member, messageChain):
                             reply = operator.quitActivity(groupId, memberId, activityName)
                             needAt = True
                             needReply = True
-                    elif messages == '活动清单':
+                    elif messages == '活动清单' or messages == '活动列表':
                         reply = operator.getActivityList(groupId, app)
                         needReply = True
 
-                    elif messages == '四级词汇' or messages == '四级单词':
+                    elif messages == '四级词汇' or messages == '四级单词' or messages == '4级词汇' or messages == '4级单词':
                         vocabularyNumber = 1
                         reply = vocabulary.getVocabulary4(vocabularyNumber)
                         needReply = True
-                    elif messages[:5] == '四级词汇 ' or messages[:5] == '四级单词 ':
+                    elif messages[:5] == '四级词汇 ' or messages[:5] == '四级单词 ' or messages[:5] == '4级词汇 ' or messages[:5] == '4级单词 ':
                         vocabularyNumber = int(messages[5:].strip())
                         if vocabularyNumber <= 0:
                             vocabularyNumber = 1
                         reply = vocabulary.getVocabulary4(vocabularyNumber)
                         needReply = True
-                    elif messages == '六级词汇' or messages == '六级单词':
+                    elif messages == '六级词汇' or messages == '六级单词' or messages == '6级词汇' or messages == '6级单词':
                         vocabularyNumber = 1
                         reply = vocabulary.getVocabulary6(vocabularyNumber)
                         needReply = True
-                    elif messages[:5] == '六级词汇 ' or messages[:5] == '六级单词 ':
+                    elif messages[:5] == '六级词汇 ' or messages[:5] == '六级单词 ' or messages[:5] == '6级词汇 ' or messages[:5] == '6级单词 ':
                         vocabularyNumber = int(messages[5:].strip())
                         if vocabularyNumber <= 0:
                             vocabularyNumber = 1
