@@ -280,5 +280,5 @@ def function(code, member, app, groupId):
 
 
     if result == '' and isImage == '':
-        result = '未知指令：' + code + '\n请输入\"*help\"查看帮助'
+        result = '未知指令：' + code + '\n请输入\"帮助\"查看帮助\n请输入\"骰娘\"查看骰娘帮助\n请输入\"游戏帮助\"查看游戏帮助'
     return (result, needAt, isImage)

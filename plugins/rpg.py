@@ -35,98 +35,101 @@ decompose = {}  # 分解
 synthesis = {}  # 合成
 
 
-async def menu(strMessage, groupId, member, app, botBaseInformation, messageChain):
+async def menu(message, group_id, member, app, bot_information, right, be_at):
     global user
     global systemData
-    Bot_QQ = botBaseInformation['baseInformation']['Bot_QQ']
-    Bot_Name = botBaseInformation['baseInformation']['Bot_Name']
+    Bot_QQ = bot_information['baseInformation']['Bot_QQ']
+    Bot_Name = bot_information['baseInformation']['Bot_Name']
 
     needReply = False
     needAt = False
     reply = ''
     isImage = ''
+    at_qq = 0
 
-    if groupId in botBaseInformation['gameOff']:  # 本群关闭了游戏
-        return (needReply, needAt, reply, isImage)
+    if group_id in bot_information['gameOff']:  # 本群关闭了游戏
+        return needReply, reply, isImage, at_qq, needAt
 
     memberName = ''
-    if groupId != 0:
+    if group_id != 0:
         memberName = member.name
     else:
         memberName = member.nickname
 
     newUser(member.id, memberName)
 
-    if strMessage.strip() == '签到':
+    if message.strip() == '签到':
         id = member.id
         reply = memberName + sign(id)
         needReply = True
-    elif strMessage[:4] == '查询合成' or strMessage[:4] == '介绍合成' or strMessage[:4] == '查看合成' or strMessage[:4] == '解释合成' or strMessage[:4] == '合成路线':
-        reply = getSynthesis(strMessage[4:].strip())
+    elif message[:4] == '查询合成' or message[:4] == '介绍合成' or message[:4] == '查看合成' or message[:4] == '解释合成' or message[:4] == '合成路线':
+        reply = getSynthesis(message[4:].strip())
         needReply = True
-    elif strMessage[:4] == '查询分解' or strMessage[:4] == '介绍分解' or strMessage[:4] == '查看分解' or strMessage[:4] == '解释分解':
-        reply = getDecompose(strMessage[4:].strip())
+    elif message[:4] == '查询分解' or message[:4] == '介绍分解' or message[:4] == '查看分解' or message[:4] == '解释分解':
+        reply = getDecompose(message[4:].strip())
         needReply = True
-    elif strMessage[:2] == '介绍' or strMessage[:2] == '查询' or strMessage[:2] == '查看' or strMessage[:2] == '解释':
-        reply = getComments(strMessage[2:].strip())
+    elif message[:2] == '介绍' or message[:2] == '查询' or message[:2] == '查看' or message[:2] == '解释':
+        reply = getComments(message[2:].strip())
         needReply = True
-    elif '击剑' in strMessage and groupId != 0:
-        tmp = strMessage.replace('击剑', '').strip()
-        if tmp[0] == '@' and tmp[1:].isdigit():
+    elif '击剑' in message and group_id != 0:
+        tmp = message.replace('击剑', '').strip()
+        print(tmp)
+        tmp_length = len(tmp)
+        if be_at and tmp_length == 0:
+            replylist = [
+                '一把把你按在了地上',
+                '敲了敲你的脑袋',
+                '摸了摸你的头说：“乖，一边去~”',
+                '白了你一眼',
+                '并不想理你',
+                '对你感到了无语'
+            ]
+            reply = Bot_Name + random.choice(replylist)
+            needReply = True
+        elif tmp_length > 2 and tmp[0] == '@' and tmp[1:].isdigit():
             target = int(tmp[1:])
-            if target != Bot_QQ:
-                await fencing(member, target, app)
-            else:
-                replylist = [
-                    '一把把你按在了地上',
-                    '敲了敲你的脑袋',
-                    '摸了摸你的头说：“乖，一边去~”',
-                    '白了你一眼',
-                    '并不想理你',
-                    '对你感到了无语'
-                ]
-                reply = Bot_Name + random.choice(replylist)
-        needReply = True
-    elif strMessage == '我的积分' or strMessage == '积分':
+            await fencing(member, target, app)
+            needReply = True
+    elif message == '我的积分' or message == '积分':
         id = member.id
         reply = memberName + getGold(id)
         needReply = True
-    elif strMessage == '我的体力' or strMessage == '体力':
+    elif message == '我的体力' or message == '体力':
         id = member.id
         reply = memberName + getStrength(id)
         needReply = True
-    elif strMessage == '我的胜率' or strMessage == '胜率':
+    elif message == '我的胜率' or message == '胜率':
         id = member.id
         reply = memberName + getRate(id)
         needReply = True
-    elif strMessage == '排行榜':
+    elif message == '排行榜':
         reply = getRank()
         needReply = True
-    elif strMessage == '兑换体力':
+    elif message == '兑换体力':
         reply = memberName + rechargeStrength(member.id)
         needReply = True
 
-    elif strMessage == '模拟抽卡' or strMessage == '模拟单抽':
+    elif message == '模拟抽卡' or message == '模拟单抽':
         reply = MRFZ_card()
         needReply = True
-    elif strMessage == '模拟十连':
+    elif message == '模拟十连':
         reply = MRFZ_card10()
         needReply = True
 
-    elif strMessage == '围攻榜首':
-        await fencingTop(member, app, groupId)
+    elif message == '围攻榜首':
+        await fencingTop(member, app, group_id)
         needReply = True
-    elif strMessage == '探险':
+    elif message == '探险':
         reply = fishing(member.id, memberName)
         needReply = True
-    elif strMessage == '闲逛':
+    elif message == '闲逛':
         reply = memberName + hangOut(member.id)
         needReply = True
-    elif strMessage == '挖矿':
+    elif message == '挖矿':
         reply = memberName + dig(member.id)
         needReply = True
-    elif '摸摸' in strMessage and groupId != 0:
-        tmp = strMessage.replace('摸摸', '').strip()
+    elif '摸摸' in message and group_id != 0:
+        tmp = message.replace('摸摸', '').strip()
         if tmp[0] == '@' and tmp[1:].isdigit():
             target = int(tmp[1:])
             print(target)
@@ -136,26 +139,26 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 reply = Bot_Name + touch(member.id, memberName)
                 print(reply)
         needReply = True
-    elif strMessage == '强化进攻' or strMessage == '强化攻击' or strMessage == '强化攻击力':
+    elif message == '强化进攻' or message == '强化攻击' or message == '强化攻击力':
         reply = memberName + strengthenAttack(member.id)
         needReply = True
-    elif strMessage == '强化防守' or strMessage == '强化防御' or strMessage == '强化防御力':
+    elif message == '强化防守' or message == '强化防御' or message == '强化防御力':
         reply = memberName + strengthenDefense(member.id)
         needReply = True
-    elif strMessage == '数据' or strMessage == '我的数据' or strMessage == '属性' or strMessage == '我的属性':
+    elif message == '数据' or message == '我的数据' or message == '属性' or message == '我的属性':
         reply = getMyData(member.id)
         needReply = True
-    elif strMessage == '背包' or strMessage == '我的背包':
+    elif message == '背包' or message == '我的背包':
         reply = memberName + getWarehouse(member.id)
         needReply = True
-    elif strMessage == '装备' or strMessage == '我的装备':
+    elif message == '装备' or message == '我的装备':
         reply = memberName + getEquipment(member.id)
         needReply = True
-    elif strMessage == 'BUFF' or strMessage == 'buff' or strMessage == 'Buff' or strMessage == '我的BUFF' or strMessage == '我的buff' or strMessage == '我的Buff':
+    elif message == 'BUFF' or message == 'buff' or message == 'Buff' or message == '我的BUFF' or message == '我的buff' or message == '我的Buff':
         reply = memberName + getBuff(member.id)
         needReply = True
-    elif strMessage[:2] == '装备' or strMessage[:2] == '使用':
-        strList = strMessage[2:].strip().split(' ')
+    elif message[:2] == '装备' or message[:2] == '使用':
+        strList = message[2:].strip().split(' ')
         if len(strList) == 1:
             reply = memberName + useGoods(member.id, strList[0], 1)
             needReply = True
@@ -165,16 +168,16 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if number > 0:
                     reply = memberName + useGoods(member.id, strList[0], number)
                     needReply = True
-    elif strMessage[:2] == '取下' or strMessage[:2] == '卸下':
-        strList = strMessage[2:].strip().split(' ')
+    elif message[:2] == '取下' or message[:2] == '卸下':
+        strList = message[2:].strip().split(' ')
         if len(strList) == 1:
             reply = memberName + getOffGoods(member.id, strList[0])
             needReply = True
-    elif strMessage == '商店':
+    elif message == '商店':
         reply = getShop()
         needReply = True
-    elif strMessage[:2] == '购买':
-        strList = strMessage[2:].strip().split(' ')
+    elif message[:2] == '购买':
+        strList = message[2:].strip().split(' ')
         if len(strList) == 1:
             reply = memberName + purchase(member.id, strList[0], 1)
             needReply = True
@@ -184,8 +187,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if number > 0:
                     reply = memberName + purchase(member.id, strList[0], number)
                     needReply = True
-    elif strMessage[:2] == '出售' or strMessage[:2] == '卖出' or strMessage[:2] == '卖掉' or strMessage[:2] == '售出':
-        strList = strMessage[2:].strip().split(' ')
+    elif message[:2] == '出售' or message[:2] == '卖出' or message[:2] == '卖掉' or message[:2] == '售出':
+        strList = message[2:].strip().split(' ')
         if len(strList) == 1:
             reply = memberName + sellGoods(member.id, strList[0], 1)
             needReply = True
@@ -195,8 +198,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if number > 0:
                     reply = memberName + sellGoods(member.id, strList[0], number)
                     needReply = True
-    elif strMessage[:2] == '丢弃' or strMessage[:2] == '丢掉':
-        strList = strMessage[2:].strip().split(' ')
+    elif message[:2] == '丢弃' or message[:2] == '丢掉':
+        strList = message[2:].strip().split(' ')
         if len(strList) == 1:
             reply = memberName + discard(member.id, strList[0], 1)
             needReply = True
@@ -206,40 +209,40 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if number > 0:
                     reply = memberName + discard(member.id, strList[0], number)
                     needReply = True
-    elif '决斗' in strMessage and groupId != 0:
-        tmp = strMessage.replace('决斗', '').strip()
-        if tmp[0] == '@' and tmp[1:].isdigit():
+    elif '决斗' in message and group_id != 0:
+        tmp = message.replace('决斗', '').strip()
+        tmp_length = len(tmp)
+        if be_at and tmp_length == 0:
+            replylist = [
+                '一把把你按在了地上',
+                '敲了敲你的脑袋',
+                '摸了摸你的头说：“乖，一边去~”',
+                '白了你一眼',
+                '并不想理你',
+                '对你感到了无语'
+            ]
+            reply = Bot_Name + random.choice(replylist)
+            needReply = True
+        elif tmp_length > 2 and tmp[0] == '@' and tmp[1:].isdigit():
             target = int(tmp[1:])
-            if target != Bot_QQ:
-                await duel(member, target, app)
-                pass
-            else:
-                replylist = [
-                    '一把把你按在了地上',
-                    '敲了敲你的脑袋',
-                    '摸了摸你的头说：“乖，一边去~”',
-                    '白了你一眼',
-                    '并不想理你',
-                    '对你感到了无语'
-                ]
-                reply = Bot_Name + random.choice(replylist)
+            await duel(member, target, app)
+            needReply = True
+    elif message == '挑战榜首':
+        await duelTop(member, app, group_id)
         needReply = True
-    elif strMessage == '挑战榜首':
-        await duelTop(member, app, groupId)
-        needReply = True
-    elif strMessage[:4] == '修改昵称' or strMessage[:4] == '修改名字' or strMessage[:4] == '修改姓名':
-        tmpName = strMessage[4:].strip()
+    elif message[:4] == '修改昵称' or message[:4] == '修改名字' or message[:4] == '修改姓名':
+        tmpName = message[4:].strip()
         reply = changeName(member.id, tmpName)
         needReply = True
 
-    elif ('赠送' in strMessage or '送' in strMessage) and '@' in strMessage:
-        message = strMessage.replace('赠送', '').replace('送', '')
+    elif ('赠送' in message or '送' in message) and '@' in message:
+        message = message.replace('赠送', '').replace('送', '')
         i = message.find('@')
         last = i + 1
         length = len(message)
         while message[last].isdigit() and last < length:
             last += 1
-        if (last != i + 1):
+        if last != i + 1:
             id2 = int(message[i + 1: last])
             tmp = message.replace('@' + message[i + 1: last], '')
             if len(tmp) > 0:
@@ -251,12 +254,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                     reply = giveOtherGoods(member.id, id2, tmplist[0], int(tmplist[1]))
                     needReply = True
 
-
-
-    # elif strMessage == '挑战BOSS' or strMessage == '挑战boss':
-    #     needReply = True
-    elif strMessage[:2] == '合成':
-        strList = strMessage[2:].strip().split(' ')
+    elif message[:2] == '合成':
+        strList = message[2:].strip().split(' ')
         if len(strList) == 1:
             reply = memberName + '，' + synthesisGoods(member.id, strList[0], 1)
             needReply = True
@@ -266,8 +265,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if number > 0:
                     reply = memberName + synthesisGoods(member.id, strList[0], number)
                     needReply = True
-    elif strMessage[:2] == '分解':
-        strList = strMessage[2:].strip().split(' ')
+    elif message[:2] == '分解':
+        strList = message[2:].strip().split(' ')
         if len(strList) == 1:
             reply = memberName + '，' + decomposeGoods(member.id, strList[0], 1)
             needReply = True
@@ -278,13 +277,14 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                     reply = memberName + decomposeGoods(member.id, strList[0], number)
                     needReply = True
 
-    if member.id == botBaseInformation['baseInformation']['Master_QQ']:
-        if strMessage == '重新加载游戏数据':
+    # 主人权限
+    if right == 0:
+        if message == '重新加载游戏数据':
             reload()
             reply = '重新加载完成'
             needReply = True
-        elif strMessage[:5] == '修改体力 ':
-            strList = strMessage.split(' ')
+        elif message[:5] == '修改体力 ':
+            strList = message.split(' ')
 
             if len(strList) == 2:
                 if strList[1].isdigit():
@@ -297,8 +297,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 elif strList[1] == '*' and strList[2].isdigit():
                     reply = giveAllStrength(int(strList[2]))
                     needReply = True
-        elif strMessage[:5] == '修改积分 ':
-            strList = strMessage.split(' ')
+        elif message[:5] == '修改积分 ':
+            strList = message.split(' ')
 
             if len(strList) == 2:
                 if strList[1].isdigit():
@@ -311,39 +311,39 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 elif strList[1] == '*' and strList[2].isdigit():
                     reply = giveAllGold(int(strList[2]))
                     needReply = True
-        elif strMessage[:5] == '查看数据 ':
-            strList = strMessage.split(' ')
+        elif message[:5] == '查看数据 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = viewUser(int(strList[1]))
                     needReply = True
-        elif strMessage[:5] == '查看胜率 ':
-            strList = strMessage.split(' ')
+        elif message[:5] == '查看胜率 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = viewRate(int(strList[1]))
                     needReply = True
-        elif strMessage[:5] == '查看背包 ':
-            strList = strMessage.split(' ')
+        elif message[:5] == '查看背包 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = viewWarehouse(int(strList[1]))
                     needReply = True
-        elif strMessage[:5] == '查看装备 ':
-            strList = strMessage.split(' ')
+        elif message[:5] == '查看装备 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = viewEquipment(int(strList[1]))
                     needReply = True
-        elif strMessage[:7] == '查看BUFF ' or strMessage[:7] == '查看buff ':
-            strList = strMessage.split(' ')
+        elif message[:7] == '查看BUFF ' or message[:7] == '查看buff ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = viewBuff(int(strList[1]))
                     needReply = True
 
-        elif strMessage[:5] == '给予物品 ' or strMessage[:5] == '给予装备 ':
-            strList = strMessage.split(' ')
+        elif message[:5] == '给予物品 ' or message[:5] == '给予装备 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 reply = giveGoods(member.id, strList[1], 1)
                 needReply = True
@@ -365,11 +365,11 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                     reply = giveAllGoods(strList[2], int(strList[3]))
                     needReply = True
 
-        elif strMessage == '开启无敌':
+        elif message == '开启无敌':
             reply = changeToGod(member.id)
             needReply = True
-        elif strMessage[:5] == '开启无敌 ':
-            strList = strMessage.split(' ')
+        elif message[:5] == '开启无敌 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = changeToGod(int(strList[1]))
@@ -378,8 +378,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToTmpGod(int(strList[1]), int(strList[2]))
                     needReply = True
-        elif strMessage[:7] == '开启临时无敌 ':
-            strList = strMessage.split(' ')
+        elif message[:7] == '开启临时无敌 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = changeToTmpGod(member.id, int(strList[1]))
@@ -388,22 +388,22 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToTmpGod(int(strList[1]), int(strList[2]))
                     needReply = True
-        elif strMessage == '关闭无敌':
+        elif message == '关闭无敌':
             reply = closeGod(member.id)
             needReply = True
-        elif strMessage[:5] == '关闭无敌 ':
-            strList = strMessage.split(' ')
+        elif message[:5] == '关闭无敌 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = closeGod(int(strList[1]))
                     needReply = True
             needReply = True
-        elif strMessage == '查看无敌的人':
+        elif message == '查看无敌的人':
             reply = viewGod()
             needReply = True
 
-        elif strMessage[:7] == '开启1级防御 ':
-            strList = strMessage.split(' ')
+        elif message[:7] == '开启1级防御 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = changeToDefense1(member.id, int(strList[1]))
@@ -412,8 +412,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToDefense1(int(strList[1]), int(strList[2]))
                     needReply = True
-        elif strMessage[:7] == '开启2级防御 ':
-            strList = strMessage.split(' ')
+        elif message[:7] == '开启2级防御 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = changeToDefense2(member.id, int(strList[1]))
@@ -422,8 +422,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToDefense2(int(strList[1]), int(strList[2]))
                     needReply = True
-        elif strMessage[:7] == '开启3级防御 ':
-            strList = strMessage.split(' ')
+        elif message[:7] == '开启3级防御 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = changeToDefense3(member.id, int(strList[1]))
@@ -432,8 +432,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToDefense3(int(strList[1]), int(strList[2]))
                     needReply = True
-        elif strMessage[:7] == '开启4级防御 ':
-            strList = strMessage.split(' ')
+        elif message[:7] == '开启4级防御 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = changeToDefense4(member.id, int(strList[1]))
@@ -442,8 +442,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToDefense4(int(strList[1]), int(strList[2]))
                     needReply = True
-        elif strMessage[:7] == '开启5级防御 ':
-            strList = strMessage.split(' ')
+        elif message[:7] == '开启5级防御 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = changeToDefense5(member.id, int(strList[1]))
@@ -453,8 +453,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                     reply = changeToDefense5(int(strList[1]), int(strList[2]))
                     needReply = True
 
-        elif strMessage[:7] == '开启1级进攻 ':
-            strList = strMessage.split(' ')
+        elif message[:7] == '开启1级进攻 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = changeToRampage1(member.id, int(strList[1]))
@@ -463,8 +463,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToRampage1(int(strList[1]), int(strList[2]))
                     needReply = True
-        elif strMessage[:7] == '开启2级进攻 ':
-            strList = strMessage.split(' ')
+        elif message[:7] == '开启2级进攻 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = changeToRampage2(member.id, int(strList[1]))
@@ -473,8 +473,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToRampage2(int(strList[1]), int(strList[2]))
                     needReply = True
-        elif strMessage[:7] == '开启3级进攻 ':
-            strList = strMessage.split(' ')
+        elif message[:7] == '开启3级进攻 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = changeToRampage3(member.id, int(strList[1]))
@@ -483,8 +483,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToRampage3(int(strList[1]), int(strList[2]))
                     needReply = True
-        elif strMessage[:7] == '开启4级进攻 ':
-            strList = strMessage.split(' ')
+        elif message[:7] == '开启4级进攻 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = changeToRampage4(member.id, int(strList[1]))
@@ -493,8 +493,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToRampage4(int(strList[1]), int(strList[2]))
                     needReply = True
-        elif strMessage[:7] == '开启5级进攻 ':
-            strList = strMessage.split(' ')
+        elif message[:7] == '开启5级进攻 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = changeToRampage5(member.id, int(strList[1]))
@@ -504,8 +504,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                     reply = changeToRampage5(int(strList[1]), int(strList[2]))
                     needReply = True
 
-        elif strMessage[:9] == '开启积分收益减半 ':
-            strList = strMessage.split(' ')
+        elif message[:9] == '开启积分收益减半 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = changeToHalveGold(member.id, int(strList[1]))
@@ -514,8 +514,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToHalveGold(int(strList[1]), int(strList[2]))
                     needReply = True
-        elif strMessage[:9] == '开启击剑不掉积分 ':
-            strList = strMessage.split(' ')
+        elif message[:9] == '开启击剑不掉积分 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = changeToNoLoss(member.id, int(strList[1]))
@@ -524,8 +524,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToNoLoss(int(strList[1]), int(strList[2]))
                     needReply = True
-        elif strMessage[:9] == '开启双倍积分收益 ' or strMessage[:9] == '开启两倍积分收益 ':
-            strList = strMessage.split(' ')
+        elif message[:9] == '开启双倍积分收益 ' or message[:9] == '开启两倍积分收益 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = changeToDoubleGold(member.id, int(strList[1]))
@@ -534,8 +534,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToDoubleGold(int(strList[1]), int(strList[2]))
                     needReply = True
-        elif strMessage[:9] == '开启三倍积分收益 ':
-            strList = strMessage.split(' ')
+        elif message[:9] == '开启三倍积分收益 ':
+            strList = message.split(' ')
             if len(strList) == 2:
                 if strList[1].isdigit():
                     reply = changeToTripleGold(member.id, int(strList[1]))
@@ -544,8 +544,8 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
                 if strList[1].isdigit() and strList[2].isdigit():
                     reply = changeToTripleGold(int(strList[1]), int(strList[2]))
                     needReply = True
-        elif strMessage[:11] == '开启固定增减积分收益 ':
-            strList = strMessage.split(' ')
+        elif message[:11] == '开启固定增减积分收益 ':
+            strList = message.split(' ')
             if len(strList) == 3:
                 if strList[1].isdigit():
                     if strList[2].isdigit():
@@ -565,12 +565,12 @@ async def menu(strMessage, groupId, member, app, botBaseInformation, messageChai
 
         # 记录操作
         if needReply:
-            logManage.log(getNow.toString(), member.id, strMessage + "; 执行结果：" + reply)
+            logManage.log(getNow.toString(), member.id, message + "; 执行结果：" + reply)
 
     if needReply:
         dataManage.save_obj(user, 'user/information')
         dataManage.save_obj(systemData, 'user/system')
-    return (needReply, needAt, reply, isImage)
+    return needReply, reply, isImage, at_qq, needAt
 
 
 # ============================================
@@ -584,6 +584,7 @@ def getNumber(string):
     else:
         return 0
 
+
 def giveOtherGoods(from_id, to_id, name, number):
     global user
     global goods
@@ -594,12 +595,15 @@ def giveOtherGoods(from_id, to_id, name, number):
     if user[from_id]['warehouse'][name]['number'] < number:
         return '你没有足够的物品'
     newUser(to_id, '(无名)')
+    if from_id == to_id:
+        return '自己送自己礼物干什么嘞？'
 
     if getGooods(to_id, 2, name, number):
         discard(from_id, name, number)
         return '赠送成功！'
     else:
         return '对方背包已满！'
+
 
 # 重新加载文件
 def reload():
@@ -626,7 +630,7 @@ def reload():
             i = i.strip()
             if len(i) > 0 and i[0] != '#':
                 datas = i.split(' ')
-                if len(datas) > 3: # 至少得有名字、简介、类型
+                if len(datas) > 3:  # 至少得有名字、简介、类型
                     if not goods.__contains__(datas[0]):
                         goods[datas[0]] = {
                             'id': index  # 编号
@@ -659,7 +663,6 @@ def reload():
                 if len(datas) == 2:
                     buff[datas[0]] = datas[1]
 
-
     # 获取基本数据
     with open('data/user/baseInformation.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
@@ -670,7 +673,6 @@ def reload():
                 if len(datas) == 2:
                     baseInformation[datas[0]] = datas[1]
 
-
     # 获取合成数据
     with open('data/user/synthesis.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
@@ -678,7 +680,7 @@ def reload():
             i = i.strip()
             if len(i) > 0 and i[0] != '#':
                 datas = i.split(' ')
-                if len(datas) > 1: # 至少得有名字、合成物品
+                if len(datas) > 1:  # 至少得有名字、合成物品
                     if goods.__contains__(datas[0]):
                         synthesis[datas[0]] = {}  # 如果拥有该物品才可以合成
                         for j in datas:
@@ -688,7 +690,6 @@ def reload():
                         if len(synthesis[datas[0]]) == 0:
                             del synthesis[datas[0]]
 
-
     # 获取分解数据
     with open('data/user/decompose.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
@@ -696,7 +697,7 @@ def reload():
             i = i.strip()
             if len(i) > 0 and i[0] != '#':
                 datas = i.split(' ')
-                if len(datas) > 1: # 至少得有名字、分解物品
+                if len(datas) > 1:  # 至少得有名字、分解物品
                     if goods.__contains__(datas[0]):
                         decompose[datas[0]] = {}  # 如果拥有该物品才可以合成
                         for j in datas:
@@ -713,6 +714,7 @@ def reload():
         recalculateAttribute(key)
 
     return True
+
 
 # 积分、体力值修改
 def update(id, mode, gold, strength):  # mode值表示了该击剑由什么模式产生的（-2：交易操作、-1：管理员权限、0：击剑、1：探险、2：闲逛）
@@ -869,6 +871,7 @@ def update(id, mode, gold, strength):  # mode值表示了该击剑由什么模�
                 systemData['rank']['gold-3']['id'] = goldId3
                 systemData['rank']['gold-3']['gold'] = user[goldId3]['gold'] if goldId3 != 0 else 0
 
+
 # 获得商品
 def getGooods(id, mode, name, number):  # （-1：系统补偿,0：购买所得，1：探险、闲逛获得,2：赠送所得）
     global user
@@ -876,7 +879,7 @@ def getGooods(id, mode, name, number):  # （-1：系统补偿,0：购买所得�
     b = type(number)
     if str(b) != '<class \'int\'>':
         return False
-    
+
     if user[id]['warehouse'].__contains__(name):
         user[id]['warehouse'][name]['number'] += number
         return True
@@ -997,6 +1000,7 @@ def apllyAttribute(id, name):
     if goods[name].__contains__('knapsack'):
         user[id]['attribute']['knapsack-up'] += goods[name]['knapsack']
 
+
 # 取消应用属性值
 def cancelAttribute(id, name):
     global goods
@@ -1016,6 +1020,7 @@ def cancelAttribute(id, name):
         user[id]['attribute']['strength-sign-up'] -= goods[name]['strength-sign']
     if goods[name].__contains__('knapsack'):
         user[id]['attribute']['knapsack-up'] -= goods[name]['knapsack']
+
 
 # 使用商品
 def useGoods(id, name, number):
@@ -1158,17 +1163,16 @@ def useGoods(id, name, number):
             if number > user[id]['warehouse'][name]['number']:
                 number = user[id]['warehouse'][name]['number']
             countWord = ''
-            if goods[name]['type'] == 0: # 药水
+            if goods[name]['type'] == 0:  # 药水
                 countWord = '瓶'
-            elif goods[name]['type'] == 9: # 卷轴
+            elif goods[name]['type'] == 9:  # 卷轴
                 countWord = '张'
-            elif goods[name]['type'] == 10: # 宝箱、礼包
+            elif goods[name]['type'] == 10:  # 宝箱、礼包
                 countWord = '个'
-            elif goods[name]['type'] == 11: # 矿石
+            elif goods[name]['type'] == 11:  # 矿石
                 countWord = '个'
-            elif goods[name]['type'] == 15: # 食物
+            elif goods[name]['type'] == 15:  # 食物
                 countWord = '个'
-
 
             # 积分、体力
             gold = 0
@@ -1257,7 +1261,7 @@ def decomposeGoods(id, name, number):
     if number > user[id]['warehouse'][name]['number']:
         number = user[id]['warehouse'][name]['number']
 
-    discard(id, name, number) # 丢弃物品
+    discard(id, name, number)  # 丢弃物品
     operate = {}  # 记录每一步的操作，以便于恢复操作
     flag = True  # 分解是否成功
     for key, value in decompose[name].items():
@@ -1265,7 +1269,7 @@ def decomposeGoods(id, name, number):
             flag = False
             break
 
-        if operate.__contains__(key): # 记录操作
+        if operate.__contains__(key):  # 记录操作
             operate[key] += value * number
         else:
             operate[key] = value * number
@@ -1290,7 +1294,7 @@ def synthesisGoods(id, name, number):
     for key, value in synthesis[name].items():
         if user[id]['warehouse'].__contains__(key) and user[id]['warehouse'][key]['number'] >= value * number:
             discard(id, key, value * number)
-            if operate.__contains__(key): # 记录操作
+            if operate.__contains__(key):  # 记录操作
                 operate[key] += value * number
             else:
                 operate[key] = value * number
@@ -1298,7 +1302,7 @@ def synthesisGoods(id, name, number):
             flag = False
             break
 
-    if flag and not getGooods(id, -1, name, number): # 获取合成后的物品
+    if flag and not getGooods(id, -1, name, number):  # 获取合成后的物品
         flag = False
 
     if flag:
@@ -1307,6 +1311,7 @@ def synthesisGoods(id, name, number):
         for key, value in operate.items():
             getGooods(id, -1, key, value)
         return '背包已满或材料不足，合成失败！'
+
 
 # ============================================
 # 操作
@@ -1530,7 +1535,7 @@ def getComments(name):
         result = '名字：' + name
         result += '\n介绍：' + str(baseInformation[name]['comments'])
         return result
-    elif name.isdigit() or (name[3:].isdigit() and (name[:3] == 'id:'or name[:3] == 'id：')) :
+    elif name.isdigit() or (name[3:].isdigit() and (name[:3] == 'id:' or name[:3] == 'id：')):
         if not name.isdigit():
             name = name[3:]
         goodsId = int(name)
@@ -1569,6 +1574,7 @@ def getComments(name):
         return '不存在该物品'
     else:
         return '不存在该物品'
+
 
 # 查询合成路线
 def getSynthesis(name):
@@ -1625,6 +1631,7 @@ def getSynthesis(name):
     else:
         return '不存在该物品'
 
+
 # 查询分解路线
 def getDecompose(name):
     if goods.__contains__(name):
@@ -1643,6 +1650,7 @@ def getDecompose(name):
     else:
         return '不存在该物品'
 
+
 # 改变名字
 def changeName(id, name):
     global user
@@ -1654,6 +1662,7 @@ def changeName(id, name):
     user[id]['name'] = name
     user[id]['initName'] = True
     return name + '修改成功~'
+
 
 # 新用戶
 def newUser(id, name):
@@ -1772,6 +1781,7 @@ def rechargeStrength(id):
         user[id]['attribute']['strength'] += gain
         return '你消耗了' + str(cost) + '积分，获得了' + str(gain) + '点体力'
 
+
 # 击剑
 async def fencing(member, id2, app):
     if member.id == id2:
@@ -1811,7 +1821,8 @@ async def fencing(member, id2, app):
         # 获胜概率为 你的攻击 - 对方防御力 + 你的san值 - 对方san值
         attack = user[member.id]['attribute']['attack'] + user[member.id]['attribute']['attack-up']
         defense = user[other.id]['attribute']['defense'] + user[member.id]['attribute']['defense-up']
-        winPoint = 500 + ((attack - defense) * 10 + user[member.id]['attribute']['san'] - user[other.id]['attribute']['san'])
+        winPoint = 500 + (
+                    (attack - defense) * 10 + user[member.id]['attribute']['san'] - user[other.id]['attribute']['san'])
 
         # BUFF启用
         if member.id in systemData['god']:  # 用户是无敌模式
@@ -1919,15 +1930,16 @@ async def fencing(member, id2, app):
             Plain(result)
         ]))
 
+
 # 挑战榜首
-async def fencingTop(member, app, groupId):
+async def fencingTop(member, app, group_id):
     global user
     global systemData
 
     goldId = systemData['rank']['gold-1']['id']
 
     if goldId == member.id:
-        if groupId != 0:
+        if group_id != 0:
             await app.sendGroupMessage(member.group, MessageChain.create([
                 Plain('自己也要围攻自己吗？')
             ]))
@@ -1961,7 +1973,8 @@ async def fencingTop(member, app, groupId):
         # 获胜概率为 你的攻击 - 对方防御力 + 你的san值 - 对方san值
         attack = user[member.id]['attribute']['attack'] + user[member.id]['attribute']['attack-up']
         defense = user[goldId]['attribute']['defense'] + user[member.id]['attribute']['defense-up']
-        winPoint = 500 + ((attack - defense) * 10 + user[member.id]['attribute']['san'] - user[goldId]['attribute']['san'])
+        winPoint = 500 + (
+                    (attack - defense) * 10 + user[member.id]['attribute']['san'] - user[goldId]['attribute']['san'])
 
         # BUFF启用
         if member.id in systemData['god']:  # 用户是无敌模式
@@ -2035,7 +2048,7 @@ async def fencingTop(member, app, groupId):
         loser = ''
         result = ''
         memberName = ''
-        if groupId == 0:
+        if group_id == 0:
             memberName = member.nickname
         else:
             memberName = member.name
@@ -2068,7 +2081,7 @@ async def fencingTop(member, app, groupId):
         lineNumber = linecache.getline(r'data/user/fencing.txt', x * 2 + 3)
         process = lineNumber.replace('*name1*', winner).replace('*name2*', loser)
 
-        if groupId != 0:
+        if group_id != 0:
             await app.sendGroupMessage(member.group, MessageChain.create([
                 Plain(process),
                 Plain('------------\n'),
@@ -2080,6 +2093,7 @@ async def fencingTop(member, app, groupId):
                 Plain('------------\n'),
                 Plain(result)
             ]))
+
 
 # 决斗
 
@@ -2121,7 +2135,8 @@ async def duel(member, id2, app):
         # 获胜概率为 你的攻击 - 对方防御力 + 你的san值 - 对方san值
         attack = user[member.id]['attribute']['attack'] + user[member.id]['attribute']['attack-up']
         defense = user[other.id]['attribute']['defense'] + user[member.id]['attribute']['defense-up']
-        winPoint = 500 + (attack - defense + user[member.id]['attribute']['san'] - user[other.id]['attribute']['san']) * 10
+        winPoint = 500 + (
+                    attack - defense + user[member.id]['attribute']['san'] - user[other.id]['attribute']['san']) * 10
 
         # BUFF启用
         if member.id in systemData['god']:  # 用户是无敌模式
@@ -2218,21 +2233,20 @@ async def duel(member, id2, app):
             update(member.id, 0, -getGold, 0)
             update(other.id, 0, getGold, 0)
 
-
         await app.sendGroupMessage(member.group, MessageChain.create([
             Plain(result)
         ]))
 
 
 # 决斗榜首
-async def duelTop(member, app, groupId):
+async def duelTop(member, app, group_id):
     global user
     global systemData
 
     goldId = systemData['rank']['gold-1']['id']
 
     if goldId == member.id:
-        if groupId != 0:
+        if group_id != 0:
             await app.sendGroupMessage(member.group, MessageChain.create([
                 Plain('自己也要打自己吗？')
             ]))
@@ -2266,7 +2280,8 @@ async def duelTop(member, app, groupId):
         # 获胜概率为 你的攻击 - 对方防御力 + 你的san值 - 对方san值
         attack = user[member.id]['attribute']['attack'] + user[member.id]['attribute']['attack-up']
         defense = user[goldId]['attribute']['defense'] + user[member.id]['attribute']['defense-up']
-        winPoint = 500 + ((attack - defense) * 10 + user[member.id]['attribute']['san'] - user[goldId]['attribute']['san'])
+        winPoint = 500 + (
+                    (attack - defense) * 10 + user[member.id]['attribute']['san'] - user[goldId]['attribute']['san'])
 
         # BUFF启用
         if member.id in systemData['god']:  # 用户是无敌模式
@@ -2340,7 +2355,7 @@ async def duelTop(member, app, groupId):
         loser = ''
         result = ''
         memberName = ''
-        if groupId == 0:
+        if group_id == 0:
             memberName = member.nickname
         else:
             memberName = member.name
@@ -2368,7 +2383,7 @@ async def duelTop(member, app, groupId):
             update(member.id, 0, -getGold, 0)
             update(goldId, 0, getGold, 0)
 
-        if groupId != 0:
+        if group_id != 0:
             await app.sendGroupMessage(member.group, MessageChain.create([
                 Plain(result)
             ]))
@@ -2467,13 +2482,13 @@ def sellGoods(id, name, number):
 # 明日方舟抽卡模拟器
 
 def MRFZ_card():
-    botBaseInformation = dataManage.load_obj('baseInformation')
-    if not botBaseInformation['reply'].__contains__('cards'):
-        botBaseInformation['reply']['cards'] = 0
-    botBaseInformation['reply']['cards'] += 1
-    if botBaseInformation['reply']['cards'] > 5:
+    bot_information = dataManage.load_obj('baseInformation')
+    if not bot_information['reply'].__contains__('cards'):
+        bot_information['reply']['cards'] = 0
+    bot_information['reply']['cards'] += 1
+    if bot_information['reply']['cards'] > 5:
         return '你抽卡太快了，每分钟最多只能抽5次哦~'
-    dataManage.save_obj(botBaseInformation, 'baseInformation')
+    dataManage.save_obj(bot_information, 'baseInformation')
 
     card1 = []
     card2 = []
@@ -2522,13 +2537,13 @@ def MRFZ_card():
 
 
 def MRFZ_card10():
-    botBaseInformation = dataManage.load_obj('baseInformation')
-    if not botBaseInformation['reply'].__contains__('cards'):
-        botBaseInformation['reply']['cards'] = 0
-    botBaseInformation['reply']['cards'] += 1
-    if botBaseInformation['reply']['cards'] > 5:
+    bot_information = dataManage.load_obj('baseInformation')
+    if not bot_information['reply'].__contains__('cards'):
+        bot_information['reply']['cards'] = 0
+    bot_information['reply']['cards'] += 1
+    if bot_information['reply']['cards'] > 5:
         return '你抽卡太快了，每分钟最多只能抽5次哦~'
-    dataManage.save_obj(botBaseInformation, 'baseInformation')
+    dataManage.save_obj(bot_information, 'baseInformation')
 
     card1 = []
     card2 = []
@@ -2616,12 +2631,15 @@ def touch(id, name):
     update(id, -2, gold, 0)
     return '看' + name + '太可怜，于是给了你一些积分'
 
+
 '''
 消耗体力 2
 
 90% 木板
 10% 苹果
 '''
+
+
 def cutDown(id):
     global user
     if user[id]['attribute']['strength'] < 1:
@@ -2651,6 +2669,8 @@ def cutDown(id):
 0.009% 合金
 0.001% 下界合金
 '''
+
+
 def dig(id):
     global user
     if user[id]['attribute']['strength'] < 2:
@@ -2785,6 +2805,7 @@ def dig(id):
             getGooods(id, 1, '下界合金', 1)
 
     return result
+
 
 '''
 消耗体力：1

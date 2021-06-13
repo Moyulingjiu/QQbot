@@ -3,6 +3,7 @@
 from plugins import dataManage
 import random
 
+
 def reply(strMessage, member, botBaseInformation):
     questionReply = dataManage.load_obj('keyReply/' + str(member.group.id))
     KeyReply = dataManage.load_obj('keyReply/' + str(member.group.id) + 'key')
@@ -18,8 +19,6 @@ def reply(strMessage, member, botBaseInformation):
     if not KeyReply.__contains__('RecoveryProbability'):
         KeyReply['RecoveryProbability'] = 100
         dataManage.save_obj(KeyReply, 'keyReply/' + str(member.group.id) + 'key')
-    print('p：', p)
-    print('RecoveryProbability：', KeyReply['RecoveryProbability'])
 
     if botBaseInformation['reply']['lastMinute'] <= 10:
         # 全字段匹配
@@ -31,7 +30,7 @@ def reply(strMessage, member, botBaseInformation):
                 needReply = True
                 botBaseInformation['reply']['lastMinute'] += 1
                 dataManage.save_obj(botBaseInformation, 'baseInformation')
-        
+
         # 全字段匹配带at
         if not needReply:
             if questionReplyAt.__contains__(strMessage):
@@ -79,4 +78,4 @@ def reply(strMessage, member, botBaseInformation):
 
     print('KeyReply AtId:', AtId)
     print('KeyReply Reply:', reply)
-    return (needReply, needAt, reply, AtId)
+    return needReply, reply, '', AtId, needAt

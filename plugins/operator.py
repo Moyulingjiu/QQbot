@@ -47,20 +47,21 @@ async def sendMessage(groupId, clock, app):
 # 管理员模块
 
 
-async def administratorOperation(strMessage, groupId, memberId, app, member, botBaseInformation):
+async def administratorOperation(strMessage, groupId, memberId, app, member, botBaseInformation, right):
     Bot_QQ = botBaseInformation['baseInformation']['Bot_QQ']
     Bot_Name = botBaseInformation['baseInformation']['Bot_Name']
+    master_qq = botBaseInformation['baseInformation']['Master_QQ']
     clock = dataManage.load_obj('clockIn')
 
     needReply = False
     needAt = False
     reply = ''
-    passport = False
     isImage = ''
 
+    # ===================================================================================
+    # ===================================================================================
     # 主人权限
-    if memberId ==  botBaseInformation['baseInformation']['Master_QQ']:
-        passport = True
+    if right < 1:
         if strMessage == '主人帮助':
             isImage = command.helpMaster()
             needReply = True
@@ -77,6 +78,9 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
 
             print('退出')
             sys.exit()
+        elif strMessage == '查看机器人信息':
+            reply = '机器人名字：' + Bot_Name + '\n机器人QQ：' + str(Bot_QQ) + '\n主人QQ：' + str(master_qq)
+            needReply = True
         elif strMessage[:5] == '删除文摘 ':
             reply = talk.delPoem(int(strMessage[5:]))
             needReply = True
@@ -125,7 +129,6 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
         elif strMessage[:6] == '删除管理员 ':
             reply = delAdministrator(int(strMessage[6:]), botBaseInformation)
             needReply = True
-
         elif strMessage[:5] == '开启脏话 ':
             reply = addcursePlanGroup(int(strMessage[5:]), botBaseInformation)
             needReply = True
@@ -137,10 +140,11 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
             dataManage.save_obj(botBaseInformation, 'baseInformation')
             reply = '清空成功！'
             needReply = True
-        
+
+    # ===================================================================================
+    # ===================================================================================
     # 管理员权限
-    if memberId in botBaseInformation["administrator"] or passport:
-        passport = True
+    if right < 2:
         if strMessage == '管理员帮助':
             isImage = command.helpAdmministor()
             needReply = True
@@ -204,10 +208,11 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
             if groupId > 0:
                 reply = delcursePlanGroup(groupId, botBaseInformation)
                 needReply = True
-        
 
+    # ===================================================================================
+    # ===================================================================================
     # 贡献者权限
-    if memberId in botBaseInformation["contributors"] or passport:
+    if right < 3:
         if strMessage == '贡献者帮助':
             isImage = command.helpContributor()
             needReply = True
@@ -241,7 +246,6 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
             else:
                 reply = '本群没有打卡计划哦！'
             needReply = True
-
 
         elif strMessage[:5] == '添加回复 ' and groupId != 0:
             stringList = strMessage.split(' ')
@@ -380,21 +384,6 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
                 reply = await viewActivity(groupId, activityName, app)
                 needReply = True
 
-    if strMessage == '我的权限':
-        if memberId ==  botBaseInformation['baseInformation']['Master_QQ']:
-            reply = '当前权限：主人\n可以输入主人帮助来获取指令帮助哦~'
-            needAt = True
-            needReply = True
-        elif memberId in botBaseInformation["administrator"]:
-            reply = '当前权限：管理员\n可以输入管理员帮助来获取指令帮助哦~'
-            needAt = True
-            needReply = True
-        elif memberId in botBaseInformation["contributors"]:
-            reply = '当前权限：贡献者\n可以输入贡献者帮助来获取指令帮助哦~~'
-            needAt = True
-            needReply = True
-
-    
     if needReply:
         if strMessage != '贡献者帮助' and strMessage != '管理员帮助' and strMessage != '主人帮助':
             logManage.log(getNow.toString(), memberId, strMessage + "; 执行结果：" + reply)
