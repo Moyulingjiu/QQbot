@@ -20,6 +20,7 @@ from plugins import getNow
 
 import sys
 
+
 # ==========================================================
 # 监听模块
 
@@ -42,6 +43,7 @@ async def sendMessage(groupId, clock, app):
         await app.sendGroupMessage(group, message)
         return True
     return False
+
 
 # ==========================================================
 # 管理员模块
@@ -200,15 +202,6 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
             reply = '当前版本为：' + botBaseInformation['baseInformation']['version']
             needReply = True
 
-        elif strMessage == '开启脏话':
-            if groupId > 0:
-                reply = addcursePlanGroup(groupId, botBaseInformation)
-                needReply = True
-        elif strMessage == '关闭脏话':
-            if groupId > 0:
-                reply = delcursePlanGroup(groupId, botBaseInformation)
-                needReply = True
-
     # ===================================================================================
     # ===================================================================================
     # 贡献者权限
@@ -291,7 +284,7 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
             else:
                 reply = '格式错误！请检查星号'
                 needReply = True
-        
+
         elif strMessage[:6] == '添加关键词 ' and groupId != 0:
             stringList = strMessage.split(' ')
             if len(stringList) == 3:
@@ -336,7 +329,7 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
             else:
                 reply = '格式错误！请检查星号'
                 needReply = True
-        
+
         elif strMessage[:8] == '关键词回复概率 ' and groupId != 0:
             reply = editKeyProbability(strMessage[8:], member)
             needReply = True
@@ -399,7 +392,7 @@ async def administratorOperation(strMessage, groupId, memberId, app, member, bot
 # 添加贡献者
 def addContributors(memberId, botBaseInformation):
     if memberId > 0:
-        if memberId ==  botBaseInformation['baseInformation']['Master_QQ']:
+        if memberId == botBaseInformation['baseInformation']['Master_QQ']:
             reply = '他是主人哦~'
         elif memberId in botBaseInformation["administrator"]:
             reply = '该成员已经是管理员了'
@@ -413,10 +406,11 @@ def addContributors(memberId, botBaseInformation):
         reply = '诶？这个QQ正确吗？'
     return reply
 
+
 # 移除贡献者
 def delContributors(memberId, botBaseInformation):
     if memberId > 0:
-        if memberId ==  botBaseInformation['baseInformation']['Master_QQ']:
+        if memberId == botBaseInformation['baseInformation']['Master_QQ']:
             reply = '他是主人哦~'
         elif memberId in botBaseInformation["administrator"]:
             reply = '该成员已经是管理员啦，不是贡献者'
@@ -430,10 +424,11 @@ def delContributors(memberId, botBaseInformation):
         reply = '诶？这个QQ正确吗？'
     return reply
 
+
 # 添加管理员
 def addAdministrator(memberId, botBaseInformation):
     if memberId > 0:
-        if memberId ==  botBaseInformation['baseInformation']['Master_QQ']:
+        if memberId == botBaseInformation['baseInformation']['Master_QQ']:
             reply = '他是主人哦~'
         elif memberId in botBaseInformation["administrator"]:
             reply = '该成员已经是管理员了'
@@ -450,10 +445,11 @@ def addAdministrator(memberId, botBaseInformation):
         reply = '诶？这个QQ正确吗？'
     return reply
 
+
 # 移除管理员
 def delAdministrator(memberId, botBaseInformation):
     if memberId > 0:
-        if memberId ==  botBaseInformation['baseInformation']['Master_QQ']:
+        if memberId == botBaseInformation['baseInformation']['Master_QQ']:
             reply = '他是主人哦~不能从管理员中移除'
         elif not (memberId in botBaseInformation["administrator"]):
             reply = '该成员不是管理员哦~'
@@ -479,17 +475,20 @@ def changeVersion(version, botBaseInformation):
     dataManage.save_obj(botBaseInformation, 'baseInformation')
     return '修改成功！当前版本：' + version
 
+
 # 修改名字
 def changeName(name, botBaseInformation):
     botBaseInformation['baseInformation']['Bot_Name'] = name
     dataManage.save_obj(botBaseInformation, 'baseInformation')
     return '修改成功！当前名字：' + name
 
+
 # 修改机器人QQ
 def changeQQ(qq, botBaseInformation):
     botBaseInformation['baseInformation']['Bot_QQ'] = qq
     dataManage.save_obj(botBaseInformation, 'baseInformation')
     return '修改成功！当前QQ：' + qq
+
 
 # ==========================================================
 # 黑名单操作
@@ -531,6 +530,7 @@ def removeBlacklistMember(memberId, botBaseInformation):
     dataManage.save_obj(botBaseInformation, 'baseInformation')
     return '已经将人' + str(memberId) + '移除黑名单'
 
+
 # ==========================================================
 # 屏蔽词操作
 
@@ -539,10 +539,11 @@ def addScreenWord(word, botBaseInformation):
     screenWords = dataManage.load_obj('AIScreenWords')
     if word in screenWords:
         return '已经有该屏蔽词了'
-    
+
     screenWords.append(word)
     dataManage.save_obj(screenWords, 'AIScreenWords')
     return '添加成功~！'
+
 
 # 删除屏蔽词
 def delScreenWord(word, botBaseInformation):
@@ -553,14 +554,17 @@ def delScreenWord(word, botBaseInformation):
     dataManage.save_obj(screenWords, 'AIScreenWords')
     return '删除成功'
 
+
 # 查看屏蔽词
 def viewScreenWord(botBaseInformation):
     screenWords = dataManage.load_obj('AIScreenWords')
     return str(screenWords)
 
+
 # ==========================================================
 # 关键词操作
 KeyScreenWord = ['RecoveryProbability', 'reply', '~$~']
+
 
 # 添加绝对匹配
 def addQuestionReply(word, reply, member):
@@ -587,13 +591,14 @@ def addQuestionReply(word, reply, member):
         dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id))
         return '添加成功~'
 
+
 # 删除绝对匹配
 def delQuestionReply(word, reply, member):
     if word in KeyScreenWord:
         return word + '为保留字，不可以删除'
     if reply in KeyScreenWord:
         return reply + '为保留字，不可以删除'
-        
+
     keyReply = dataManage.load_obj('keyReply/' + str(member.group.id))
     if keyReply.__contains__(word):
         if reply in keyReply[word]:
@@ -607,13 +612,14 @@ def delQuestionReply(word, reply, member):
     else:
         return '没有该词组配对~'
 
+
 # 添加绝对匹配（带at）
 def addQuestionReplyAt(word, reply, at, member):
     if word in KeyScreenWord:
         return word + '为保留字，不可以添加'
     if reply in KeyScreenWord:
         return reply + '为保留字，不可以添加'
-        
+
     keyReply = dataManage.load_obj('keyReply/' + str(member.group.id) + 'at')
     if len(keyReply) >= 100:
         return '最多只可以添加100个回复哦~'
@@ -624,7 +630,7 @@ def addQuestionReplyAt(word, reply, at, member):
         at = int(at)
     if at != -1 and at <= 0:
         return '艾特对象格式错误'
-    
+
     reply = reply + '~$~' + str(at)
 
     if keyReply.__contains__(word):
@@ -641,13 +647,14 @@ def addQuestionReplyAt(word, reply, at, member):
         dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id) + 'at')
         return '添加成功~'
 
+
 # 删除绝对匹配（带at）
 def delQuestionReplyAt(word, reply, at, member):
     if word in KeyScreenWord:
         return word + '为保留字，不可以删除'
     if reply in KeyScreenWord:
         return reply + '为保留字，不可以删除'
-        
+
     keyReply = dataManage.load_obj('keyReply/' + str(member.group.id) + 'at')
     if at == '全体成员':
         at = -1
@@ -655,7 +662,7 @@ def delQuestionReplyAt(word, reply, at, member):
         at = int(at)
     if at != -1 and at <= 0:
         return '艾特对象格式错误'
-    
+
     reply = reply + '~$~' + str(at)
 
     if keyReply.__contains__(word):
@@ -670,6 +677,7 @@ def delQuestionReplyAt(word, reply, at, member):
     else:
         return '没有该词组配对~'
 
+
 # =====================
 # 添加关键词匹配
 def addKeyReply(word, reply, member):
@@ -677,7 +685,7 @@ def addKeyReply(word, reply, member):
         return word + '为保留字，不可以添加'
     if reply in KeyScreenWord:
         return reply + '为保留字，不可以添加'
-        
+
     keyReply = dataManage.load_obj('keyReply/' + str(member.group.id) + 'key')
     if len(keyReply) >= 100:
         return '最多只可以添加100个回复哦~'
@@ -696,13 +704,14 @@ def addKeyReply(word, reply, member):
         dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id) + 'key')
         return '添加成功~'
 
+
 # 删除关键词匹配
 def delKeyReply(word, reply, member):
     if word in KeyScreenWord:
         return word + '为保留字，不可以删除'
     if reply in KeyScreenWord:
         return reply + '为保留字，不可以删除'
-        
+
     keyReply = dataManage.load_obj('keyReply/' + str(member.group.id) + 'key')
     if keyReply.__contains__(word):
         if reply in keyReply[word]:
@@ -716,13 +725,14 @@ def delKeyReply(word, reply, member):
     else:
         return '没有该词组配对~'
 
+
 # 添加关键词匹配（带at）
 def addKeyReplyAt(word, reply, at, member):
     if word in KeyScreenWord:
         return word + '为保留字，不可以添加'
     if reply in KeyScreenWord:
         return reply + '为保留字，不可以添加'
-        
+
     keyReply = dataManage.load_obj('keyReply/' + str(member.group.id) + 'keyAt')
     if len(keyReply) >= 100:
         return '最多只可以添加100个回复哦~'
@@ -733,7 +743,7 @@ def addKeyReplyAt(word, reply, at, member):
         at = int(at)
     if at != -1 and at <= 0:
         return '艾特对象格式错误'
-    
+
     reply = reply + '~$~' + str(at)
 
     if keyReply.__contains__(word):
@@ -750,13 +760,14 @@ def addKeyReplyAt(word, reply, at, member):
         dataManage.save_obj(keyReply, 'keyReply/' + str(member.group.id) + 'keyAt')
         return '添加成功~'
 
+
 # 删除关键词匹配（带at）
 def delKeyReplyAt(word, reply, at, member):
     if word in KeyScreenWord:
         return word + '为保留字，不可以删除'
     if reply in KeyScreenWord:
         return reply + '为保留字，不可以删除'
-        
+
     keyReply = dataManage.load_obj('keyReply/' + str(member.group.id) + 'keyAt')
     if at == '全体成员':
         at = -1
@@ -764,7 +775,7 @@ def delKeyReplyAt(word, reply, at, member):
         at = int(at)
     if at != -1 and at <= 0:
         return '艾特对象格式错误'
-    
+
     reply = reply + '~$~' + str(at)
 
     if keyReply.__contains__(word):
@@ -778,6 +789,7 @@ def delKeyReplyAt(word, reply, at, member):
             return '没有该词组配对~'
     else:
         return '没有该词组配对~'
+
 
 def editKeyProbability(probability, member):
     keyReply = dataManage.load_obj('keyReply/' + str(member.group.id) + 'key')
@@ -794,34 +806,56 @@ def editKeyProbability(probability, member):
 def addComplexReply(word, reply, member):
     pass
 
+
 # 删除复杂回复（带艾特）
 def delComplexReply(word, reply, member):
     pass
+
 
 # 添加复杂关键词(带艾特)
 def addComplexKey(word, reply, member):
     pass
 
+
 # 删除复杂关键词（带艾特）
 def delComplexKey(word, reply, member):
     pass
+
 
 # ==========================================================
 # 骂人计划操作
 
 def addcursePlanGroup(groupId, botBaseInformation):
     if groupId in botBaseInformation['cursePlanGroup']:
-        return '该群已经开启了骂人哦~'
+        return '该群已经开启了脏话哦~'
     botBaseInformation['cursePlanGroup'].append(groupId)
     dataManage.save_obj(botBaseInformation, 'baseInformation')
     return '已开启∑(っ°Д°;)っ'
-    
+
+
 def delcursePlanGroup(groupId, botBaseInformation):
     if not groupId in botBaseInformation['cursePlanGroup']:
-        return '该群本来就没有开启了骂人!!!∑(ﾟДﾟノ)ノ'
+        return '该群本来就没有开启脏话!!!∑(ﾟДﾟノ)ノ'
     botBaseInformation['cursePlanGroup'].remove(groupId)
     dataManage.save_obj(botBaseInformation, 'baseInformation')
     return '已关闭，切，懦夫~'
+
+
+def addPornPlanGroup(groupId, botBaseInformation):
+    if groupId in botBaseInformation['pixiv']:
+        return '该群已经开启了涩图哦~'
+    botBaseInformation['pixiv'].append(groupId)
+    dataManage.save_obj(botBaseInformation, 'baseInformation')
+    return '已开启ヾ(･ω･*)ﾉ'
+
+
+def delPornPlanGroup(groupId, botBaseInformation):
+    if not groupId in botBaseInformation['pixiv']:
+        return '该群本来就没有开启涩图!!!∑(ﾟДﾟノ)ノ'
+    botBaseInformation['pixiv'].remove(groupId)
+    dataManage.save_obj(botBaseInformation, 'baseInformation')
+    return '已关闭，(灬°ω°灬) '
+
 
 # ==========================================================
 # 活动
@@ -858,6 +892,7 @@ def addActivity(groupId, memberId, activityName, lastMinute):
         dataManage.save_obj(activityList, 'activity')
         return '活动 ' + activityName + '已开启，请在' + str(lastMinute) + '分钟内输入\"参加活动 ' + activityName + '\"报名'
 
+
 # 参与活动
 def joinActivity(groupId, memberId, activityName):
     activityList = dataManage.load_obj('activity')
@@ -873,6 +908,7 @@ def joinActivity(groupId, memberId, activityName):
             return '不存在该活动！'
     else:
         return '不存在该活动！'
+
 
 # 退出活动
 def quitActivity(groupId, memberId, activityName):
@@ -890,6 +926,7 @@ def quitActivity(groupId, memberId, activityName):
     else:
         return '不存在该活动！'
 
+
 # 删除活动
 def delActivity(groupId, memberId, activityName):
     activityList = dataManage.load_obj('activity')
@@ -904,6 +941,7 @@ def delActivity(groupId, memberId, activityName):
             return '不存在该活动！'
     else:
         return '不存在该活动！'
+
 
 # 活动名单
 async def viewActivity(groupId, activityName, app):
@@ -923,6 +961,7 @@ async def viewActivity(groupId, activityName, app):
             return '不存在该活动！'
     else:
         return '不存在该活动！'
+
 
 def getActivityList(groupId, app):
     activityList = dataManage.load_obj('activity')

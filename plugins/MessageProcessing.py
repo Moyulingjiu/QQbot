@@ -31,6 +31,7 @@ from plugins import getNow
 from plugins import keyReply
 from plugins import vocabulary
 from plugins import rpg
+from plugins import PixivImage
 
 
 # 发送消息
@@ -153,7 +154,8 @@ class MessageProcessing:
                 'blacklistMember': [],
                 'testGroup': [],
                 'cursePlanGroup': [],
-                'mute': []
+                'mute': [],
+                'pixiv': []
             }
             dataManage.save_obj(self.bot_information, 'baseInformation')
         else:
@@ -219,7 +221,7 @@ class MessageProcessing:
         return self.bot_qq
 
     def __init__(self):
-        pass
+        self.pixiv = PixivImage.pixiv()
 
     def get_right(self, qq):
         if qq == self.bot_information['baseInformation']['Master_QQ']:
@@ -451,7 +453,28 @@ class MessageProcessing:
 
         # 打卡&活动
         if not need_reply and mode == 1:
-            if self.clock['groupClock'].__contains__(group_id):
+            if message[:4] == '参加活动' or message[:4] == '参与活动':
+                activityName = message[4:].strip()
+                if len(activityName) == 0:
+                    reply_text = '活动名不能为空'
+                    need_reply = True
+                else:
+                    reply_text = operator.joinActivity(group_id, qq, activityName)
+                    need_at = True
+                    need_reply = True
+            elif message[:4] == '退出活动':
+                activityName = message[4:].strip()
+                if len(activityName) == 0:
+                    reply_text = '活动名不能为空'
+                    need_reply = True
+                else:
+                    reply_text = operator.quitActivity(group_id, qq, activityName)
+                    need_at = True
+                    need_reply = True
+            elif message == '活动清单' or message == '活动列表':
+                reply_text = operator.getActivityList(group_id, app)
+                need_reply = True
+            elif self.clock['groupClock'].__contains__(group_id):
                 if message == '打卡':
                     reply_text = name + clockIn.clockIn(group_id, qq)
                     need_reply = True
@@ -496,27 +519,6 @@ class MessageProcessing:
                 elif message == '开启打卡总结' and right < 3:
                     reply_text = clockIn.onSummary(group_id)
                     need_reply = True
-            elif message[:4] == '参加活动' or message[:4] == '参与活动':
-                activityName = message[4:].strip()
-                if len(activityName) == 0:
-                    reply_text = '活动名不能为空'
-                    need_reply = True
-                else:
-                    reply_text = operator.joinActivity(group_id, qq, activityName)
-                    need_at = True
-                    need_reply = True
-            elif message[:4] == '退出活动':
-                activityName = message[4:].strip()
-                if len(activityName) == 0:
-                    reply_text = '活动名不能为空'
-                    need_reply = True
-                else:
-                    reply_text = operator.quitActivity(group_id, qq, activityName)
-                    need_at = True
-                    need_reply = True
-            elif message == '活动清单' or message == '活动列表':
-                reply_text = operator.getActivityList(group_id, app)
-                need_reply = True
 
             if need_reply:
                 logManage.groupLog(getNow.toString(), qq, group_id, member.group.name, message + "; 执行结果：" + reply_text)
@@ -591,9 +593,40 @@ class MessageProcessing:
             elif message == '情话':
                 reply_text = talk.loveTalk()
                 need_reply = True
-            elif message == '骂我一句' or message == '骂我' or message == '再骂' or message == '你再骂':
+            elif message == '骂我一句' or message == '骂我' or message == '再骂' or message == '你再骂' or message == '脏话':
                 if mode == 0 or mode == 2 or (mode == 1 and group_id in self.bot_information['cursePlanGroup']):
                     reply_text = talk.swear()
+                    need_reply = True
+
+        # 涩图
+        if not need_reply and mode == 1 and group_id in self.bot_information['pixiv']:
+            if message == '涩图':
+                await app.sendGroupMessage(member.group, MessageChain.create([
+                    Plain('该功能并未优化暂时被锁定，不开放。具体开放日期待定，是开发情况而定。')
+                ]))
+                # image = self.pixiv.search('lolicon')
+                # if len(image) > 0:
+                #     for url in image:
+                #         await app.sendGroupMessage(member.group, MessageChain.create([
+                #             Image.fromNetworkAddress(url)
+                #         ]))
+                #     need_reply = True
+                # else:
+                #     reply_text = '获取失败！请联系主人，可能梯子又挂了'
+                #     need_reply = True
+            elif message[:2] == '搜图':
+                await app.sendGroupMessage(member.group, MessageChain.create([
+                    Plain('稍等片刻，马上就来~(测试功能，不对外开放)')
+                ]))
+                image = self.pixiv.search(message[2:].strip())
+                if len(image) > 0:
+                    for url in image:
+                        await app.sendGroupMessage(member.group, MessageChain.create([
+                            Image.fromNetworkAddress(url)
+                        ]))
+                    need_reply = True
+                else:
+                    reply_text = '获取失败！请联系主人，可能梯子又挂了'
                     need_reply = True
 
         # 指令
@@ -602,18 +635,47 @@ class MessageProcessing:
                 (reply_text, need_at, reply_image) = command.function(message[1:], member, app, group_id)
                 need_reply = True
 
+        # -----------------------------------------------------------------------------------
         # 管理员操作
         if not need_reply:
-            if right < 3:
-                (need_reply, need_at, reply_text, reply_image) = await operator.administratorOperation(
-                    message,
-                    group_id,
-                    qq,
-                    app,
-                    member,
-                    self.bot_information,
-                    right)
+            if mode == 1:
+                if message == '开启脏话' or message == '脏话开启':
+                    if right < 2:
+                        reply_text = operator.addcursePlanGroup(group_id, self.bot_information)
+                    else:
+                        reply_text = '权限不够！'
+                    need_reply = True
+                elif message == '关闭脏话' or message == '脏话关闭':
+                    if right < 2:
+                        reply_text = operator.delcursePlanGroup(group_id, self.bot_information)
+                    else:
+                        reply_text = '权限不够！'
+                    need_reply = True
+                elif message == '开启涩图':
+                    if right < 1:
+                        reply_text = operator.addPornPlanGroup(group_id, self.bot_information)
+                    else:
+                        reply_text = '权限不够！'
+                    need_reply = True
+                elif message == '关闭涩图':
+                    if right < 1:
+                        reply_text = operator.delPornPlanGroup(group_id, self.bot_information)
+                    else:
+                        reply_text = '权限不够！'
+                    need_reply = True
 
+            if right < 3:
+                if not need_reply:
+                    (need_reply, need_at, reply_text, reply_image) = await operator.administratorOperation(
+                        message,
+                        group_id,
+                        qq,
+                        app,
+                        member,
+                        self.bot_information,
+                        right)
+
+        # -----------------------------------------------------------------------------------
         # rpg游戏
         if not need_reply:
             (need_reply, reply_text, reply_image, at_qq, need_at) = await rpg.menu(
@@ -642,7 +704,7 @@ class MessageProcessing:
                 reply_chain = self.message_tmp[group_id]
                 tmp = str(reply_chain.asDisplay())
                 self.message_tmp[group_id] = get_message.messageChain  # 将记录的上一次的消息更改为这次收到的消息
-                if 'xml' not in tmp:
+                if 'xml' not in tmp and tmp[0] != '[' and tmp[-1] != ']':
                     if tmp == message and tmp != self.last_reply:
                         await app.sendGroupMessage(member.group, reply_chain.asSendable())
                         need_reply = True

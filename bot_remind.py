@@ -24,8 +24,8 @@ from plugins import logManage
 from plugins import getNow
 from plugins import operator
 
-remainTimeHour = 23
-remainTimeMinute = 00
+remainTimeHour = 0
+remainTimeMinute = 45
 
 clock = {}
 botBaseInformation = {}
