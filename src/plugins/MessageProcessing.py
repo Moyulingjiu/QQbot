@@ -17,8 +17,6 @@ import time
 
 from plugins import talk
 from plugins import weather
-from plugins import smallFunction
-from plugins import lucky
 from plugins import command
 from plugins import weiboHot
 from plugins import clockIn
@@ -29,9 +27,9 @@ from plugins import baidu
 from plugins import logManage
 from plugins import getNow
 from plugins import keyReply
-from plugins import vocabulary
 from plugins import rpg
 from plugins import PixivImage
+from plugins import BaseFunction
 
 
 # 发送消息
@@ -130,6 +128,8 @@ class MessageProcessing:
 
     message_tmp = {}
     last_reply = ''
+
+    luck = BaseFunction.luck()
 
     def loadfile(self):
         # 基本信息重置
@@ -256,6 +256,7 @@ class MessageProcessing:
         # ===================================================================================
         # ===================================================================================
         # 基本信息获取
+        # interceptable_need_reply = False  # 可被打断的回复
         need_reply = False  # 是否需要回复
         reply_text = ''  # 回复的文本内容
         reply_image = ''  # 回复的图片
@@ -519,28 +520,28 @@ class MessageProcessing:
         # 帮助内容
         if not need_reply:
             if message == '帮助':
-                reply_image = command.help()
+                reply_image = command.help_function()
                 need_reply = True
             elif message == '打卡帮助':
-                reply_image = command.helpClock()
+                reply_image = command.help_clock()
                 if mode == 0 or mode == 2:
                     reply_text = '这部分命令，只支持群聊哦~'
                 need_reply = True
             elif message == '活动帮助':
-                reply_image = command.helpActivity()
+                reply_image = command.help_activity()
                 if mode == 0 or mode == 2:
                     reply_text = '这部分命令，只支持群聊哦~'
                 need_reply = True
             elif message == '骰娘' or message == '骰娘帮助':
-                reply_image = command.helpThrower()
+                reply_image = command.help_thrower()
                 if mode == 0 or mode == 2:
                     reply_text = '这部分命令，只支持群聊哦~'
                 need_reply = True
             elif message == '塔罗牌帮助':
-                reply_image = command.helpTarot()
+                reply_image = command.help_tarot()
                 need_reply = True
             elif message == '游戏帮助':
-                reply_image = command.helpGame()
+                reply_image = command.help_game()
                 need_reply = True
 
             if need_reply:
@@ -555,7 +556,7 @@ class MessageProcessing:
                     reply_text = '活动名不能为空'
                     need_reply = True
                 else:
-                    reply_text = operator.joinActivity(group_id, qq, activityName)
+                    reply_text = operator.join_activity(group_id, qq, activityName)
                     need_at = True
                     need_reply = True
             elif message[:4] == '退出活动':
@@ -564,11 +565,11 @@ class MessageProcessing:
                     reply_text = '活动名不能为空'
                     need_reply = True
                 else:
-                    reply_text = operator.quitActivity(group_id, qq, activityName)
+                    reply_text = operator.quit_activity(group_id, qq, activityName)
                     need_at = True
                     need_reply = True
             elif message == '活动清单' or message == '活动列表':
-                reply_text = operator.getActivityList(group_id, app)
+                reply_text = operator.get_activity_list(group_id, app)
                 need_reply = True
             elif self.clock['groupClock'].__contains__(group_id):
                 if message == '打卡':
@@ -631,7 +632,7 @@ class MessageProcessing:
                     need_reply = True
             elif message[-2:] == '天气':  # 结尾的天气
                 tmp = message[:-2].strip()
-                if tmp != '这鬼' and tmp[0] != '#':  # 语言优化处理（避免“这鬼天气”的语气词）
+                if '这鬼' not in tmp and tmp[0] != '#':  # 语言优化处理（避免“这鬼天气”的语气词）
                     reply_text = weather.getWeather(tmp)
                     need_at = False
                     need_reply = True
@@ -643,15 +644,15 @@ class MessageProcessing:
                     need_reply = True
 
             elif message == '色子' or message == '骰子':
-                reply_text = smallFunction.dick()
+                reply_text = BaseFunction.dice()
                 need_at = True
                 need_reply = True
             elif message == '抛硬币' or message == '硬币':
-                reply_text = smallFunction.coin()
+                reply_text = BaseFunction.coin()
                 need_at = True
                 need_reply = True
             elif message == '运势':
-                reply_text = lucky.luck(qq)
+                reply_text = self.luck.get_luck(qq)
                 need_at = True
                 need_reply = True
 
@@ -664,23 +665,23 @@ class MessageProcessing:
 
             elif message == '四级词汇' or message == '四级单词' or message == '4级词汇' or message == '4级单词':
                 vocabularyNumber = 1
-                reply_text = vocabulary.getVocabulary4(vocabularyNumber)
+                reply_text = BaseFunction.get_vocabulary4(vocabularyNumber)
                 need_reply = True
             elif message[:5] == '四级词汇 ' or message[:5] == '四级单词 ' or message[:5] == '4级词汇 ' or message[:5] == '4级单词 ':
                 vocabularyNumber = int(message[5:].strip())
                 if vocabularyNumber <= 0:
                     vocabularyNumber = 1
-                reply_text = vocabulary.getVocabulary4(vocabularyNumber)
+                reply_text = BaseFunction.get_vocabulary4(vocabularyNumber)
                 need_reply = True
             elif message == '六级词汇' or message == '六级单词' or message == '6级词汇' or message == '6级单词':
                 vocabularyNumber = 1
-                reply_text = vocabulary.getVocabulary6(vocabularyNumber)
+                reply_text = BaseFunction.get_vocabulary6(vocabularyNumber)
                 need_reply = True
             elif message[:5] == '六级词汇 ' or message[:5] == '六级单词 ' or message[:5] == '6级词汇 ' or message[:5] == '6级单词 ':
                 vocabularyNumber = int(message[5:].strip())
                 if vocabularyNumber <= 0:
                     vocabularyNumber = 1
-                reply_text = vocabulary.getVocabulary6(vocabularyNumber)
+                reply_text = BaseFunction.get_vocabulary6(vocabularyNumber)
                 need_reply = True
 
             if need_reply:
@@ -753,42 +754,16 @@ class MessageProcessing:
         # -----------------------------------------------------------------------------------
         # 管理员操作
         if not need_reply:
-            if mode == 1:
-                if message == '开启脏话' or message == '脏话开启':
-                    if right < 2:
-                        reply_text = operator.addcursePlanGroup(group_id, self.bot_information)
-                    else:
-                        reply_text = '权限不够！'
-                    need_reply = True
-                elif message == '关闭脏话' or message == '脏话关闭':
-                    if right < 2:
-                        reply_text = operator.delcursePlanGroup(group_id, self.bot_information)
-                    else:
-                        reply_text = '权限不够！'
-                    need_reply = True
-                elif message == '开启涩图':
-                    if right < 1:
-                        reply_text = operator.addPornPlanGroup(group_id, self.bot_information)
-                    else:
-                        reply_text = '权限不够！'
-                    need_reply = True
-                elif message == '关闭涩图':
-                    if right < 1:
-                        reply_text = operator.delPornPlanGroup(group_id, self.bot_information)
-                    else:
-                        reply_text = '权限不够！'
-                    need_reply = True
-
-            if right < 3:
-                if not need_reply:
-                    (need_reply, need_at, reply_text, reply_image) = await operator.administratorOperation(
-                        message,
-                        group_id,
-                        qq,
-                        app,
-                        member,
-                        self.bot_information,
-                        right)
+            if not need_reply:
+                (need_reply, need_at, reply_text, reply_image) = await operator.administrator_operation(
+                    message,
+                    group_id,
+                    qq,
+                    app,
+                    member,
+                    self.bot_information,
+                    right,
+                    mode)
 
             if need_reply:
                 self.bot_information['statistics']['operate'] += 1

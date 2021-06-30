@@ -1,5 +1,3 @@
-import re
-
 from plugins import tarot
 from plugins import dataManage
 from plugins import TRPG
@@ -104,39 +102,39 @@ def show_key(member, group_id, bot_information):
 
 # ==========================================================
 
-def help():
+def help_function():
     return 'help/帮助.png'
 
 
-def helpThrower():
+def help_thrower():
     return 'help/骰娘帮助.png'
 
 
-def helpClock():
+def help_clock():
     return 'help/打卡帮助.png'
 
 
-def helpActivity():
+def help_activity():
     return 'help/活动帮助.png'
 
 
-def helpContributor():
+def help_contributor():
     return 'help/贡献者帮助.png'
 
 
-def helpAdmministor():
+def help_administrator():
     return 'help/管理员帮助.png'
 
 
-def helpMaster():
+def help_master():
     return 'help/主人帮助.png'
 
 
-def helpTarot():
+def help_tarot():
     return 'help/塔罗牌帮助.png'
 
 
-def helpGame():
+def help_game():
     return 'help/游戏帮助.png'
 
 
@@ -148,9 +146,9 @@ def function(code, member, app, group_id, bot_information):
     isImage = ''
 
     if code == 'help':
-        isImage = help()
+        isImage = help_function()
     elif code == 'help tarot':
-        isImage = helpTarot()
+        isImage = help_tarot()
 
     elif code[:7] == 'key add':
         tmp = code[7:].strip()
@@ -272,7 +270,7 @@ def function(code, member, app, group_id, bot_information):
                             fail_dick_base = int(tmp4[1])
             if fail_dick_number > 0 and fail_dick_size > 0:
                 result = table.sc(success, fail_dick_number, fail_dick_size, fail_dick_base, group_id,
-                                          member.id)
+                                  member.id)
                 needAt = True
         else:
             result = '这是群聊命令'

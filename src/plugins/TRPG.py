@@ -217,7 +217,8 @@ class Expression:
         bracket_flag = 0
         if filters(self.expression) is None:
             raise ArithmeticError('Non-expression')
-        if not self.expression[len(self.expression)-1] == ')' and not '0' <= self.expression[len(self.expression)-1] <= '9':
+        if not self.expression[len(self.expression) - 1] == ')' and not '0' <= self.expression[
+            len(self.expression) - 1] <= '9':
             raise ArithmeticError('wrong format')
         while i < len(self.expression):
             current = time.time()
@@ -277,15 +278,15 @@ class Expression:
                     d_str = self.expression[j]
                 elif self.expression[i + 1] == '(':
                     bracket_flag = 1
-                    j = j+1
+                    j = j + 1
                     while bracket_flag > 0:
                         if self.expression[j + 1] == '(':
-                            bracket_flag = bracket_flag+1
-                        elif self.expression[j+1] == ')':
-                            bracket_flag = bracket_flag-1
+                            bracket_flag = bracket_flag + 1
+                        elif self.expression[j + 1] == ')':
+                            bracket_flag = bracket_flag - 1
                         j = j + 1
 
-                    d_str = self.expression[i + 1:j+1]
+                    d_str = self.expression[i + 1:j + 1]
                 dick_expression = Expression(r_str)
                 dick_number = dick_expression.handle()
                 dick_expression = Expression(d_str)
@@ -293,7 +294,7 @@ class Expression:
                 dice = Dick(dick_number, dick_size)
                 self.number.push(dice.sum)
                 i = j + 1
-
+                operator_flag = 0
             elif self.expression[i] == '(':
                 self.operator.push(self.expression[i])
                 i = i + 1
