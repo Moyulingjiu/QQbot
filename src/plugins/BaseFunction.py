@@ -3,6 +3,7 @@ import datetime
 import linecache
 
 from plugins import dataManage
+from plugins import getNow
 
 
 # ==========================================================
@@ -104,3 +105,29 @@ def get_vocabulary6(number):
 
 
 # ==========================================================
+# 漂流瓶
+
+class DriftingBottle:
+    def __init__(self):
+        self.bottle = dataManage.load_obj('bottle/bottle')
+        if not self.bottle.__contains__('message'):
+            self.bottle['message'] = []
+
+    def throw(self, qq, text):
+        date = getNow.toString()
+        self.bottle['message'].append({
+            'text': text,
+            'qq': qq,
+            'date': date
+        })
+        dataManage.save_obj(self.bottle, 'bottle/bottle')
+        return '成功扔出一个漂流瓶，当前有' + str(len(self.bottle['message'])) + '个漂流瓶'
+
+    def pick(self):
+        if len(self.bottle['message']) == 0:
+            return '没有漂流瓶了呢~不妨扔一个'
+
+        data = random.choice(self.bottle['message'])
+        self.bottle['message'].remove(data)
+        dataManage.save_obj(self.bottle, 'bottle/bottle')
+        return data['text'] + '——' + data['date']

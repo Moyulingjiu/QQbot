@@ -1350,10 +1350,12 @@ def getRate(id):
         return '你还暂未进行任何对决'
     rate = float(user[id]['match']['win']) / float(user[id]['match']['win'] + user[id]['match']['lose'])
     rate = round(rate, 2) * 100
-    result = '\n总计场次：' + str(user[id]['match']['win'] + user[id]['match']['lose'])
-    result += '\n获胜次数：' + str(user[id]['match']['win'])
-    result += '\n你的胜率为：' + str(int(rate)) + '%'
+    result = '\nPVP场次：' + str(user[id]['match']['win'] + user[id]['match']['lose'])
+    result += '\nPVP获胜次数：' + str(user[id]['match']['win'])
+    result += '\n你的PVP胜率为：' + str(int(rate)) + '%'
     result += '\n登顶次数：' + str(user[id]['match']['topTimes'])
+    result += '\n击败怪物数：' + str(user[id]['match']['monster'])
+    result += '\n击败Boss数：' + str(user[id]['match']['legend'])
     return result
 
 

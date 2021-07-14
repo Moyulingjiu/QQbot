@@ -130,6 +130,7 @@ class MessageProcessing:
     last_reply = ''
 
     luck = BaseFunction.luck()
+    bottle = BaseFunction.DriftingBottle()
 
     def loadfile(self):
         # 基本信息重置
@@ -684,6 +685,16 @@ class MessageProcessing:
                 reply_text = BaseFunction.get_vocabulary6(vocabularyNumber)
                 need_reply = True
 
+            elif message == '拾取漂流瓶' or message == '捡漂流瓶' or message == '捞漂流瓶':
+                reply_text = self.bottle.pick()
+                need_reply = True
+            elif message[:4] == '扔漂流瓶' and message_len > 4:
+                text = message[4:].strip()
+                if len(text) > 0:
+                    reply_text = self.bottle.throw(qq, text)
+                    need_reply = True
+
+
             if need_reply:
                 self.bot_information['statistics']['base_function'] += 1
                 dataManage.save_obj(self.bot_information, 'baseInformation')
@@ -744,8 +755,12 @@ class MessageProcessing:
         # 指令
         if not need_reply:
             if 0 < message_code_len < 1000 and message_code[0].isalnum():
-                (reply_text, need_at, reply_image) = command.function(message_code, member, app, group_id, self.bot_information)
+                (reply_text, need_at, reply_image) = command.function(message_code, member, app, group_id, self.bot_information, mode)
                 need_reply = True
+
+                if reply_text == '*运势*':
+                    reply_text = self.luck.get_luck(qq)
+                    need_at = True
 
             if need_reply:
                 self.bot_information['statistics']['command'] += 1
@@ -763,6 +778,7 @@ class MessageProcessing:
                     member,
                     self.bot_information,
                     right,
+                    group_right,
                     mode)
 
             if need_reply:
@@ -822,10 +838,10 @@ class MessageProcessing:
                 message,
                 be_at,
                 self.bot_information,
-                app,
                 name,
                 group_id,
-                qq)
+                qq,
+                mode)
 
             if need_reply:
                 self.bot_information['statistics']['auto_reply'] += 1
@@ -842,7 +858,7 @@ class MessageProcessing:
 
         if master is not None:
             await app.sendFriendMessage(master, MessageChain.create([
-                Plain('有新的好友申请！')
+                Plain('有新的好友申请' + str(event.supplicant) + '！')
             ]))
         await event.accept()
 
@@ -861,3 +877,7 @@ class MessageProcessing:
             await app.sendFriendMessage(member, MessageChain.create([
                 Plain(reply)
             ]))
+
+    async def nudge(self, app, event):
+        print(event.target)
+        print(event.subject)

@@ -69,7 +69,7 @@ def remove_key(key, member, group_id, bot_information):
     else:
         if bot_information['keyToken']['group'].__contains__(group_id):
             if key in bot_information['keyToken']['group'][group_id]:
-                del bot_information['keyToken']['group'][group_id][key]
+                bot_information['keyToken']['group'][group_id].remove(key)
                 if len(bot_information['keyToken']['group'][group_id]) == 0:
                     del bot_information['keyToken']['group'][group_id]
                 dataManage.save_obj(bot_information, 'baseInformation')
@@ -138,12 +138,17 @@ def help_game():
     return 'help/游戏帮助.png'
 
 
-def function(code, member, app, group_id, bot_information):
+def function(code, member, app, group_id, bot_information, mode):
     global key_allow
 
     needAt = False
     result = ''
     isImage = ''
+
+    if mode == 0:
+        name = member.nickname
+    else:
+        name = member.name
 
     if code == 'help':
         isImage = help_function()
@@ -161,15 +166,14 @@ def function(code, member, app, group_id, bot_information):
                     result += i
         else:
             result = '格式错误！'
-    elif code[:9] == 'key remove':
-        tmp = code[9:].strip()
+    elif code[:10] == 'key remove':
+        tmp = code[10:].strip()
         if len(tmp) == 1:
             result = remove_key(tmp, member, group_id, bot_information)
         else:
             result = '格式错误！'
     elif code == 'key list':
         result = show_key(member, group_id, bot_information)
-
 
     elif code == 'tarotb':
         result = tarot.GetTarot()
@@ -199,6 +203,9 @@ def function(code, member, app, group_id, bot_information):
         result = tarot.tarotHexagram()
     elif code == 'tarot 凯尔特十字':
         result = tarot.tarotCelticCross()
+
+    elif code == 'jrrp':
+        result = '*运势*'
 
     elif code[:8] == 'role add':  # 添加人物
         tmp = code[8:].strip().split(' ')
@@ -398,22 +405,28 @@ def function(code, member, app, group_id, bot_information):
             result = '这是群聊命令'
     elif code == 'ex':  # 清空属性
         if group_id != 0:
-            result = '复制下面冒号后面这段话就可以导出属性：' + table.export(group_id, member.id)
+            result = table.export(group_id, member.id)
         else:
             result = '这是群聊命令'
+    elif code == 'name':  # 随机名字
+        result = name + TRPG.random_name(1)
+    elif code[:4] == 'name':  # 随机名字
+        tmp = code[4:].strip()
+        if tmp.isdigit():
+            result = name + TRPG.random_name(int(tmp))
 
     if result == '':
         express = TRPG.Expression(code.replace(' ', ''))
         try:
             result = code + '=' + str(express.show())
+        except OverflowError as e:
+            result = '运算超时'
         except ArithmeticError as e:
             err = str(e)
             if err == 'Non-expression':
                 print('Non-expression')
             elif err == 'wrong format':
                 result = '表达式无法解析'
-        except OverflowError as e:
-            result = '运算超时'
 
     if result == '' and isImage == '' and code.isalnum():
         result = '未知指令：' + code + '\n请输入\"帮助\"查看帮助\n请输入\"骰娘\"查看骰娘帮助\n请输入\"游戏帮助\"查看游戏帮助'

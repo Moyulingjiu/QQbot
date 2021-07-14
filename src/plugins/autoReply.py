@@ -9,155 +9,218 @@ screenWords = []
 unknown_reply = ['诶？', '你说的话太深奥了', '我也不是很清楚呢', '不知道哦~', '你猜']
 
 
-def reply(messages, beAt, botBaseInformation, app, nickname, groupId, memberId):
+def reply(message, be_at, bot_information, nickname, group_id, qq, mode):
     global screenWords
     screenWords = dataManage.load_obj('AIScreenWords')
 
-    Bot_QQ = botBaseInformation['baseInformation']['Bot_QQ']
-    Bot_Name = botBaseInformation['baseInformation']['Bot_Name']
-    needReply = False
-    needAt = False
-    reply = ''
-    isImage = ''
+    bot_qq = bot_information['baseInformation']['Bot_QQ']
+    bot_name = bot_information['baseInformation']['Bot_Name']
+    need_reply = False
+    need_at = False
+    reply_text = ''
+    reply_image = ''
 
-    if groupId == 0:
-        if memberId in botBaseInformation['noAI']['friend']:
-            return needReply, reply, isImage, 0, needAt
+    if mode == 0 or mode == 2:
+        if qq in bot_information['noAI']['friend']:
+            return need_reply, reply_text, reply_image, 0, need_at
     else:
-        if groupId in botBaseInformation['noAI']['group']:
-            return needReply, reply, isImage, 0, needAt
+        if group_id in bot_information['noAI']['group']:
+            return need_reply, reply_text, reply_image, 0, need_at
 
-    if beAt:
-        print('被艾特：' + messages)
-        if messages == '你好':
-            reply = '你好呀，' + nickname + '。小柒很高兴遇见你！'
-            needAt = True
-            needReply = True
-        elif messages == '抱抱':
-            replylist = ['抱抱呀！', Bot_Name +
-                         '才不要和你抱抱！', '抱抱', '抱抱' + nickname]
-            reply = replylist[random.randrange(0, len(replylist))]
-            needReply = True
-        elif messages == '贴贴':
-            replylist = ['贴贴', 'image贴贴', '快来贴贴，嘿嘿！', '不贴不贴']
-            reply = replylist[random.randrange(0, len(replylist))]
-            if reply == 'image贴贴':
-                reply = ''
-                isImage = '贴贴.jpg'
-            needReply = True
-        elif messages == '晚安':
-            replylist = ['晚安', 'image晚安', '晚安哦' + nickname,
-                         '记得要梦见' + Bot_Name, '快睡吧']
-            reply = replylist[random.randrange(0, len(replylist))]
-            if reply == 'image晚安':
-                reply = ''
-                isImage = '晚安.png'
-            needReply = True
-        elif messages == '谢谢':
-            replylist = ['嘿嘿', '不用谢啦', '要时刻想着' + Bot_Name, '没事啦']
-            reply = replylist[random.randrange(0, len(replylist))]
-        elif messages == '快来' or messages == '快来快来':
-            replylist = ['游戏启动', '来了来了', '不要着急嘛']
-            reply = replylist[random.randrange(0, len(replylist))]
-            needReply = True
-        elif messages == '傻子':
-            reply = '你才是傻子，' + Bot_Name + '才不傻'
-            needReply = True
-        elif messages == '笨蛋':
-            reply = Bot_Name + '才不要理你了'
-            needReply = True
-        elif messages == '蠢货':
-            reply = '哼'
-            needReply = True
-        elif messages == '你是猪吗' or messages == '猪':
-            reply = '你以为谁都像你一天天哼唧哼唧的'
-            needReply = True
-        elif messages == '早安':
-            reply = '早哦，' + nickname
-            needReply = True
-        elif messages == '帮助':
-            reply = '你可以输入*help来查询帮助哦~'
-            needReply = True
-        else:
-            reply = AIchat.getReply(botBaseInformation, messages)
-            needReply = True
-            for i in screenWords:
-                if reply.find(i) != -1:
-                    reply = random.choice(unknown_reply)
+    if be_at:
+        need_reply, need_at, reply_text, reply_image = forced_reply(bot_information, bot_name, nickname, message)
     else:
-        if messages == 'yjy爬':
-            reply = 'yjy快爬'
-            needReply = True
-        elif messages == '我是fw' or messages == '我是废物':
-            reply = '在' + Bot_Name + '心中，' + nickname + '一直都很厉害的哦~'
-            needReply = True
-        elif messages == '好家伙':
-            tmpNumber = random.randrange(0, 7)
-            if tmpNumber == 3:
-                reply = '又发生什么辣？'
-                needReply = True
-            elif tmpNumber == 1:
-                isImage == '问号.jpg'
-                needReply = True
-        elif messages == '你们早上都没课的嘛':
-            reply = Bot_Name + '还没有开始上课呢'
-            needReply = True
-        elif messages == '摸了':
-            reply = nickname + '桑怎么可以摸鱼呢'
-            needReply = True
-        elif messages == '也不是不行':
-            reply = nickname + '那就快冲！'
-            needReply = True
-        elif messages[-3:] == '多好啊':
-            reply = '是呀是呀'
-            needReply = True
-        elif messages == '上课':
-            reply = Bot_Name + '陪你一起上课'
-            needReply = True
-        elif messages == '满课':
-            reply = '好惨哦'
-            needReply = True
-        elif messages == '谢谢':
-            reply = '嘿嘿'
-            needReply = True
-        elif messages == '有人ow吗':
-            reply = Bot_Name + '也想来'
-            needReply = True
-        elif messages[-2:] == '快来':
-            reply = Bot_Name + '来了来了'
-            needReply = True
-        elif messages == '晚安':
-            replylist = ['晚安', 'image晚安', '晚安哦' + nickname,
-                         '记得要梦见' + Bot_Name, '快睡吧']
-            reply = replylist[random.randrange(0, len(replylist))]
-            if reply == 'image晚安':
-                reply = ''
-                isImage = '晚安.png'
-            needReply = True
-        elif messages == '早安':
-            reply = '早哦，' + nickname
-            needReply = True
-        elif messages == '来一张涩图':
-            reply = '能不能多读书，少看涩图'
-            needReply = True
-        elif messages == '？':
-            tmpNumber = random.randrange(0, 10)
-            if tmpNumber == 2:
-                reply = '怎么啦'
-                needReply = True
-            elif tmpNumber == 1:
-                isImage == '问号.jpg'
-                needReply = True
-        else:
-            tmpNumber = random.randrange(0, 1000)
-            if tmpNumber < 10:
-                if botBaseInformation['reply']['lastMinute'] <= 10:
-                    reply = AIchat.getReply(botBaseInformation, messages)
-                    needReply = True
-                    for i in screenWords:
-                        if reply.find(i) != -1:
-                            needReply = False
-                    if needReply:
-                        botBaseInformation['reply']['lastMinute'] += 1
-                        dataManage.save_obj(botBaseInformation, 'baseInformation')
-    return needReply, reply, isImage, 0, needAt
+        need_reply, need_at, reply_text, reply_image = self_reply(bot_information, bot_name, nickname, message)
+
+    return need_reply, reply_text, reply_image, 0, need_at
+
+
+def forced_reply(bot_information, bot_name, nickname, message):
+    need_reply = False
+    need_at = False
+    reply_text = ''
+    reply_image = ''
+
+    print('被艾特：' + message)
+    need_reply, need_at, reply_text, reply_image = reply_word(bot_information, bot_name, nickname, message)
+
+    if not need_reply:
+        reply_text = AIchat.getReply(bot_information, message)
+        need_reply = True
+        for i in screenWords:
+            if reply_text.find(i) != -1:
+                reply_text = random.choice(unknown_reply)
+                break
+
+    return need_reply, need_at, reply_text, reply_image
+
+
+def self_reply(bot_information, bot_name, nickname, message):
+    need_reply = False
+    need_at = False
+    reply_text = ''
+    reply_image = ''
+
+    # 强制触发词
+    if message == 'yjy爬':
+        reply_text = 'yjy快爬'
+        need_reply = True
+    elif message == '来一张涩图':
+        reply_text = '能不能多读书，少看涩图'
+        need_reply = True
+    elif message == '骂我':
+        reply_text = '咦惹？你是弱0吗'
+        need_reply = True
+    if need_reply:
+        return need_reply, need_at, reply_text, reply_image
+
+    # 非强制触发词回复内容
+    rand = random.randrange(0, 10)
+    if rand > 8:
+        return need_reply, need_at, reply_text, reply_image
+    need_reply, need_at, reply_text, reply_image = reply_word(bot_information, bot_name, nickname, message)
+
+    if not need_reply:
+        tmpNumber = random.randrange(0, 1000)
+        if tmpNumber < 10:
+            if bot_information['reply']['lastMinute'] <= 10:
+                reply_text = AIchat.getReply(bot_information, message)
+                need_reply = True
+                for i in screenWords:
+                    if reply_text.find(i) != -1:
+                        need_reply = False
+                if need_reply:
+                    bot_information['reply']['lastMinute'] += 1
+                    dataManage.save_obj(bot_information, 'baseInformation')
+
+    return need_reply, need_at, reply_text, reply_image
+
+
+def reply_word(bot_information, bot_name, nickname, message):
+    need_reply = False
+    need_at = False
+    reply_text = ''
+    reply_image = ''
+
+    if message == '你好':
+        reply_text = '你好呀，' + nickname + '。小柒很高兴遇见你！'
+        need_at = True
+        need_reply = True
+    elif message == '抱抱':
+        reply_list = ['抱抱呀！', bot_name + '才不要和你抱抱！', '抱抱', '抱抱' + nickname]
+        reply_text = reply_list[random.randrange(0, len(reply_list))]
+        need_reply = True
+    elif message == '贴贴':
+        reply_list = ['贴贴', 'image贴贴', '快来贴贴，嘿嘿！', '不贴不贴']
+        reply_text = reply_list[random.randrange(0, len(reply_list))]
+        if reply_text == 'image贴贴':
+            reply_text = ''
+            reply_image = '贴贴.jpg'
+        need_reply = True
+    elif message == '晚安' or message == '安安':
+        reply_list = ['晚安', 'image晚安', '晚安哦' + nickname, '记得要梦见' + bot_name, '快睡吧']
+        reply_text = reply_list[random.randrange(0, len(reply_list))]
+        if reply_text == 'image晚安':
+            reply_text = ''
+            reply_image = '晚安.png'
+        need_reply = True
+    elif message == '早安' or message == '早':
+        reply_text = '早哦，' + nickname
+        need_reply = True
+    elif message == '午安' or message == '睡午觉了':
+        reply_text = '午安呀！' + nickname
+        need_reply = True
+
+    elif message == '谢谢':
+        reply_list = ['嘿嘿', '不用谢啦', '要时刻想着' + bot_name, '没事啦']
+        reply_text = reply_list[random.randrange(0, len(reply_list))]
+    elif message == '快来' or message == '快来快来':
+        reply_list = ['游戏启动', '来了来了', '不要着急嘛']
+        reply_text = reply_list[random.randrange(0, len(reply_list))]
+        need_reply = True
+
+    elif message == '傻子':
+        reply_text = '你才是傻子，' + bot_name + '才不傻'
+        need_reply = True
+    elif message == '笨蛋':
+        reply_text = bot_name + '才不要理你了'
+        need_reply = True
+    elif message == '蠢货':
+        reply_text = '哼'
+        need_reply = True
+    elif message == '你是猪吗' or message == '猪':
+        reply_text = '你以为谁都像你一天天哼唧哼唧的'
+        need_reply = True
+    elif message == '人工智障':
+        reply_text = '哎呀呀呀！我已经很努力了QAQ'
+        need_reply = True
+
+    elif message == '爱不爱我' or message == '爱我吗':
+        reply_list = ['爱你鸭！', bot_name + '超级爱你的~', '不爱，略略略']
+        reply_text = reply_list[random.randrange(0, len(reply_list))]
+        need_reply = True
+    elif message == '喜不喜欢我' or message == '喜欢我吗':
+        reply_list = ['喜欢你鸭！', bot_name + '超级喜欢你的~', '不喜欢，略略略']
+        reply_text = reply_list[random.randrange(0, len(reply_list))]
+        need_reply = True
+
+    elif message == '我是fw' or message == '我是废物':
+        reply_text = '在' + bot_name + '心中，' + nickname + '一直都很厉害的哦~'
+        need_reply = True
+    elif message == '摸了' or message == '摸鱼' or message == '摸鱼了':
+        reply_text = nickname + '桑怎么可以摸鱼呢'
+        need_reply = True
+    elif message == '也不是不行':
+        reply_text = nickname + '那就快冲！'
+        need_reply = True
+
+    elif message == '？' or message == '?':
+        tmpNumber = random.randrange(0, 10)
+        if tmpNumber == 2:
+            reply_list = ['怎么啦？', '嗯哼？']
+            reply_text = reply_list[random.randrange(0, len(reply_list))]
+            need_reply = True
+        elif tmpNumber == 1:
+            reply_image = '问号.jpg'
+            need_reply = True
+    elif message == '好家伙':
+        tmpNumber = random.randrange(0, 5)
+        if tmpNumber == 3:
+            reply_list = ['又发生什么辣', '又有什么大事情吗', '什么大事件']
+            reply_text = reply_list[random.randrange(0, len(reply_list))]
+            need_reply = True
+        elif tmpNumber == 1:
+            reply_image = '问号.jpg'
+            need_reply = True
+
+    elif message == '有人ow吗':
+        reply_text = bot_name + '也想来'
+        need_reply = True
+    elif message[-2:] == '快来':
+        reply_text = bot_name + '来了来了'
+        need_reply = True
+    elif message[-3:] == '多好啊':
+        reply_text = '是呀是呀'
+        need_reply = True
+    elif message == '上课':
+        reply_text = bot_name + '陪你一起上课'
+        need_reply = True
+    elif message == '满课':
+        reply_text = '好惨哦'
+        need_reply = True
+    elif message == '谢谢':
+        reply_text = '嘿嘿'
+        need_reply = True
+    elif message == '你们早上都没课的嘛':
+        reply_text = bot_name + '还没有开始上课呢'
+        need_reply = True
+    elif message == '早八' or message == '又是早八' or message == '明天早八' or message == '我明天早八':
+        reply_list = ['好惨鸭', bot_name + '抱抱你，不要哭', '摸摸头', '不哭不哭，站起来撸']
+        reply_text = reply_list[random.randrange(0, len(reply_list))]
+        need_reply = True
+    elif message == '我不配':
+        reply_list = ['人贵有自知之明', bot_name + '抱抱你，不要哭']
+        reply_text = reply_list[random.randrange(0, len(reply_list))]
+        need_reply = True
+
+    return need_reply, need_at, reply_text, reply_image

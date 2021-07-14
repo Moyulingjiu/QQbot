@@ -45,7 +45,7 @@ async def send_clock_message(group_id, clock, app):
 
 # ==========================================================
 # 管理员模块
-async def administrator_operation(message, group_id, qq, app, member, bot_information, right, mode):
+async def administrator_operation(message, group_id, qq, app, member, bot_information, right, group_right, mode):
     bot_qq = bot_information['baseInformation']['Bot_QQ']
     bot_name = bot_information['baseInformation']['Bot_Name']
     master_qq = bot_information['baseInformation']['Master_QQ']
@@ -56,7 +56,6 @@ async def administrator_operation(message, group_id, qq, app, member, bot_inform
     message5 = message[:5]
     message6 = message[:6]
     message7 = message[:7]
-    message8 = message[:8]
 
     need_reply = False
     need_at = False
@@ -383,13 +382,13 @@ async def administrator_operation(message, group_id, qq, app, member, bot_inform
             need_reply = True
 
         elif (message == '开启脏话' or message == '脏话开启') and mode == 1:
-            if right < 2:
+            if right < 2 or group_right < 2:
                 reply_text = add_curse_plan_group(group_id, bot_information)
             else:
                 reply_text = '权限不足，请输入"我的权限"查看'
             need_reply = True
         elif (message == '关闭脏话' or message == '脏话关闭') and mode == 1:
-            if right < 2:
+            if right < 2 or group_right < 2:
                 reply_text = del_curse_plan_group(group_id, bot_information)
             else:
                 reply_text = '权限不足，请输入"我的权限"查看'
@@ -548,9 +547,9 @@ async def administrator_operation(message, group_id, qq, app, member, bot_inform
                 reply_text = '权限不足，请输入"我的权限"查看'
             need_reply = True
 
-        elif message8 == '关键词回复概率 ' and message_len > 8 and mode == 1:
+        elif message7 == '关键词回复概率' and message_len > 7 and mode == 1:
             if right < 3:
-                reply_text = edit_key_probability(message[8:], member)
+                reply_text = edit_key_probability(message[7:].strip(), member)
             else:
                 reply_text = '权限不足，请输入"我的权限"查看'
             need_reply = True
@@ -600,6 +599,23 @@ async def administrator_operation(message, group_id, qq, app, member, bot_inform
                     reply_text = await view_activity(group_id, activity_name, app)
             else:
                 reply_text = '权限不足，请输入"我的权限"查看'
+            need_reply = True
+
+        elif message == '申请权限' and mode == 1:
+            if group_right == 0:
+                member_list = await app.memberList(group_id)
+                if len(member_list) > 5:
+                    reply_text = add_contributors(qq, bot_information)
+                    if reply_text == '添加成功~':
+                        reply_text = '申请贡献者权限成功，可以输入“贡献者帮助”获取管理指令，需要更高权限的请前往' + bot_name + '官方群(479504567)找主人要'
+                    elif '正确' in reply_text:
+                        reply_text = '因为未知原因申请失败，请稍后重试'
+                    else:
+                        reply_text = reply_text.replace('他', '你').replace('该成员', '你')
+                else:
+                    reply_text = '你的群需要超过5人，请去' + bot_name + '官方群(479504567)找主人要权限'
+            else:
+                reply_text = '你并非群主（群需要超过5人），请去' + bot_name + '官方群(479504567)找主人要权限'
             need_reply = True
 
     if need_reply:
@@ -1017,7 +1033,7 @@ def del_key_reply_at(word, reply_text, at, member):
 
 
 def edit_key_probability(probability, member):
-    if probability.isdigit():
+    if not probability.isdigit():
         return '格式错误，请输入0~100的数字'
     keyReply = dataManage.load_obj('keyReply/' + str(member.group.id) + 'key')
     p = int(probability)
