@@ -1,0 +1,15 @@
+version=0.5.6
+qq=0
+name=小柒
+color=天蓝色
+age=14
+master=0
+masterRight=
+administrator=
+contributor=
+RPGadministrator=
+blacklistGroup=
+blacklistMember=
+
+# 官方群号，逗号分隔
+testGroup=0

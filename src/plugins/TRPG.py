@@ -21,6 +21,9 @@ def attribute_dick2():
 def random_name(number):
     if number < 1:
         return '数量都小于1啦！'
+    elif number > 100:
+        return '太多了吧！'
+
     result = '的随机名称：'
     first = False
     for i in range(number):
@@ -160,7 +163,9 @@ def str_to_attribute(attribute, string, mode):
             if number > 100:
                 number = 100
             name = name.strip()
-            print(name)
+            if name[-1:] == '：' or name[-1:] == ':':
+                name = name[:-1]
+                
             if len(name) > 0:
                 if mode == 0 or (mode == 1 and attribute.__contains__(name)):
                     attribute[name] = number
@@ -456,8 +461,8 @@ class TableRolePlayGame:
     role = {}
 
     def __init__(self):
-        self.attribute = dataManage.load_obj('coc')
-        self.role = dataManage.load_obj('cocRole')
+        self.attribute = dataManage.load_obj('data/TRPG/coc')
+        self.role = dataManage.load_obj('data/TRPG/cocRole')
 
     # ==========================================================
     # 丢色子
@@ -534,7 +539,7 @@ class TableRolePlayGame:
             self.attribute[group_id][qq]['san值'] = san
             self.attribute[group_id][qq]['理智'] = san
             self.attribute[group_id][qq]['理智值'] = san
-        dataManage.save_obj(self.attribute, 'coc')
+        dataManage.save_obj(self.attribute, 'data/TRPG/coc')
         return result
 
     def sa(self, num, group_id, qq):
@@ -632,7 +637,7 @@ class TableRolePlayGame:
             del self.attribute[group_id][qq]
 
         self.sta(attribute, group_id, qq)
-        dataManage.save_obj(self.attribute, 'coc')
+        dataManage.save_obj(self.attribute, 'data/TRPG/coc')
         return '覆盖成功！目前有属性个数：' + str(len(self.attribute[group_id][qq]))
 
     def sta(self, attribute, group_id, qq):
@@ -643,7 +648,7 @@ class TableRolePlayGame:
 
         self.attribute[group_id][qq], edit_number = str_to_attribute(self.attribute[group_id][qq], attribute, 0)
 
-        dataManage.save_obj(self.attribute, 'coc')
+        dataManage.save_obj(self.attribute, 'data/TRPG/coc')
         return '追加成功！' + '\n追加属性个数：' + str(edit_number) + '\n目前有属性个数：' + str(len(self.attribute[group_id][qq]))
 
     def stc(self, attribute, group_id, qq):
@@ -654,7 +659,7 @@ class TableRolePlayGame:
 
         self.attribute[group_id][qq], edit_number = str_to_attribute(self.attribute[group_id][qq], attribute, 1)
 
-        dataManage.save_obj(self.attribute, 'coc')
+        dataManage.save_obj(self.attribute, 'data/TRPG/coc')
         return '成功修改' + str(edit_number) + '个属性'
 
     def std(self, attribute, group_id, qq):
@@ -671,20 +676,20 @@ class TableRolePlayGame:
                 continue
             edit_number += 1
             del self.attribute[group_id][qq][i]
-        dataManage.save_obj(self.attribute, 'coc')
+        dataManage.save_obj(self.attribute, 'data/TRPG/coc')
         return '成功删除' + str(edit_number) + '个属性'
 
     def clear_all(self, group_id):
         if self.attribute.__contains__(group_id):
             del self.attribute[group_id]
-        dataManage.save_obj(self.attribute, 'coc')
+        dataManage.save_obj(self.attribute, 'data/TRPG/coc')
         return '清空成功！'
 
     def clear_single(self, group_id, qq):
         if self.attribute.__contains__(group_id):
             if self.attribute[group_id].__contains__(qq):
                 del self.attribute[group_id][qq]
-        dataManage.save_obj(self.attribute, 'coc')
+        dataManage.save_obj(self.attribute, 'data/TRPG/coc')
         return '清空成功！'
 
     def show(self, group_id, qq):
@@ -783,13 +788,13 @@ class TableRolePlayGame:
             del self.role[role_name]
         self.role[role_name], edit_number = str_to_attribute(self.role[role_name], attribute, 0)
 
-        dataManage.save_obj(self.role, 'cocRole')
+        dataManage.save_obj(self.role, 'data/TRPG/cocRole')
         return '人物' + role_name + '已修改'
 
     def remove_role(self, group_id, role_name):
         if self.role.__contains__(role_name):
             del self.role[role_name]
-            dataManage.save_obj(self.role, 'cocRole')
+            dataManage.save_obj(self.role, 'data/TRPG/cocRole')
             return '人物' + role_name + '已删除'
         else:
             return '人物' + role_name + '不存在'
@@ -820,7 +825,7 @@ class TableRolePlayGame:
             return '不存在该人物'
 
         self.attribute[group_id][qq] = self.role[role_name]
-        dataManage.save_obj(self.attribute, 'coc')
+        dataManage.save_obj(self.attribute, 'data/TRPG/coc')
         return '已将人物模板' + role_name + '的属性复制给你~'
 
     def copy_to_role(self, role_name, group_id, qq):
@@ -830,4 +835,5 @@ class TableRolePlayGame:
             return '你目前没有属性，不能复制到人物卡上哦~'
 
         self.role[role_name] = self.attribute[group_id][qq]
-        dataManage.save_obj(self.role, 'cocRole')
+        dataManage.save_obj(self.role, 'data/TRPG/cocRole')
+        return '已将你的属性复制到人物卡：' + role_name

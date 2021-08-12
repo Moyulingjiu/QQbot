@@ -5,7 +5,7 @@ from plugins import TRPG
 # ==========================================================
 
 key_allow = [
-    '#',
+    '#', '*',
     ',', '，',
     '.', '。',
     '!', '！',
@@ -14,239 +14,235 @@ key_allow = [
     ';', '；',
     '+',
     '-',
-    '/',
-    '='
+    '/'
 ]
 table = TRPG.TableRolePlayGame()
 
 
 # =========================================================
 # 触发词
-def add_key(key, member, group_id, bot_information):
-    if group_id == 0:
-        qq = member.id
-        if bot_information['keyToken']['friend'].__contains__(qq):
-            if key in bot_information['keyToken']['friend'][qq]:
-                return '已启用该关键字'
-            else:
-                bot_information['keyToken']['friend'][qq].append(key)
-                dataManage.save_obj(bot_information, 'baseInformation')
-                return '操作成功！启用关键字“' + key + '”，使用“*key list”命令可以查看当前启用的关键字'
-        else:
-            bot_information['keyToken']['friend'][qq] = []
-            bot_information['keyToken']['friend'][qq].append(key)
-            dataManage.save_obj(bot_information, 'baseInformation')
-            return '操作成功！启用关键字“' + key + '”，使用“*key list”命令可以查看当前启用的关键字'
+def add_key(key, mode, config, group_id, qq):
+    if key in config['config']['key']:
+        return '已启用该触发词'
+    if key not in key_allow:
+        reply = '该触发词不允许使用，仅允许使用以下符号作为触发词：'
+        for i in key_allow:
+            reply += i
+        return reply
+
+    config['config']['key'].append(key)
+    if mode == 1:
+        dataManage.save_group(group_id, config)
     else:
-        if bot_information['keyToken']['group'].__contains__(group_id):
-            if key in bot_information['keyToken']['group'][group_id]:
-                return '已启用该关键字'
-            else:
-                bot_information['keyToken']['group'][group_id].append(key)
-                dataManage.save_obj(bot_information, 'baseInformation')
-                return '操作成功！群内启用关键字“' + key + '”，使用“*key list”命令可以查看当前启用的关键字'
-        else:
-            bot_information['keyToken']['group'][group_id] = []
-            bot_information['keyToken']['group'][group_id].append(key)
-            dataManage.save_obj(bot_information, 'baseInformation')
-            return '操作成功！群内启用关键字“' + key + '”，使用“*key list”命令可以查看当前启用的关键字'
+        dataManage.save_user(qq, config)
+    return '操作成功！启用触发词“' + key + '”，使用“*key list”命令可以查看当前启用的触发词'
 
 
-def remove_key(key, member, group_id, bot_information):
-    if group_id == 0:
-        qq = member.id
-        if bot_information['keyToken']['friend'].__contains__(qq):
-            if key in bot_information['keyToken']['friend'][qq]:
-                del bot_information['keyToken']['friend'][qq][key]
-                if len(bot_information['keyToken']['friend'][qq]) == 0:
-                    del bot_information['keyToken']['friend'][qq]
-                dataManage.save_obj(bot_information, 'baseInformation')
-                return '已关闭该关键字'
-            else:
-                return '该关键字未启用'
-        else:
-            return '该关键字未启用'
+def remove_key(key, mode, config, group_id, qq):
+    if key not in config['config']['key']:
+        return '未启用该触发词'
+
+    config['config']['key'].remove(key)
+    if mode == 1:
+        dataManage.save_group(group_id, config)
     else:
-        if bot_information['keyToken']['group'].__contains__(group_id):
-            if key in bot_information['keyToken']['group'][group_id]:
-                bot_information['keyToken']['group'][group_id].remove(key)
-                if len(bot_information['keyToken']['group'][group_id]) == 0:
-                    del bot_information['keyToken']['group'][group_id]
-                dataManage.save_obj(bot_information, 'baseInformation')
-                return '已关闭该关键字'
-            else:
-                return '该关键字未启用'
-        else:
-            return '该关键字未启用'
+        dataManage.save_user(qq, config)
+    return '操作成功！已删除触发词' + key
 
 
-def show_key(member, group_id, bot_information):
-    if group_id == 0:
-        qq = member.id
-        if bot_information['keyToken']['friend'].__contains__(qq):
-            result = '启用关键字如下：'
-            for i in bot_information['keyToken']['friend'][qq]:
-                result += i
-            return result
-        else:
-            return '未启用任何附加关键字'
+def clear_key(mode, config, group_id, qq):
+    config['config']['key'] = []
+    if mode == 1:
+        dataManage.save_group(group_id, config)
     else:
-        if bot_information['keyToken']['group'].__contains__(group_id):
-            result = '启用关键字如下：'
-            for i in bot_information['keyToken']['group'][group_id]:
-                result += i
-            return result
-        else:
-            return '未启用任何附加关键字'
+        dataManage.save_user(qq, config)
+    return '已清除所有触发词'
+
+
+def show_key(config):
+    if len(config['config']['key']) == 0:
+        return '未启用任何触发词'
+    reply = '启用触发词如下：'
+    for i in config['config']['key']:
+        reply += i
+    return reply
 
 
 # ==========================================================
 
 def help_function():
-    return 'help/帮助.png'
+    return 'data/Help/帮助.png'
+
+
+def help_modular():
+    return 'data/Help/模块管理帮助.png'
+
+
+def help_clash():
+    return 'data/Help/部落冲突查询帮助.png'
 
 
 def help_thrower():
-    return 'help/骰娘帮助.png'
+    return 'data/Help/骰娘帮助.png'
 
 
 def help_clock():
-    return 'help/打卡帮助.png'
+    return 'data/Help/打卡帮助.png'
 
 
 def help_activity():
-    return 'help/活动帮助.png'
+    return 'data/Help/活动帮助.png'
 
 
 def help_contributor():
-    return 'help/贡献者帮助.png'
+    return 'data/Help/贡献者帮助.png'
 
 
 def help_administrator():
-    return 'help/管理员帮助.png'
+    return 'data/Help/管理员帮助.png'
 
 
 def help_master():
-    return 'help/主人帮助.png'
+    return 'data/Help/主人帮助.png'
 
 
 def help_tarot():
-    return 'help/塔罗牌帮助.png'
+    return 'data/Help/塔罗牌帮助.png'
 
 
 def help_game():
-    return 'help/游戏帮助.png'
+    return 'data/Help/游戏帮助.png'
 
 
-def function(code, member, app, group_id, bot_information, mode):
+def function(code, qq, name, group_id, mode, bot_config, config, statistics):
     global key_allow
 
-    needAt = False
-    result = ''
-    isImage = ''
+    trpg = True
+    if mode == 1:
+        trpg = config['config']['TRPG']
 
-    if mode == 0:
-        name = member.nickname
-    else:
-        name = member.name
+    need_at = False
+    reply_text = ''
+    reply_image = ''
 
     if code == 'help':
-        isImage = help_function()
+        reply_image = help_function()
     elif code == 'help tarot':
-        isImage = help_tarot()
+        reply_image = help_tarot()
 
     elif code[:7] == 'key add':
         tmp = code[7:].strip()
         if len(tmp) == 1:
             if tmp in key_allow:
-                result = add_key(tmp, member, group_id, bot_information)
+                reply_text = add_key(tmp, mode, config, group_id, qq)
             else:
-                result = '不允许这个符号，仅允许扩展以下符号：'
+                reply_text = '不允许这个符号，仅允许扩展以下符号：'
                 for i in key_allow:
-                    result += i
+                    reply_text += i
         else:
-            result = '格式错误！'
+            reply_text = '格式错误！'
     elif code[:10] == 'key remove':
         tmp = code[10:].strip()
         if len(tmp) == 1:
-            result = remove_key(tmp, member, group_id, bot_information)
+            reply_text = remove_key(tmp, mode, config, group_id, qq)
         else:
-            result = '格式错误！'
+            reply_text = '格式错误！'
     elif code == 'key list':
-        result = show_key(member, group_id, bot_information)
+        reply_text = show_key(config)
+    elif code == 'key clear':
+        reply_text = clear_key(mode, config, group_id, qq)
 
     elif code == 'tarotb':
-        result = tarot.GetTarot()
+        reply_text = tarot.GetTarot()
     elif code == 'tarotl':
-        result = tarot.GetTarot2()
+        reply_text = tarot.GetTarot2()
     elif code == 'tarot':
-        result = tarot.tarot()
+        reply_text = tarot.tarot()
     elif code == 'tarot 时间':
-        result = tarot.tarotTime()
+        reply_text = tarot.tarotTime()
     elif code == 'tarot 是非':
-        result = tarot.tarotIs()
+        reply_text = tarot.tarotIs()
     elif code == 'tarot 圣三角':
-        result = tarot.tarotIs()
+        reply_text = tarot.tarotIs()
     elif code == 'tarot 钻石展开法':
-        result = tarot.tarotBussiness()
+        reply_text = tarot.tarotBussiness()
     elif code == 'tarot 恋人金字塔':
-        result = tarot.tarotLove()
+        reply_text = tarot.tarotLove()
     elif code == 'tarot 自我探索':
-        result = tarot.tarotSelf()
+        reply_text = tarot.tarotSelf()
     elif code == 'tarot 吉普赛十字':
-        result = tarot.tarotCross()
+        reply_text = tarot.tarotCross()
     elif code == 'tarot 二选一':
-        result = tarot.tarotChoose()
+        reply_text = tarot.tarotChoose()
     elif code == 'tarot 关系发展':
-        result = tarot.tarotForward()
+        reply_text = tarot.tarotForward()
     elif code == 'tarot 六芒星':
-        result = tarot.tarotHexagram()
+        reply_text = tarot.tarotHexagram()
     elif code == 'tarot 凯尔特十字':
-        result = tarot.tarotCelticCross()
+        reply_text = tarot.tarotCelticCross()
 
-    elif code == 'jrrp':
-        result = '*运势*'
+    elif code == 'jrrp' and trpg:
+        reply_text = '*运势*'
 
-    elif code[:8] == 'role add':  # 添加人物
+    elif code[:8] == 'role add' and trpg:  # 添加人物
         tmp = code[8:].strip().split(' ')
         if len(tmp) == 2:
-            result = table.add_role(tmp[1], group_id, tmp[0])
-    elif code[:11] == 'role remove':  # 删除人物
-        result = table.remove_role(group_id, code[11:].strip())
-    elif code == 'role list':
-        result = table.show_role_list(group_id)
-    elif code[:9] == 'role show':
-        result = table.show_role(group_id, code[9:].strip())
-    elif code[:9] == 'role copy':
+            reply_text = table.add_role(tmp[1], group_id, tmp[0])
+    elif code[:11] == 'role remove' and trpg:  # 删除人物
+        reply_text = table.remove_role(group_id, code[11:].strip())
+    elif code == 'role list' and trpg:
+        reply_text = table.show_role_list(group_id)
+    elif code[:9] == 'role show' and trpg:
+        reply_text = table.show_role(group_id, code[9:].strip())
+    elif code[:9] == 'role copy' and trpg:
         if group_id != 0:
-            result = table.copy_role(code[9:].strip(), group_id, member.id)
-            needAt = True
+            reply_text = table.copy_role(code[9:].strip(), group_id, qq)
+            need_at = True
         else:
-            result = '这是群聊命令，请在骰娘群里复制属性，因为每个群之间的属性是不共通的哦~'
+            reply_text = '这是群聊命令，请在骰娘群里复制属性，因为每个群之间的属性是不共通的哦~'
 
-    elif code[:3] == 'coc':
+
+    elif code[:7] == 'roleadd' and trpg:  # 添加人物
+        tmp = code[7:].strip().split(' ')
+        if len(tmp) == 2:
+            reply_text = table.add_role(tmp[1], group_id, tmp[0])
+    elif code[:10] == 'roleremove' and trpg:  # 删除人物
+        reply_text = table.remove_role(group_id, code[10:].strip())
+    elif code == 'rolelist' and trpg:
+        reply_text = table.show_role_list(group_id)
+    elif code[:8] == 'roleshow' and trpg:
+        reply_text = table.show_role(group_id, code[8:].strip())
+    elif code[:8] == 'rolecopy' and trpg:
+        if group_id != 0:
+            reply_text = table.copy_role(code[8:].strip(), group_id, qq)
+            need_at = True
+        else:
+            reply_text = '这是群聊命令，请在骰娘群里复制属性，因为每个群之间的属性是不共通的哦~'
+
+
+    elif code[:3] == 'coc' and trpg:
         tmp = code[3:].strip()
         if tmp.isdigit():
-            result = table.coc7(int(tmp))
-            needAt = True
+            reply_text = table.coc7(int(tmp))
+            need_at = True
         elif len(tmp) == 0:
-            result = table.coc7(1)
-            needAt = True
-    elif code[:2] == 'sa':
+            reply_text = table.coc7(1)
+            need_at = True
+    elif code[:2] == 'sa' and trpg:
         if group_id != 0:
             tmp = code[2:].strip()
             if tmp.isdigit():
-                result = table.sa(int(tmp), group_id, member.id)
-                needAt = True
+                reply_text = table.sa(int(tmp), group_id, qq)
+                need_at = True
         else:
-            result = '这是群聊命令'
-    elif code == 'sc':
+            reply_text = '这是群聊命令'
+    elif code == 'sc' and trpg:
         if group_id != 0:
-            result = table.rasan(group_id, member.id)
-            needAt = True
+            reply_text = table.rasan(group_id, qq)
+            need_at = True
         else:
-            result = '这是群聊命令'
-    elif code[:2] == 'sc':
+            reply_text = '这是群聊命令'
+    elif code[:2] == 'sc' and trpg:
         if group_id != 0:
             tmp1 = code[2:].strip()
             tmp2 = tmp1.split('/')
@@ -276,20 +272,20 @@ def function(code, member, app, group_id, bot_information, mode):
                             fail_dick_size = int(tmp4[0])
                             fail_dick_base = int(tmp4[1])
             if fail_dick_number > 0 and fail_dick_size > 0:
-                result = table.sc(success, fail_dick_number, fail_dick_size, fail_dick_base, group_id,
-                                  member.id)
-                needAt = True
+                reply_text = table.sc(success, fail_dick_number, fail_dick_size, fail_dick_base, group_id,
+                                  qq)
+                need_at = True
         else:
-            result = '这是群聊命令'
+            reply_text = '这是群聊命令'
 
 
-    elif code == 'rd':
-        result = table.rd(1, 100, 1)
-        needAt = True
-    elif code == 'rp':
-        result = table.rd(1, 20, 1)
-        needAt = True
-    elif code[:2] == 'rd':
+    elif (code == 'rd' or code == 'r') and trpg:
+        reply_text = table.rd(1, 100, 1)
+        need_at = True
+    elif code == 'rp' and trpg:
+        reply_text = table.rd(1, 20, 1)
+        need_at = True
+    elif code[:2] == 'rd' and trpg:
         size = 1
         times = 1
         if code[2:].isdigit():
@@ -300,8 +296,8 @@ def function(code, member, app, group_id, bot_information, mode):
                 size = int(tmp[0])
                 times = int(tmp[1])
         if size > 0:
-            result = table.rd(1, size, times)
-    elif code[0] == 'r' and 'd' in code and code[len(code) - 1] != 'd':
+            reply_text = table.rd(1, size, times)
+    elif code[0] == 'r' and 'd' in code and code[len(code) - 1] != 'd' and trpg:
         num = 0
         size = 0
         times = 1
@@ -315,120 +311,137 @@ def function(code, member, app, group_id, bot_information, mode):
             size = int(tmp[0])
             times = int(tmp[1])
         if size > 0 and num > 0:
-            result = table.rd(num, size, times)
-            if result != '啊嘞？':
-                needAt = True
-    elif code[:3] == 'sta':  # 追加属性
+            reply_text = table.rd(num, size, times)
+            if reply_text != '啊嘞？':
+                need_at = True
+
+    elif code[:3] == 'sta' and trpg:  # 追加属性
         if group_id != 0:
             if len(code) > 4:
                 attribute = code[3:].strip()
-                result = table.sta(attribute, group_id, member.id)
-                needAt = True
+                reply_text = table.sta(attribute, group_id, qq)
+                need_at = True
         else:
-            result = '这是群聊命令'
-    elif code[:3] == 'stc':  # 修改属性
+            reply_text = '这是群聊命令'
+    elif code[:3] == 'stc' and trpg:  # 修改属性
         if group_id != 0:
             if len(code) > 4:
                 attribute = code[3:].strip()
-                result = table.stc(attribute, group_id, member.id)
-                needAt = True
+                reply_text = table.stc(attribute, group_id, qq)
+                need_at = True
         else:
-            result = '这是群聊命令'
-    elif code[:3] == 'std':  # 删除属性
+            reply_text = '这是群聊命令'
+    elif code[:3] == 'std' and trpg:  # 删除属性
         if group_id != 0:
             if len(code) > 4:
                 attribute = code[4:]
-                result = table.std(attribute, group_id, member.id)
-                needAt = True
+                reply_text = table.std(attribute, group_id, qq)
+                need_at = True
         else:
-            result = '这是群聊命令'
+            reply_text = '这是群聊命令'
 
-    elif code[:7] == 'st from':  # 设置属性
+    elif code[:7] == 'st from' and trpg:  # 设置属性
         if group_id != 0:
             role_name = code[7:].strip()
-            result = table.copy_role(role_name, group_id, member.id)
-            needAt = True
+            reply_text = table.copy_role(role_name, group_id, qq)
+            need_at = True
         else:
-            result = '这是群聊命令'
-    elif code[:5] == 'st to':  # 把属性设置到人物卡
+            reply_text = '这是群聊命令'
+    elif code[:6] == 'stfrom' and trpg:  # 设置属性
+        if group_id != 0:
+            role_name = code[6:].strip()
+            reply_text = table.copy_role(role_name, group_id, qq)
+            need_at = True
+        else:
+            reply_text = '这是群聊命令'
+
+    elif code[:5] == 'st to' and trpg:  # 把属性设置到人物卡
         if group_id != 0:
             role_name = code[5:].strip()
-            result = table.copy_to_role(role_name, group_id, member.id)
-            needAt = True
+            reply_text = table.copy_to_role(role_name, group_id, qq)
+            need_at = True
         else:
-            result = '这是群聊命令'
-    elif code[:2] == 'st':  # 设置属性
+            reply_text = '这是群聊命令'
+    elif code[:4] == 'stto' and trpg:  # 把属性设置到人物卡
         if group_id != 0:
-            if len(code) > 3:
-                attribute = code[2:].strip()
-                result = table.st(attribute, group_id, member.id)
-                needAt = True
+            role_name = code[4:].strip()
+            reply_text = table.copy_to_role(role_name, group_id, qq)
+            need_at = True
         else:
-            result = '这是群聊命令'
+            reply_text = '这是群聊命令'
 
-    elif code == 'show':  # 展示属性
-        if group_id != 0:
-            result = table.show(group_id, member.id)
-            needAt = True
-        else:
-            result = '这是群聊命令'
-    elif code == 'show all' or code == 'showall':  # 展示属性
-        if group_id != 0:
-            result = table.show_all(group_id, member.id)
-            needAt = True
-        else:
-            result = '这是群聊命令'
-    elif code[:4] == 'show':
-        if group_id != 0:
-            result = table.show_single(code[4:].strip(), group_id, member.id)
-        else:
-            result = '这是群聊命令'
-    elif code[:2] == 'ra':  # 鉴定属性
+    elif code[:2] == 'st' and trpg:  # 设置属性
         if group_id != 0:
             if len(code) > 3:
                 attribute = code[2:].strip()
-                result = table.ra(attribute, group_id, member.id)
-                needAt = True
+                reply_text = table.st(attribute, group_id, qq)
+                need_at = True
         else:
-            result = '这是群聊命令'
-    elif code == 'clear all':  # 清空属性
+            reply_text = '这是群聊命令'
+
+    elif code == 'show' and trpg:  # 展示属性
         if group_id != 0:
-            result = table.clear_all(group_id)
-            needAt = True
+            reply_text = table.show(group_id, qq)
+            need_at = True
         else:
-            result = '这是群聊命令'
-    elif code == 'clear':  # 清空属性
+            reply_text = '这是群聊命令'
+    elif (code == 'show all' or code == 'showall') and trpg:  # 展示属性
         if group_id != 0:
-            result = table.clear_single(group_id, member.id)
-            needAt = True
+            reply_text = table.show_all(group_id, qq)
+            need_at = True
         else:
-            result = '这是群聊命令'
-    elif code == 'ex':  # 清空属性
+            reply_text = '这是群聊命令'
+    elif code[:4] == 'show' and trpg:
         if group_id != 0:
-            result = table.export(group_id, member.id)
+            reply_text = table.show_single(code[4:].strip(), group_id, qq)
         else:
-            result = '这是群聊命令'
-    elif code == 'name':  # 随机名字
-        result = name + TRPG.random_name(1)
-    elif code[:4] == 'name':  # 随机名字
+            reply_text = '这是群聊命令'
+    elif code[:2] == 'ra' and trpg:  # 鉴定属性
+        if group_id != 0:
+            if len(code) > 3:
+                attribute = code[2:].strip()
+                reply_text = table.ra(attribute, group_id, qq)
+                need_at = True
+        else:
+            reply_text = '这是群聊命令'
+    elif code == 'clear all' and trpg:  # 清空属性
+        if group_id != 0:
+            reply_text = table.clear_all(group_id)
+            need_at = True
+        else:
+            reply_text = '这是群聊命令'
+    elif code == 'clear' and trpg:  # 清空属性
+        if group_id != 0:
+            reply_text = table.clear_single(group_id, qq)
+            need_at = True
+        else:
+            reply_text = '这是群聊命令'
+    elif code == 'ex' and trpg:  # 清空属性
+        if group_id != 0:
+            reply_text = table.export(group_id, qq)
+        else:
+            reply_text = '这是群聊命令'
+    elif code == 'name' and trpg:  # 随机名字
+        reply_text = name + TRPG.random_name(1)
+    elif code[:4] == 'name' and trpg:  # 随机名字
         tmp = code[4:].strip()
         if tmp.isdigit():
-            result = name + TRPG.random_name(int(tmp))
+            reply_text = name + TRPG.random_name(int(tmp))
 
-    if result == '':
+    if reply_text == '':
         express = TRPG.Expression(code.replace(' ', ''))
         try:
-            result = code + '=' + str(express.show())
+            reply_text = code + '=' + str(express.show())
         except OverflowError as e:
-            result = '运算超时'
+            reply_text = '运算超时'
         except ArithmeticError as e:
             err = str(e)
             if err == 'Non-expression':
                 print('Non-expression')
             elif err == 'wrong format':
-                result = '表达式无法解析'
+                reply_text = '表达式无法解析'
 
-    if result == '' and isImage == '' and code.isalnum():
-        result = '未知指令：' + code + '\n请输入\"帮助\"查看帮助\n请输入\"骰娘\"查看骰娘帮助\n请输入\"游戏帮助\"查看游戏帮助'
+    if reply_text == '' and reply_image == '' and code.isalnum():
+        reply_text = '未知指令：' + code + '\n请输入\"帮助\"查看帮助\n请输入\"骰娘\"查看骰娘帮助\n请输入\"游戏帮助\"查看游戏帮助'
 
-    return result, needAt, isImage
+    return reply_text, need_at, reply_image

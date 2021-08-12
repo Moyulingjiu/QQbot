@@ -79,7 +79,7 @@ def get_data(html_txt):
 
 def getWeather(cityName):
     # url="http://www.weather.com.cn/weather/101190401.shtml"
-    city = dataManage.load_obj('weather')
+    city = dataManage.read_weather()
     
     if cityName[-1] == '市':
         cityName = cityName[:-1]
@@ -95,5 +95,5 @@ def getWeather(cityName):
                 str(i[3]) + '℃，最高气温为：' + str(i[2]) + '℃\n'
         return ans[:-1].replace('None', '(获取失败)')
     else:
-        logManage.log(getNow.toString(), 0, '查询城市：' + cityName + '，未找到该城市！')
+        logManage.log(getNow.toString(), '查询城市：' + cityName + '，未找到该城市！')
         return '未能查询到该城市，请联系管理员将该城市加入字典'

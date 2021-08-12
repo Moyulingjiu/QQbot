@@ -6,54 +6,54 @@ import linecache
 # 文摘
 
 def poem():
-    lineNumber = int(linecache.getline(r'data/poem.txt', 1))
+    lineNumber = int(linecache.getline(r'data/Function/Talk/poem.txt', 1))
     a = random.randrange(2, lineNumber + 1)  # 1-9中生成随机数
     # 从文件poem.txt中对读取第a行的数据
-    theline = linecache.getline(r'data/poem.txt', a)
+    theline = linecache.getline(r'data/Function/Talk/poem.txt', a)
     theline = theline[theline.find('.')+1:-1]
     return theline
 
 
 def loveTalk():
-    lineNumber = int(linecache.getline(r'data/lovetalk.txt', 1))
+    lineNumber = int(linecache.getline(r'data/Function/Talk/lovetalk.txt', 1))
     a = random.randrange(2, lineNumber + 1)  # 1-9中生成随机数
     # 从文件lovetalk.txt中对读取第a行的数据
-    theline = linecache.getline(r'data/lovetalk.txt', a)
+    theline = linecache.getline(r'data/Function/Talk/lovetalk.txt', a)
     theline = theline[theline.find('.')+1:-1]
     return theline
 
 
 def swear():
-    lineNumber = int(linecache.getline(r'data/swear.txt', 1))
+    lineNumber = int(linecache.getline(r'data/Function/Talk/swear.txt', 1))
     a = random.randrange(2, lineNumber + 1)  # 1-9中生成随机数
     # 从文件swear.txt中对读取第a行的数据
-    theline = linecache.getline(r'data/swear.txt', a)
+    theline = linecache.getline(r'data/Function/Talk/swear.txt', a)
     theline = theline[theline.find('.')+1:-1]
     return theline
 
 
 def numPoem():
-    lineNumber = int(linecache.getline(r'data/poem.txt', 1))
+    lineNumber = int(linecache.getline(r'data/Function/Talk/poem.txt', 1))
     return '当前文摘有：' + str(lineNumber) + '条'
 
 
 def numLoveTalk():
-    lineNumber = int(linecache.getline(r'data/lovetalk.txt', 1))
+    lineNumber = int(linecache.getline(r'data/Function/Talk/lovetalk.txt', 1))
     return '当前情话有：' + str(lineNumber) + '条'
 
 
 def numSwear():
-    lineNumber = int(linecache.getline(r'data/swear.txt', 1))
+    lineNumber = int(linecache.getline(r'data/Function/Talk/swear.txt', 1))
     return '当前脏话有：' + str(lineNumber) + '条'
 
 
 def addPoem(newPoem):
-    with open('data/poem.txt', 'r+', encoding='utf-8') as f:
+    with open('data/Function/Talk/poem.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
     index = 1
     text[0] = str(int(text[0]) + len(newPoem))
     head = text[0]
-    with open('data/poem.txt', 'w', encoding='utf-8') as f:
+    with open('data/Function/Talk/poem.txt', 'w', encoding='utf-8') as f:
         f.write(text[0] + '\n')
         del text[0]
         for line in text:
@@ -68,13 +68,13 @@ def addPoem(newPoem):
 
 
 def addLoveTalk(newLoveTalk):
-    with open('data/lovetalk.txt', 'r+', encoding='utf-8') as f:
+    with open('data/Function/Talk/lovetalk.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
     index = 1
     print(text[0])
     text[0] = str(int(text[0]) + len(newLoveTalk))
     head = text[0]
-    with open('data/lovetalk.txt', 'w', encoding='utf-8') as f:
+    with open('data/Function/Talk/lovetalk.txt', 'w', encoding='utf-8') as f:
         f.write(text[0] + '\n')
         del text[0]
         for line in text:
@@ -89,13 +89,13 @@ def addLoveTalk(newLoveTalk):
 
 
 def addSwear(newLoveTalk):
-    with open('data/swear.txt', 'r+', encoding='utf-8') as f:
+    with open('data/Function/Talk/swear.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
     index = 1
     print(text[0])
     text[0] = str(int(text[0]) + len(newLoveTalk))
     head = text[0]
-    with open('data/swear.txt', 'w', encoding='utf-8') as f:
+    with open('data/Function/Talk/swear.txt', 'w', encoding='utf-8') as f:
         f.write(text[0] + '\n')
         del text[0]
         for line in text:
@@ -110,12 +110,12 @@ def addSwear(newLoveTalk):
 
 
 def delPoem(delIndex):
-    with open('data/poem.txt', 'r+', encoding='utf-8') as f:
+    with open('data/Function/Talk/poem.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
     index = 1
     text[0] = str(int(text[0]) - 1)
     head = text[0]
-    with open('data/poem.txt', 'w', encoding='utf-8') as f:
+    with open('data/Function/Talk/poem.txt', 'w', encoding='utf-8') as f:
         f.write(text[0] + '\n')
         del text[0]
         for line in text:
@@ -127,12 +127,12 @@ def delPoem(delIndex):
 
 
 def delLoveTalk(delIndex):
-    with open('data/lovetalk.txt', 'r+', encoding='utf-8') as f:
+    with open('data/Function/Talk/lovetalk.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
     index = 1
     text[0] = str(int(text[0]) - 1)
     head = text[0]
-    with open('data/lovetalk.txt', 'w', encoding='utf-8') as f:
+    with open('data/Function/Talk/lovetalk.txt', 'w', encoding='utf-8') as f:
         f.write(text[0] + '\n')
         del text[0]
         for line in text:
@@ -144,12 +144,12 @@ def delLoveTalk(delIndex):
 
 
 def delSwear(delIndex):
-    with open('data/swear.txt', 'r+', encoding='utf-8') as f:
+    with open('data/Function/Talk/swear.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
     index = 1
     text[0] = str(int(text[0]) - 1)
     head = text[0]
-    with open('data/swear.txt', 'w', encoding='utf-8') as f:
+    with open('data/Function/Talk/swear.txt', 'w', encoding='utf-8') as f:
         f.write(text[0] + '\n')
         del text[0]
         for line in text:

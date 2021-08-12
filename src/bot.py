@@ -1,21 +1,19 @@
 import asyncio
+
 # 所有事件监听都在entry中可以找到
 from graia.application.entry import (
     GraiaMiraiApplication, Session,
-    MessageChain, Group, Friend, Member, MemberInfo,
-    Plain, Image, AtAll, At, Face, Source
+    Friend, Member, Source
 )
-from graia.application.entry import (
-    BotMuteEvent, BotGroupPermissionChangeEvent
-)
-from graia.application.event.mirai import NewFriendRequestEvent
+from graia.application.event.mirai import NewFriendRequestEvent, NudgeEvent, BotLeaveEventKick, \
+    BotInvitedJoinGroupRequestEvent, MemberJoinEvent
 from graia.broadcast import Broadcast
 
+from plugins import MessageProcessing
 # =============================================================
 # 附加功能类
 from plugins import getNow
 from plugins import logManage
-from plugins import MessageProcessing
 
 # ==========================================================
 # 基本信息
@@ -23,7 +21,7 @@ from plugins import MessageProcessing
 message_processing = MessageProcessing.MessageProcessing()
 init = message_processing.loadfile()
 if not init:
-    logManage.log(getNow.toString(), 0, '——————————————————————————\n启动失败！！！\n')
+    logManage.log(getNow.toString(), '——————————————————————————\n启动失败！！！\n')
     print('文件缺失！')
     exit(0)
 
@@ -38,7 +36,7 @@ apps = GraiaMiraiApplication(
     connect_info=Session(
         host="http://localhost:8080",  # 填入 httpapi 服务运行的地址
         authKey="INITKEYJ5zXeZ5E",  # 填入 authKey
-        account=399608601,  # 你的机器人的 qq 号
+        account=1812322920,  # 你的机器人的 qq 号
         websocket=True  # Graia 已经可以根据所配置的消息接收的方式来保证消息接收部分的正常运作.
     )
 )
@@ -72,7 +70,36 @@ async def new_friend(app: GraiaMiraiApplication, event: NewFriendRequestEvent):
     await message_processing.new_friend(app, event)
 
 
+# 群邀请
+@bcc.receiver("BotInvitedJoinGroupRequestEvent")
+async def new_group(app: GraiaMiraiApplication, event: BotInvitedJoinGroupRequestEvent):
+    global message_processing
+    await message_processing.new_group(app, event)
+
+
+# 踢出事件
+@bcc.receiver("BotLeaveEventKick")
+async def kick(app: GraiaMiraiApplication, event: BotLeaveEventKick):
+    global message_processing
+    await message_processing.kick(app, event)
+
+
+# 新成员加入
+@bcc.receiver("MemberJoinEvent")
+async def join(app: GraiaMiraiApplication, event: MemberJoinEvent):
+    global message_processing
+    await message_processing.join(app, event)
+
+
+# 戳一戳事件
+@bcc.receiver("NudgeEvent")
+async def nudge(app: GraiaMiraiApplication, event: NudgeEvent):
+    print('ok')
+    global message_processing
+    await message_processing.nudge(app, event)
+
+
 qq = message_processing.get_qq()
 name = message_processing.get_name()
-logManage.log(getNow.toString(), 0, name + '(' + str(qq) + ')启动！')
+logManage.log(getNow.toString(), name + '(' + str(qq) + ')初始化成功，开始运行！')
 apps.launch_blocking()

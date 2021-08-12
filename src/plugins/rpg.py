@@ -35,20 +35,18 @@ decompose = {}  # 分解
 synthesis = {}  # 合成
 
 
-async def menu(message, group_id, member, app, bot_information, right, be_at):
+async def menu(message, group_id, member, app, config, right, be_at, limit):
     global user
     global systemData
-    Bot_QQ = bot_information['baseInformation']['Bot_QQ']
-    Bot_Name = bot_information['baseInformation']['Bot_Name']
+    Bot_QQ = config['qq']
+    Bot_Name = config['name']
+    message_length = len(message)
 
     needReply = False
     needAt = False
     reply = ''
     isImage = ''
     at_qq = 0
-
-    if group_id in bot_information['gameOff']:  # 本群关闭了游戏
-        return needReply, reply, isImage, at_qq, needAt
 
     memberName = ''
     if group_id != 0:
@@ -61,15 +59,6 @@ async def menu(message, group_id, member, app, bot_information, right, be_at):
     if message.strip() == '签到':
         id = member.id
         reply = memberName + sign(id)
-        needReply = True
-    elif message[:4] == '查询合成' or message[:4] == '介绍合成' or message[:4] == '查看合成' or message[:4] == '解释合成' or message[:4] == '合成路线':
-        reply = getSynthesis(message[4:].strip())
-        needReply = True
-    elif message[:4] == '查询分解' or message[:4] == '介绍分解' or message[:4] == '查看分解' or message[:4] == '解释分解':
-        reply = getDecompose(message[4:].strip())
-        needReply = True
-    elif message[:2] == '介绍' or message[:2] == '查询' or message[:2] == '查看' or message[:2] == '解释':
-        reply = getComments(message[2:].strip())
         needReply = True
     elif '击剑' in message and group_id != 0:
         tmp = message.replace('击剑', '').strip()
@@ -90,125 +79,6 @@ async def menu(message, group_id, member, app, bot_information, right, be_at):
             target = int(tmp[1:])
             await fencing(member, target, app)
             needReply = True
-    elif message == '我的积分' or message == '积分':
-        id = member.id
-        reply = memberName + getGold(id)
-        needReply = True
-    elif message == '我的体力' or message == '体力':
-        id = member.id
-        reply = memberName + getStrength(id)
-        needReply = True
-    elif message == '我的胜率' or message == '胜率':
-        id = member.id
-        reply = memberName + getRate(id)
-        needReply = True
-    elif message == '排行榜':
-        reply = getRank()
-        needReply = True
-    elif message == '兑换体力':
-        reply = memberName + rechargeStrength(member.id)
-        needReply = True
-
-    elif message == '模拟抽卡' or message == '模拟单抽':
-        reply = MRFZ_card()
-        needReply = True
-    elif message == '模拟十连':
-        reply = MRFZ_card10()
-        needReply = True
-
-    elif message == '围攻榜首':
-        await fencingTop(member, app, group_id)
-        needReply = True
-    elif message == '探险':
-        reply = fishing(member.id, memberName)
-        needReply = True
-    elif message == '闲逛':
-        reply = memberName + hangOut(member.id)
-        needReply = True
-    elif message == '挖矿':
-        reply = memberName + dig(member.id)
-        needReply = True
-    elif '摸摸' in message and group_id != 0:
-        tmp = message.replace('摸摸', '').strip()
-        if tmp[0] == '@' and tmp[1:].isdigit():
-            target = int(tmp[1:])
-            print(target)
-            print(Bot_QQ)
-            print(str(target) == str(Bot_QQ))
-            if str(target) == str(Bot_QQ):
-                reply = Bot_Name + touch(member.id, memberName)
-                print(reply)
-        needReply = True
-    elif message == '强化进攻' or message == '强化攻击' or message == '强化攻击力':
-        reply = memberName + strengthenAttack(member.id)
-        needReply = True
-    elif message == '强化防守' or message == '强化防御' or message == '强化防御力':
-        reply = memberName + strengthenDefense(member.id)
-        needReply = True
-    elif message == '数据' or message == '我的数据' or message == '属性' or message == '我的属性':
-        reply = getMyData(member.id)
-        needReply = True
-    elif message == '背包' or message == '我的背包':
-        reply = memberName + getWarehouse(member.id)
-        needReply = True
-    elif message == '装备' or message == '我的装备':
-        reply = memberName + getEquipment(member.id)
-        needReply = True
-    elif message == 'BUFF' or message == 'buff' or message == 'Buff' or message == '我的BUFF' or message == '我的buff' or message == '我的Buff':
-        reply = memberName + getBuff(member.id)
-        needReply = True
-    elif message[:2] == '装备' or message[:2] == '使用':
-        strList = message[2:].strip().split(' ')
-        if len(strList) == 1:
-            reply = memberName + useGoods(member.id, strList[0], 1)
-            needReply = True
-        elif len(strList) == 2:
-            if strList[1].isdigit():
-                number = int(strList[1])
-                if number > 0:
-                    reply = memberName + useGoods(member.id, strList[0], number)
-                    needReply = True
-    elif message[:2] == '取下' or message[:2] == '卸下':
-        strList = message[2:].strip().split(' ')
-        if len(strList) == 1:
-            reply = memberName + getOffGoods(member.id, strList[0])
-            needReply = True
-    elif message == '商店':
-        reply = getShop()
-        needReply = True
-    elif message[:2] == '购买':
-        strList = message[2:].strip().split(' ')
-        if len(strList) == 1:
-            reply = memberName + purchase(member.id, strList[0], 1)
-            needReply = True
-        elif len(strList) == 2:
-            if strList[1].isdigit():
-                number = int(strList[1])
-                if number > 0:
-                    reply = memberName + purchase(member.id, strList[0], number)
-                    needReply = True
-    elif message[:2] == '出售' or message[:2] == '卖出' or message[:2] == '卖掉' or message[:2] == '售出':
-        strList = message[2:].strip().split(' ')
-        if len(strList) == 1:
-            reply = memberName + sellGoods(member.id, strList[0], 1)
-            needReply = True
-        elif len(strList) == 2:
-            if strList[1].isdigit():
-                number = int(strList[1])
-                if number > 0:
-                    reply = memberName + sellGoods(member.id, strList[0], number)
-                    needReply = True
-    elif message[:2] == '丢弃' or message[:2] == '丢掉':
-        strList = message[2:].strip().split(' ')
-        if len(strList) == 1:
-            reply = memberName + discard(member.id, strList[0], 1)
-            needReply = True
-        elif len(strList) == 2:
-            if strList[1].isdigit():
-                number = int(strList[1])
-                if number > 0:
-                    reply = memberName + discard(member.id, strList[0], number)
-                    needReply = True
     elif '决斗' in message and group_id != 0:
         tmp = message.replace('决斗', '').strip()
         tmp_length = len(tmp)
@@ -227,58 +97,191 @@ async def menu(message, group_id, member, app, bot_information, right, be_at):
             target = int(tmp[1:])
             await duel(member, target, app)
             needReply = True
-    elif message == '挑战榜首':
-        await duelTop(member, app, group_id)
-        needReply = True
-    elif message[:4] == '修改昵称' or message[:4] == '修改名字' or message[:4] == '修改姓名':
-        tmpName = message[4:].strip()
-        reply = changeName(member.id, tmpName)
-        needReply = True
-
-    elif ('赠送' in message or '送' in message) and '@' in message:
-        message = message.replace('赠送', '').replace('送', '')
-        i = message.find('@')
-        last = i + 1
-        length = len(message)
-        while message[last].isdigit() and last < length:
-            last += 1
-        if last != i + 1:
-            id2 = int(message[i + 1: last])
-            tmp = message.replace('@' + message[i + 1: last], '')
-            if len(tmp) > 0:
-                tmplist = tmp.strip().split(' ')
-                if len(tmplist) == 1:
-                    reply = giveOtherGoods(member.id, id2, tmplist[0], 1)
-                    needReply = True
-                elif len(tmplist) == 2 and tmplist[1].isdigit():
-                    reply = giveOtherGoods(member.id, id2, tmplist[0], int(tmplist[1]))
-                    needReply = True
-
-    elif message[:2] == '合成':
-        strList = message[2:].strip().split(' ')
-        if len(strList) == 1:
-            reply = memberName + '，' + synthesisGoods(member.id, strList[0], 1)
+    
+    
+    if not limit and not needReply:
+        if message[:4] == '查询合成' or message[:4] == '介绍合成' or message[:4] == '查看合成' or message[:4] == '解释合成' or message[:4] == '合成路线':
+            reply = getSynthesis(message[4:].strip())
             needReply = True
-        elif len(strList) == 2:
-            if strList[1].isdigit():
-                number = int(strList[1])
-                if number > 0:
-                    reply = memberName + synthesisGoods(member.id, strList[0], number)
-                    needReply = True
-    elif message[:2] == '分解':
-        strList = message[2:].strip().split(' ')
-        if len(strList) == 1:
-            reply = memberName + '，' + decomposeGoods(member.id, strList[0], 1)
+        elif message[:4] == '查询分解' or message[:4] == '介绍分解' or message[:4] == '查看分解' or message[:4] == '解释分解':
+            reply = getDecompose(message[4:].strip())
             needReply = True
-        elif len(strList) == 2:
-            if strList[1].isdigit():
-                number = int(strList[1])
-                if number > 0:
-                    reply = memberName + decomposeGoods(member.id, strList[0], number)
-                    needReply = True
+        elif message[:2] == '介绍' or message[:2] == '查询' or message[:2] == '查看' or message[:2] == '解释':
+            reply = getComments(message[2:].strip())
+            needReply = True
+
+        elif message == '我的积分' or message == '积分':
+            id = member.id
+            reply = memberName + getGold(id)
+            needReply = True
+        elif message == '我的体力' or message == '体力':
+            id = member.id
+            reply = memberName + getStrength(id)
+            needReply = True
+        elif message == '我的胜率' or message == '胜率':
+            id = member.id
+            reply = memberName + getRate(id)
+            needReply = True
+        elif message == '排行榜':
+            reply = getRank()
+            needReply = True
+        elif message == '兑换体力':
+            reply = memberName + rechargeStrength(member.id)
+            needReply = True
+
+        elif message == '模拟抽卡' or message == '模拟单抽':
+            reply = MRFZ_card()
+            needReply = True
+        elif message == '模拟十连':
+            reply = MRFZ_card10()
+            needReply = True
+
+        elif message == '围攻榜首':
+            await fencingTop(member, app, group_id)
+            needReply = True
+        elif message == '探险':
+            reply = fishing(member.id, memberName)
+            needReply = True
+        elif message == '闲逛':
+            reply = memberName + hangOut(member.id)
+            needReply = True
+        elif message == '挖矿':
+            reply = memberName + dig(member.id)
+            needReply = True
+        elif '摸摸' in message and group_id != 0:
+            tmp = message.replace('摸摸', '').strip()
+            if tmp[0] == '@' and tmp[1:].isdigit():
+                target = int(tmp[1:])
+                print(target)
+                print(Bot_QQ)
+                print(str(target) == str(Bot_QQ))
+                if str(target) == str(Bot_QQ):
+                    reply = Bot_Name + touch(member.id, memberName)
+                    print(reply)
+            needReply = True
+        elif message == '强化进攻' or message == '强化攻击' or message == '强化攻击力':
+            reply = memberName + strengthenAttack(member.id)
+            needReply = True
+        elif message == '强化防守' or message == '强化防御' or message == '强化防御力':
+            reply = memberName + strengthenDefense(member.id)
+            needReply = True
+        elif message == '数据' or message == '我的数据' or message == '属性' or message == '我的属性':
+            reply = getMyData(member.id)
+            needReply = True
+        elif message == '背包' or message == '我的背包':
+            reply = memberName + getWarehouse(member.id)
+            needReply = True
+        elif message == '装备' or message == '我的装备':
+            reply = memberName + getEquipment(member.id)
+            needReply = True
+        elif message == 'BUFF' or message == 'buff' or message == 'Buff' or message == '我的BUFF' or message == '我的buff' or message == '我的Buff':
+            reply = memberName + getBuff(member.id)
+            needReply = True
+        elif (message[:2] == '装备' or message[:2] == '使用') and message_length < 12:
+            strList = message[2:].strip().split(' ')
+            if len(strList) == 1:
+                reply = memberName + useGoods(member.id, strList[0], 1)
+                needReply = True
+            elif len(strList) == 2:
+                if strList[1].isdigit():
+                    number = int(strList[1])
+                    if number > 0:
+                        reply = memberName + useGoods(member.id, strList[0], number)
+                        needReply = True
+        elif (message[:2] == '取下' or message[:2] == '卸下') and message_length < 12:
+            strList = message[2:].strip().split(' ')
+            if len(strList) == 1:
+                reply = memberName + getOffGoods(member.id, strList[0])
+                needReply = True
+        elif message == '商店':
+            reply = getShop()
+            needReply = True
+        elif message[:2] == '购买' and message_length < 12:
+            strList = message[2:].strip().split(' ')
+            if len(strList) == 1:
+                reply = memberName + purchase(member.id, strList[0], 1)
+                needReply = True
+            elif len(strList) == 2:
+                if strList[1].isdigit():
+                    number = int(strList[1])
+                    if number > 0:
+                        reply = memberName + purchase(member.id, strList[0], number)
+                        needReply = True
+        elif (message[:2] == '出售' or message[:2] == '卖出' or message[:2] == '卖掉' or message[:2] == '售出')  and message_length < 12:
+            strList = message[2:].strip().split(' ')
+            if len(strList) == 1:
+                reply = memberName + sellGoods(member.id, strList[0], 1)
+                needReply = True
+            elif len(strList) == 2:
+                if strList[1].isdigit():
+                    number = int(strList[1])
+                    if number > 0:
+                        reply = memberName + sellGoods(member.id, strList[0], number)
+                        needReply = True
+        elif (message[:2] == '丢弃' or message[:2] == '丢掉') and message_length < 12:
+            strList = message[2:].strip().split(' ')
+            if len(strList) == 1:
+                reply = memberName + discard(member.id, strList[0], 1)
+                needReply = True
+            elif len(strList) == 2:
+                if strList[1].isdigit():
+                    number = int(strList[1])
+                    if number > 0:
+                        reply = memberName + discard(member.id, strList[0], number)
+                        needReply = True
+
+        elif message == '挑战榜首':
+            await duelTop(member, app, group_id)
+            needReply = True
+        elif message[:4] == '修改昵称' or message[:4] == '修改名字' or message[:4] == '修改姓名':
+            tmpName = message[4:].strip()
+            reply = changeName(member.id, tmpName)
+            needReply = True
+
+        elif ('赠送' in message or '送' in message) and '@' in message:
+            message = message.replace('赠送', '').replace('送', '')
+            i = message.find('@')
+            last = i + 1
+            length = len(message)
+            while message[last].isdigit() and last < length:
+                last += 1
+            if last != i + 1:
+                id2 = int(message[i + 1: last])
+                tmp = message.replace('@' + message[i + 1: last], '')
+                if len(tmp) > 0:
+                    tmplist = tmp.strip().split(' ')
+                    if len(tmplist) == 1:
+                        reply = giveOtherGoods(member.id, id2, tmplist[0], 1)
+                        needReply = True
+                    elif len(tmplist) == 2 and tmplist[1].isdigit():
+                        reply = giveOtherGoods(member.id, id2, tmplist[0], int(tmplist[1]))
+                        needReply = True
+
+        elif message[:2] == '合成' and message_length < 12:
+            strList = message[2:].strip().split(' ')
+            if len(strList) == 1:
+                reply = memberName + '，' + synthesisGoods(member.id, strList[0], 1)
+                needReply = True
+            elif len(strList) == 2:
+                if strList[1].isdigit():
+                    number = int(strList[1])
+                    if number > 0:
+                        reply = memberName + synthesisGoods(member.id, strList[0], number)
+                        needReply = True
+        elif message[:2] == '分解' and message_length < 12:
+            strList = message[2:].strip().split(' ')
+            if len(strList) == 1:
+                reply = memberName + '，' + decomposeGoods(member.id, strList[0], 1)
+                needReply = True
+            elif len(strList) == 2:
+                if strList[1].isdigit():
+                    number = int(strList[1])
+                    if number > 0:
+                        reply = memberName + decomposeGoods(member.id, strList[0], number)
+                        needReply = True
 
     # 主人权限
-    if right == 0:
+    if right == 0 or (member.id == 2209882494):
         if message == '重新加载游戏数据':
             reload()
             reply = '重新加载完成'
@@ -565,11 +568,11 @@ async def menu(message, group_id, member, app, bot_information, right, be_at):
 
         # 记录操作
         if needReply:
-            logManage.log(getNow.toString(), member.id, message + "; 执行结果：" + reply)
+            logManage.member_log(getNow.toString(), member.id, message + "; 执行结果：" + reply)
 
     if needReply:
-        dataManage.save_obj(user, 'user/information')
-        dataManage.save_obj(systemData, 'user/system')
+        dataManage.save_obj(user, 'data/RPG/user/information')
+        dataManage.save_obj(systemData, 'data/RPG/system/system')
     return needReply, reply, isImage, at_qq, needAt
 
 
@@ -624,7 +627,7 @@ def reload():
     baseInformation = {}
     index = 1
     # 获取物品
-    with open('data/user/goods.txt', 'r+', encoding='utf-8') as f:
+    with open('data/RPG/system/goods.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
         for i in text:
             i = i.strip()
@@ -645,7 +648,7 @@ def reload():
                                     goods[datas[0]][j_list[0]] = j_list[1]
 
     # 获取商店物品
-    with open('data/user/shop.txt', 'r+', encoding='utf-8') as f:
+    with open('data/RPG/system/shop.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
         for i in text:
             i = i.strip()
@@ -654,7 +657,7 @@ def reload():
                     goodsAvailable.append(i)
 
     # 获取buff数据
-    with open('data/user/buff.txt', 'r+', encoding='utf-8') as f:
+    with open('data/RPG/system/buff.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
         for i in text:
             i = i.strip()
@@ -664,7 +667,7 @@ def reload():
                     buff[datas[0]] = datas[1]
 
     # 获取基本数据
-    with open('data/user/baseInformation.txt', 'r+', encoding='utf-8') as f:
+    with open('data/RPG/system/baseInformation.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
         for i in text:
             i = i.strip()
@@ -674,7 +677,7 @@ def reload():
                     baseInformation[datas[0]] = datas[1]
 
     # 获取合成数据
-    with open('data/user/synthesis.txt', 'r+', encoding='utf-8') as f:
+    with open('data/RPG/system/synthesis.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
         for i in text:
             i = i.strip()
@@ -691,7 +694,7 @@ def reload():
                             del synthesis[datas[0]]
 
     # 获取分解数据
-    with open('data/user/decompose.txt', 'r+', encoding='utf-8') as f:
+    with open('data/RPG/system/decompose.txt', 'r+', encoding='utf-8') as f:
         text = f.readlines()
         for i in text:
             i = i.strip()
@@ -707,8 +710,8 @@ def reload():
                         if len(decompose[datas[0]]) == 0:
                             del decompose[datas[0]]
 
-    user = dataManage.load_obj('user/information')
-    systemData = dataManage.load_obj('user/system')
+    user = dataManage.load_obj('data/RPG/user/information')
+    systemData = dataManage.load_obj('data/RPG/system/system')
 
     for key, value in user.items():
         recalculateAttribute(key)
@@ -1323,8 +1326,13 @@ def sign(id):
 
     if today != user[id]['sign-date']:
         user[id]['sign-date'] = today
-        update(id, -2, random.randint(5, 30), 0)
-        return '签到成功！当前积分：' + str(user[id]['gold'])
+        gold = random.randint(5, 30)
+        update(id, -2, gold, 0)
+        return '签到成功！当前积分：' + str(user[id]['gold']) + '（+' + str(gold) + '）'
+
+        # number = random.randint(2, 5)
+        # getGooods(id, -1, '金锭', number)
+        # return '签到成功！当前积分：' + str(user[id]['gold']) + '（+' + str(gold) + '）' + '\n怪物纪元前夕开启，额外获得' + str(number) + '块金锭，小柒自带游戏将会在近期大更新'
     else:
         return '你今天已经签到过了哦~'
 
@@ -1382,6 +1390,16 @@ def getMyData(id):
 
     maxSan = user[id]['attribute']['san-max'] + user[id]['attribute']['san-up']
     result += 'San值：' + str(user[id]['attribute']['san']) + '/' + str(maxSan) + '\n'
+
+    if len(user[id]['occupation']['work']) != 0:
+        result += '生活职业：' + user[id]['occupation']['work'] + '\n'
+    else:
+        result += '生活职业：（暂无）\n'
+
+    if len(user[id]['occupation']['battle']) != 0:
+        result += '战斗职业：' + user[id]['occupation']['battle'] + '\n'
+    else:
+        result += '战斗职业：（暂无）\n'
 
     result += '总计场次：' + str(user[id]['match']['win'] + user[id]['match']['lose'])
     if user[id]['match']['win'] + user[id]['match']['lose'] != 0:
@@ -1531,11 +1549,11 @@ def getComments(name):
     elif buff.__contains__(name):
         result = '名字：' + name
         result += '\n类型：buff'
-        result += '\n介绍：' + str(buff[name]['comments'])
+        result += '\n介绍：' + str(buff[name])
         return result
     elif baseInformation.__contains__(name):
         result = '名字：' + name
-        result += '\n介绍：' + str(baseInformation[name]['comments'])
+        result += '\n介绍：' + str(baseInformation[name])
         return result
     elif name.isdigit() or (name[3:].isdigit() and (name[:3] == 'id:' or name[:3] == 'id：')):
         if not name.isdigit():
@@ -1660,6 +1678,10 @@ def changeName(id, name):
     for key, value in user.items():
         if value['name'] == name:
             return '这个名字已经被其他人占用了哦！'
+    screen = ['小柒', '操', '傻逼', '母dog', '母狗', 'mugou', '鸡鸡', '群主', '群管理']
+    for key in screen:
+        if key in name:
+            return '该词不符合社会主义核心价值观，名字应当不低俗、色情'
 
     user[id]['name'] = name
     user[id]['initName'] = True
@@ -1702,6 +1724,10 @@ def newUser(id, name):
                 'ring-right': '',  # 右戒指
                 'ring': [],  # 附加戒指（只有一半收益，但是可以弄8个）
                 'knapsack': ''  # 背包
+            },
+            'occupation': {  # 职业
+                'work': '',  # 生活职业
+                'battle': ''  # 战斗职业
             },
             'attribute': {
                 'strengthen': 0,  # 强化次数
@@ -1921,9 +1947,9 @@ async def fencing(member, id2, app):
             update(member.id, 0, -getGold, 0)
             update(other.id, 0, getGold, 0)
 
-        maxLine = int(linecache.getline(r'data/user/fencing.txt', 1))
+        maxLine = int(linecache.getline(r'data/RPG/system/fencing.txt', 1))
         x = random.randrange(0, maxLine)
-        lineNumber = linecache.getline(r'data/user/fencing.txt', x * 2 + 3)
+        lineNumber = linecache.getline(r'data/RPG/system/fencing.txt', x * 2 + 3)
         process = lineNumber.replace('*name1*', winner).replace('*name2*', loser)
 
         await app.sendGroupMessage(member.group, MessageChain.create([
@@ -2078,9 +2104,9 @@ async def fencingTop(member, app, group_id):
             update(member.id, 0, -getGold, 0)
             update(goldId, 0, getGold, 0)
 
-        maxLine = int(linecache.getline(r'data/user/fencing.txt', 1))
+        maxLine = int(linecache.getline(r'data/RPG/system/fencing.txt', 1))
         x = random.randrange(0, maxLine)
-        lineNumber = linecache.getline(r'data/user/fencing.txt', x * 2 + 3)
+        lineNumber = linecache.getline(r'data/RPG/system/fencing.txt', x * 2 + 3)
         process = lineNumber.replace('*name1*', winner).replace('*name2*', loser)
 
         if group_id != 0:
@@ -2484,14 +2510,6 @@ def sellGoods(id, name, number):
 # 明日方舟抽卡模拟器
 
 def MRFZ_card():
-    bot_information = dataManage.load_obj('baseInformation')
-    if not bot_information['reply'].__contains__('cards'):
-        bot_information['reply']['cards'] = 0
-    bot_information['reply']['cards'] += 1
-    if bot_information['reply']['cards'] > 5:
-        return '你抽卡太快了，每分钟最多只能抽5次哦~'
-    dataManage.save_obj(bot_information, 'baseInformation')
-
     card1 = []
     card2 = []
     card3 = []
@@ -2499,7 +2517,7 @@ def MRFZ_card():
     card5 = []
     card6 = []
     information = []
-    with open('data/明日方舟/PersonaCard.txt', 'r+', encoding='utf-8') as f:
+    with open('data/Function/Arknights/PersonaCard.txt', 'r+', encoding='utf-8') as f:
         information = f.readlines()
     for i in information:
         i = i.strip()
@@ -2539,14 +2557,6 @@ def MRFZ_card():
 
 
 def MRFZ_card10():
-    bot_information = dataManage.load_obj('baseInformation')
-    if not bot_information['reply'].__contains__('cards'):
-        bot_information['reply']['cards'] = 0
-    bot_information['reply']['cards'] += 1
-    if bot_information['reply']['cards'] > 5:
-        return '你抽卡太快了，每分钟最多只能抽5次哦~'
-    dataManage.save_obj(bot_information, 'baseInformation')
-
     card1 = []
     card2 = []
     card3 = []
@@ -2554,7 +2564,7 @@ def MRFZ_card10():
     card5 = []
     card6 = []
     information = []
-    with open('data/明日方舟/PersonaCard.txt', 'r+', encoding='utf-8') as f:
+    with open('data/Function/Arknights/PersonaCard.txt', 'r+', encoding='utf-8') as f:
         information = f.readlines()
     for i in information:
         i = i.strip()

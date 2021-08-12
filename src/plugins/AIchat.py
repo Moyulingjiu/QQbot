@@ -1,8 +1,8 @@
 
 import requests
 
-def getReply(botBaseInformation, AtMessage):
-    Bot_Name = botBaseInformation['baseInformation']['Bot_Name']
+def getReply(config, AtMessage):
+    Bot_Name = config['name']
     quest = AtMessage
     url = 'http://api.qingyunke.com/api.php?key=free&appid=0&msg=' + quest #请求接口
 
