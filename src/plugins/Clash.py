@@ -9,7 +9,7 @@ class clash:
 
         message = message.replace(' ', '').lower()
 
-        if message == 'coc商人' or message == 'coc商人刷新表':
+        if message == 'coc商人' or message == 'coc商人刷新表' or message == 'coc商店':
             reply_image = 'data/Clash/商人数据.png'
             need_reply = True
         elif message == 'coc联赛' or message == 'coc联赛奖励':

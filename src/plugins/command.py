@@ -113,6 +113,8 @@ def help_tarot():
 def help_game():
     return 'data/Help/游戏帮助.png'
 
+def help_game_novice():
+    return 'data/Help/游戏新手指南.png'
 
 def function(code, qq, name, group_id, mode, bot_config, config, statistics):
     global key_allow

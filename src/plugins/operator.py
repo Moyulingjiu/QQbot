@@ -45,7 +45,8 @@ async def send_clock_message(group_id, clock, app):
 
 # ==========================================================
 # 管理员模块
-async def administrator_operation(app, message, qq, name, group_id, mode, member, bot_config, config, statistics, right, group_right):
+async def administrator_operation(app, message, qq, name, group_id, mode, member, bot_config, config, statistics, right,
+                                  group_right):
     bot_qq = bot_config['qq']
     bot_name = bot_config['name']
     master_qq = bot_config['master']
@@ -555,6 +556,31 @@ async def administrator_operation(app, message, qq, name, group_id, mode, member
                 reply_text = '权限不足，请输入"我的权限"查看'
             need_reply = True
 
+        elif (message == '添加复杂回复' or message == '创建复杂回复') and mode == 1:
+            user = dataManage.read_user(qq)
+            user['buffer']['id'] = 5
+            user['buffer']['buffer'] = group_id
+            dataManage.save_user(qq, user)
+            reply_text = '请在小柒的指引下完成复杂回复的添加~请问你的触发该回复的触发词是什么呢？（只能包含文本和艾特消息，你可以随时输入“*取消创建*”来取消，星号不可以省略哦~）'
+            need_reply = True
+        elif message == '查看复杂回复' and mode == 1:
+            if len(config['key_reply']['complex']) != 0:
+                reply_text = '开放的复杂回复触发词如下：'
+                for key, value in config['key_reply']['complex'].items():
+                    reply_text += '\n' + key
+            else:
+                reply_text = '没有开放的复杂回复触发词'
+            need_reply = True
+        elif message7 == '删除复杂回复 ' and mode == 1:
+            key = message[7:]
+            if config['key_reply']['complex'].__contains__(key):
+                del config['key_reply']['complex'][key]
+                dataManage.save_group(group_id, config)
+                reply_text = '删除成功~'
+            else:
+                reply_text = '没有该触发词'
+            need_reply = True
+
         elif message4 == '发起活动' and message_len > 4 and mode == 1:
             if right < 3:
                 stringList = message[4:].strip().split(' ')
@@ -644,7 +670,69 @@ async def administrator_operation(app, message, qq, name, group_id, mode, member
             else:
                 reply_text = '权限不足，请输入"我的权限"查看'
             need_reply = True
-            
+
+        elif (message5 == '创建分组 ' or message5 == '添加分组 ') and message_len > 5:
+            group_name = ''
+            i = 5
+            while i < message_len:
+                if message[i] != ' ' and message[i] != '@':
+                    group_name += message[i]
+                else:
+                    break
+                i += 1
+            if len(group_name) > 0:
+                member_text = message[i:]
+                members = analysis_qqs(member_text)
+                reply_text = add_group(group_id, config, group_name, members, qq)
+            else:
+                reply_text = '格式错误！'
+            need_reply = True
+        elif message7 == '添加分组成员 ' and message_len > 7:
+            group_name = ''
+            i = 7
+            while i < message_len:
+                if message[i] != ' ' and message[i] != '@':
+                    group_name += message[i]
+                else:
+                    break
+                i += 1
+            if len(group_name) > 0:
+                member_text = message[i:]
+                members = analysis_qqs(member_text)
+                reply_text = append_group(group_id, config, group_name, members)
+            else:
+                reply_text = '格式错误！'
+            need_reply = True
+        elif message7 == '删除分组成员 ' and message_len > 7:
+            group_name = ''
+            i = 7
+            while i < message_len:
+                if message[i] != ' ' and message[i] != '@':
+                    group_name += message[i]
+                else:
+                    break
+                i += 1
+            if len(group_name) > 0:
+                member_text = message[i:]
+                members = analysis_qqs(member_text)
+                reply_text = remove_group(group_id, config, group_name, members)
+            else:
+                reply_text = '格式错误！'
+            need_reply = True
+        elif message5 == '删除分组 ' and message_len > 5:
+            group_name = message[5:].strip()
+            reply_text = del_group(group_id, config, group_name)
+            need_reply = True
+        elif message5 == '查看分组 ' and message_len > 5:
+            group_name = message[5:].strip()
+            reply_text = await view_group(app, group_id, config, group_name)
+            need_reply = True
+        elif message == '清空分组':
+            reply_text = clear_group(group_id, config, qq)
+            need_reply = True
+        elif message == '分组列表' or message == '查看分组列表':
+            reply_text = view_all_group(config)
+            need_reply = True
 
     if need_reply:
         if message != '贡献者帮助' and message != '管理员帮助' and message != '主人帮助':
@@ -822,6 +910,7 @@ def del_screen_word(word):
 def view_screen_word():
     screenWords = dataManage.read_screen_word()
     return str(screenWords)
+
 
 # 添加群内屏蔽词
 def add_group_screen_word(group_id, config, word):
@@ -1285,3 +1374,130 @@ def get_activity_list(group_id, app):
                 reply_text += '\n' + key + '(参与人数：' + str(len(value['member'])) + ')'
             return reply_text
     return '本群暂无活动'
+
+
+# =========================================================
+def add_group(group_id, config, name, members, qq):
+    if config['group'].__contains__(name):
+        user = dataManage.read_user(qq)
+        user['buffer']['id'] = 3
+        user['buffer']['buffer'] = {
+            'name': name,
+            'group_id': group_id,
+            'members': members
+        }
+        dataManage.save_user(qq, user)
+        return '已经有该分组了哦~，是否要覆盖，回答“是”或者“否”'
+    config['group'][name] = members
+    dataManage.save_group(group_id, config)
+    return '创建分组成功~'
+
+
+def del_group(group_id, config, name):
+    if not config['group'].__contains__(name):
+        return '不存在该分组哦~'
+    del config['group'][name]
+    dataManage.save_group(group_id, config)
+    return '删除成功'
+
+
+def view_all_group(config):
+    if len(config['group']) == 0:
+        return '暂无任何分组'
+    reply = '分组如下：'
+    for i in config['group']:
+        reply += '\n' + i + '（' + str(len(config['group'][i])) + '人）'
+    return reply
+
+
+
+async def view_group(app, group_id, config, name):
+    if not config['group'].__contains__(name) or len(config['group'][name]) == 0:
+        return '暂无任何成员'
+    reply = '分组<' + name + '>成员如下：'
+    member_list = await app.memberList(group_id)
+    members = {}
+    del_members = []
+
+    for i in member_list:
+        members[i.id] = i.name
+    for i in config['group'][name]:
+        if members.__contains__(i):
+            reply += '\n' + members[i] + '（' + str(i) + '）'
+        else:
+            del_members.append(i)
+    for i in del_members:
+        config['group'][name].remove(i)
+    return reply
+
+
+def clear_group(group_id, config, qq):
+    if len(config['group']) == 0:
+        return '没有一个分组呢~'
+    user = dataManage.read_user(qq)
+    user['buffer']['id'] = 4
+    user['buffer']['buffer'] = {
+        'group_id': group_id
+    }
+    dataManage.save_user(qq, user)
+    return '是否确定清空分组数据，回答“是”或者“否”'
+
+
+def join_group(group_id, config, name, qq):
+    if not config['group'].__contains__(name):
+        return '不存在该分组哦~'
+    if qq in config['group'][name]:
+        return '你已经在分组内'
+    config['group'][name].append(qq)
+    dataManage.save_group(group_id, config)
+    return '加入成功'
+
+
+def quit_group(group_id, config, name, qq):
+    if not config['group'].__contains__(name):
+        return '不存在该分组哦~'
+    if qq not in config['group'][name]:
+        return '你不在分组内'
+    config['group'][name].remove(qq)
+    dataManage.save_group(group_id, config)
+    return '退出成功'
+
+
+def append_group(group_id, config, name, members):
+    if not config['group'].__contains__(name):
+        return '不存在该分组哦~'
+    number = 0
+    for qq in members:
+        if qq not in config['group'][name]:
+            config['group'][name].append(qq)
+            number += 1
+    dataManage.save_group(group_id, config)
+    return '成功追加' + str(number) + '个人'
+
+
+def remove_group(group_id, config, name, members):
+    if not config['group'].__contains__(name):
+        return '不存在该分组哦~'
+    number = 0
+    for qq in members:
+        if qq in config['group'][name]:
+            config['group'][name].remove(qq)
+            number += 1
+    dataManage.save_group(group_id, config)
+    return '成功删除' + str(number) + '个人'
+
+
+def analysis_qqs(string):
+    members = []
+    if '@' in string:
+        tmp_list = string.split('@')
+    else:
+        tmp_list = string.split(' ')
+
+    for tmp_qq in tmp_list:
+        tmp_qq = tmp_qq.strip()
+        if len(tmp_qq) > 0 and tmp_qq.isdigit():
+            tmp = int(tmp_qq)
+            if tmp not in members:
+                members.append(tmp)
+    return members

@@ -27,11 +27,14 @@ from plugins import baidu
 from plugins import logManage
 from plugins import getNow
 from plugins import keyReply
-from plugins import rpg
 from plugins import PixivImage
 from plugins import BaseFunction
 from plugins import Clash
 
+from plugins import RPG
+
+total_index = 0
+sum_out_range = 0
 
 # 布尔开关类型文案
 def bool_string(switch):
@@ -39,6 +42,7 @@ def bool_string(switch):
         return '已开启'
     else:
         return '已关闭'
+
 
 # 发送消息
 async def send_message(app, mode, member, reply_text, reply_image, need_at, at_qq):
@@ -130,6 +134,63 @@ async def send_message(app, mode, member, reply_text, reply_image, need_at, at_q
             ]))
 
 
+async def send_complex_message(app, mode, member, complex_reply, at):
+    if mode == 0:
+        await app.sendFriendMessage(member, complex_reply.asSendable())
+    elif mode == 1:  # 只有群聊消息有艾特
+        member_list = await app.memberList(member.group.id)
+        members = []
+        for i in member_list:
+            members.append(i.id)
+
+        if at['at_type'] == -1:
+            await app.sendGroupMessage(member.group, complex_reply.asSendable())
+        elif at['at_type'] == 0:
+            if at['at'] > 0:
+                if at['at'] in members:
+                    await app.sendGroupMessage(member.group, MessageChain.create([
+                        At(at['at'])
+                    ]).plusWith(complex_reply.asSendable()))
+                else:
+                    await app.sendGroupMessage(member.group, MessageChain.create([
+                        Plain('@' + str(at['at']))
+                    ]).plusWith(complex_reply.asSendable()))
+            elif at['at'] == 0:
+                    await app.sendGroupMessage(member.group, MessageChain.create([
+                        At(member.id)
+                    ]).plusWith(complex_reply.asSendable()))
+            elif at['at'] == -1:
+                    await app.sendGroupMessage(member.group, MessageChain.create([
+                        AtAll()
+                    ]).plusWith(complex_reply.asSendable()))
+        elif at['at_type'] == 1:
+            group = dataManage.read_group(member.group.id)
+            init = False
+            message = MessageChain.create([
+                        Plain('【未知错误】')
+            ])
+            if not group['group'].__contains__(at['at']):
+                message = MessageChain.create([
+                        Plain(at['at'])
+                ])
+            else:
+                for qq in group['group'][at['at']]:
+                    if qq in members:
+                        print(qq)
+                        if init:
+                            message = message.plusWith(MessageChain.create([
+                                    At(qq)
+                            ]))
+                        else:
+                            message = MessageChain.create([
+                                    At(qq)
+                            ])
+                            init = True
+            await app.sendGroupMessage(member.group, message.plusWith(complex_reply.asSendable()))
+    elif mode == 2:
+        await app.sendTempMessage(member.group.id, member.id, complex_reply.asSendable())
+
+
 class MessageProcessing:
     config = {}
     statistics = {}
@@ -145,6 +206,8 @@ class MessageProcessing:
 
     luck = BaseFunction.luck()
     bottle = BaseFunction.DriftingBottle()
+
+    rpg = RPG.RPG()
 
     def __init__(self):
         self.pixiv = PixivImage.pixiv()
@@ -218,6 +281,10 @@ class MessageProcessing:
 
     # 0：朋友消息，1：群消息，2：临时消息
     async def run(self, app, mode, member, message_source):
+        global total_index
+        total_index += 1
+        print('\t线程：' + str(total_index))
+
         self.config = dataManage.read_config()
         self.statistics = dataManage.read_statistics()
         self.bot_qq = self.config['qq']
@@ -237,8 +304,15 @@ class MessageProcessing:
         need_reply = False  # 是否需要回复
         reply_text = ''  # 回复的文本内容
         reply_image = ''  # 回复的图片
+        need_complex_reply = False  # 是否是复杂回复
+        complex_at = {
+            'at_type': -1,  # -1：不艾特；0：艾特；1：艾特分组
+            'at': 0
+        }  # 复杂艾特
+        complex_reply = None  # 复杂回复
         need_at = False  # 是否需要at
         at_qq = 0  # at的qq是谁
+        # 状态信息
         be_at = False  # 是否被at
         group_right = 2  # 在群里的权限（群主、管理员、成员）
         if mode == 0:
@@ -292,19 +366,20 @@ class MessageProcessing:
 
         master = await app.getFriend(self.config['master'])
 
-        print('\tmessage:' + message)
-        print('\tmessage_code:' + message_code)
-        print('\tqq:' + str(qq) + '<' + name + '>')
-        if mode == 1:
-            print('\tgroup:' + str(group_id) + '<' + member.group.name + '>')
-            print('\tmute:' + str(be_mute))
+        # print('\tmessage:' + message)
+        # print('\tmessage_code:' + message_code)
+        # print('\tqq:' + str(qq) + '<' + name + '>')
+        # if mode == 1:
+        #     print('\tgroup:' + str(group_id) + '<' + member.group.name + '>')
+        #     print('\tmute:' + str(be_mute))
 
         # ===================================================================================
         # ===================================================================================
         # 消息处理开始
 
         # 禁言消息的处理
-        if mode == 1 and message[:5] != '删除屏蔽词' and message[:5] != '添加屏蔽词' and message != '清空屏蔽词' and message != '查看屏蔽词':
+        if mode == 1 and message[:5] != '删除屏蔽词' and message[
+                                                    :5] != '添加屏蔽词' and message != '清空屏蔽词' and message != '查看屏蔽词':
             revoke = False
             for key in self.groups[group_id]['prohibited_word']:
                 if key in message:
@@ -350,7 +425,8 @@ class MessageProcessing:
             dataManage.save_statistics(self.statistics)
             await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
             return
-        elif message.replace('查看', '').replace('查询', '') == '开关列表' or message.replace('查看', '').replace('查询', '') == '模块列表':
+        elif message.replace('查看', '').replace('查询', '') == '开关列表' or message.replace('查看', '').replace('查询',
+                                                                                                        '') == '模块列表':
             if mode == 1:
                 reply_text = '群<' + member.group.name + '>模块开关情况如下：'
                 reply_text += '\n输入“模块管理帮助”获取所有指令的详细说明'
@@ -358,11 +434,13 @@ class MessageProcessing:
                 reply_text += '\n是否禁言【mute/unmute】：' + bool_string(self.groups[group_id]['config']['mute'])
                 reply_text += '\n是否限制（限制模式下仅响应艾特消息）【开启/关闭限制模式】：' + bool_string(self.groups[group_id]['config']['limit'])
                 reply_text += '\n是否开启RPG游戏【开启/关闭游戏】：' + bool_string(self.groups[group_id]['config']['RPG'])
-                reply_text += '\n是否开启RPG游戏限制模式【开启/关闭游戏限制模式】：' + bool_string(self.groups[group_id]['config']['limit_RPG'])
+                reply_text += '\n是否开启RPG游戏限制模式【开启/关闭游戏限制模式】：' + bool_string(
+                    self.groups[group_id]['config']['limit_RPG'])
                 reply_text += '\n是否开启脏话【开启/关闭脏话】：' + bool_string(self.groups[group_id]['config']['curse'])
                 reply_text += '\n是否开启P站图片搜索【开启/关闭图片搜索】：' + bool_string(self.groups[group_id]['config']['image'])
                 reply_text += '\n是否开启ai（时不时自主回复）【开启/关闭智能回复】：' + bool_string(self.groups[group_id]['config']['ai'])
-                reply_text += '\n是否开启群内自定义回复【开启/关闭自定义回复】：' + bool_string(self.groups[group_id]['config']['autonomous_reply'])
+                reply_text += '\n是否开启群内自定义回复【开启/关闭自定义回复】：' + bool_string(
+                    self.groups[group_id]['config']['autonomous_reply'])
                 reply_text += '\n是否开启自动加一【开启/关闭自动加一】：' + bool_string(self.groups[group_id]['config']['repeat'])
                 reply_text += '\n是否开启骰娘【开启/关闭骰娘】：' + bool_string(self.groups[group_id]['config']['TRPG'])
                 reply_text += '\n是否开启部落冲突数据查询【开启/关闭部落冲突查询】：' + bool_string(self.groups[group_id]['config']['clash'])
@@ -373,10 +451,11 @@ class MessageProcessing:
                     for i in key_allow:
                         reply_text += i
                 reply_text += '\n是否开启新成员欢迎【开启/关闭/设置新人欢迎】：' + bool_string(self.groups[group_id]['config']['welcome'])
-                need_reply = True
             else:
                 reply_text = '用户<' + name + '>模块开关情况如下：'
+                reply_text += '\n输入“模块管理帮助”获取所有指令的详细说明'
                 reply_text += '\n格式：”字段（操作指令）：状态“\n'
+                reply_text += '\n是否开启ai（时不时自主回复）【开启/关闭智能回复】：' + bool_string(self.users[qq]['config']['ai'])
             self.statistics['help'] += 1
             dataManage.save_statistics(self.statistics)
             await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
@@ -391,7 +470,6 @@ class MessageProcessing:
                 await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
             return
 
-
         # 如果被限制那么只回复at消息
         if mode == 1:
             if self.groups[group_id]['config']['limit']:
@@ -400,27 +478,118 @@ class MessageProcessing:
 
         # ===================================================================================
         # 处理上一次的消息
+        # print(self.users[qq]['buffer']['id'])
+        # print(self.users[qq]['buffer']['buffer'])
         if self.users[qq]['buffer']['id'] != 0:
+            reset_buffer = True
+
             if self.users[qq]['buffer']['id'] == 1:  # 群欢迎语
                 self.get_group(self.users[qq]['buffer']['buffer'])
                 self.groups[self.users[qq]['buffer']['buffer']]['welcome'] = get_message.messageChain
                 reply_text = self.bot_name + '已经记录下了~！'
                 need_reply = True
-                dataManage.save_group(self.users[qq]['buffer']['buffer'], self.groups[self.users[qq]['buffer']['buffer']])
+                dataManage.save_group(self.users[qq]['buffer']['buffer'],
+                                      self.groups[self.users[qq]['buffer']['buffer']])
             elif self.users[qq]['buffer']['id'] == 2:  # 清空屏蔽词
                 if message == '是' or message == '确定' or message == '确认' or message == '可':
                     self.get_group(self.users[qq]['buffer']['buffer'])
                     self.groups[self.users[qq]['buffer']['buffer']]['prohibited_word'] = []
                     reply_text = self.bot_name + '已经帮您清空了'
                     need_reply = True
-                    dataManage.save_group(self.users[qq]['buffer']['buffer'], self.groups[self.users[qq]['buffer']['buffer']])
+                    dataManage.save_group(self.users[qq]['buffer']['buffer'],
+                                          self.groups[self.users[qq]['buffer']['buffer']])
                 else:
                     reply_text = self.bot_name + '啊嘞？已为您取消清空。'
                     need_reply = True
+            elif self.users[qq]['buffer']['id'] == 3:  # 覆盖分组
+                if message == '是' or message == '确定' or message == '确认' or message == '可':
+                    tmp_members = self.users[qq]['buffer']['buffer']['members']
+                    tmp_name = self.users[qq]['buffer']['buffer']['name']
+                    tmp_group_id = self.users[qq]['buffer']['buffer']['group_id']
+                    self.get_group(tmp_group_id)
+                    operator.del_group(tmp_group_id, self.groups[tmp_group_id], tmp_name)
+                    operator.add_group(tmp_group_id, self.groups[tmp_group_id], tmp_name, tmp_members, qq)
+                    reply_text = '已经覆盖~'
+                    need_reply = True
+                else:
+                    reply_text = self.bot_name + '啊嘞？已为您取消覆盖分组。'
+                    need_reply = True
+            elif self.users[qq]['buffer']['id'] == 4:  # 清空分组
+                if message == '是' or message == '确定' or message == '确认' or message == '可':
+                    tmp_group_id = self.users[qq]['buffer']['buffer']['group_id']
+                    self.get_group(tmp_group_id)
+                    self.groups[tmp_group_id]['group'] = {}
+                    dataManage.save_group(tmp_group_id, self.groups[tmp_group_id])
+                    reply_text = '清空成功！'
+                    need_reply = True
+                else:
+                    reply_text = self.bot_name + '啊嘞？已为您取消清空分组。'
+                    need_reply = True
+            elif self.users[qq]['buffer']['id'] == 5:  # 创建复杂回复的触发词
+                if message != '*取消创建*':
+                    self.users[qq]['buffer']['id'] = 6
+                    self.users[qq]['buffer']['buffer'] = {
+                        'group_id': self.users[qq]['buffer']['buffer'],
+                        'key': message
+                    }
+                    dataManage.save_user(qq, self.users[qq])
+                    reply_text = '触发词：' + message
+                    reply_text += '\n小柒已为您记录下来了，请问你的回复内容是什么？（可以文字+图片，不可以包含艾特）'
+                    reset_buffer = False
+                else:
+                    reply_text = '已为您取消创建'
+                need_reply = True
+            elif self.users[qq]['buffer']['id'] == 6:  # 创建复杂回复的回复内容
+                if message != '*取消创建*':
+                    self.users[qq]['buffer']['id'] = 7
+                    self.users[qq]['buffer']['buffer']['reply'] = get_message.messageChain
+                    dataManage.save_user(qq, self.users[qq])
+                    reply_text += '小柒记录下来了，请问这条消息需要艾特谁吗（全体成员/分组/触发人/QQ号，这四种都是可以的哦~如果QQ号为0表示不艾特，如果不明白分组可以看“贡献者帮助”）？'
+                    reset_buffer = False
+                else:
+                    reply_text = '已为您取消创建'
+                need_reply = True
+            elif self.users[qq]['buffer']['id'] == 7:  # 创建复杂回复的艾特对象
+                if message != '*取消创建*':
+                    if message == '全体成员':
+                        self.users[qq]['buffer']['buffer']['at_type'] = 0  # 0表示艾特
+                        self.users[qq]['buffer']['buffer']['at'] = -1
+                    elif message == '触发人':
+                        self.users[qq]['buffer']['buffer']['at_type'] = 0
+                        self.users[qq]['buffer']['buffer']['at'] = 0
+                    elif message.isdigit():
+                        buffer_at = int(message)
+                        if buffer_at > 0:
+                            self.users[qq]['buffer']['buffer']['at_type'] = 0
+                            self.users[qq]['buffer']['buffer']['at'] = buffer_at
+                        else:
+                            self.users[qq]['buffer']['buffer']['at_type'] = -1  # -1表示不艾特
+                            self.users[qq]['buffer']['buffer']['at'] = 0
+                    else:
+                        self.users[qq]['buffer']['buffer']['at_type'] = 1  # 1表示艾特分组
+                        self.users[qq]['buffer']['buffer']['at'] = message
+                    self.get_group(self.users[qq]['buffer']['buffer']['group_id'])
+                    group = self.groups[self.users[qq]['buffer']['buffer']['group_id']]
+                    if not group['key_reply'].__contains__('complex'):
+                        group['key_reply']['complex'] = {}
+                    group['key_reply']['complex'][self.users[qq]['buffer']['buffer']['key']] = {
+                        'reply': self.users[qq]['buffer']['buffer']['reply'],
+                        'at': self.users[qq]['buffer']['buffer']['at'],
+                        'at_type': self.users[qq]['buffer']['buffer']['at_type']
+                    }
+                    dataManage.save_group(self.users[qq]['buffer']['buffer']['group_id'], group)
+                    reply_text = '创建成功~'
+                else:
+                    reply_text = '已为您取消创建'
+                need_reply = True
 
-            self.users[qq]['buffer']['id'] = 0
-            self.users[qq]['buffer']['buffer'] = None
-            dataManage.save_user(qq, self.users[qq])
+
+            print(self.users[qq]['buffer']['id'])
+            if reset_buffer:
+                self.users[qq]['buffer']['id'] = 0
+                self.users[qq]['buffer']['buffer'] = None
+                dataManage.save_user(qq, self.users[qq])
+            print(self.users[qq]['buffer']['id'])
             if need_reply:
                 await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                 return
@@ -535,8 +704,8 @@ class MessageProcessing:
                 for i in group_list:
                     print(i)
                     await app.sendGroupMessage(i, MessageChain.create([
-                            Plain(temp)
-                        ]))
+                        Plain(temp)
+                    ]))
 
             else:
                 reply_text = '智能回复本身就是开启的'
@@ -810,7 +979,7 @@ class MessageProcessing:
                 return
             elif message_code == 'clash on' or message == '开启部落冲突查询':
                 if not self.groups[group_id]['config']['clash']:
-                    if group_right < 2 or right < 3:
+                    if right == 0:
                         self.groups[group_id]['config']['clash'] = True
                         dataManage.save_group(group_id, self.groups[group_id])
 
@@ -819,7 +988,7 @@ class MessageProcessing:
                         reply_text = '本群已开启部落冲突查询功能~'
                         await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
-                        reply_text = '权限不足，需要群管理或群主'
+                        reply_text = '权限不足，需要主人，因为部落冲突查询包含大量链接，容易被冻结，请去官方群（479504567）找主人审核后开启'
                         await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'clash off' or message == '关闭部落冲突查询':
@@ -882,8 +1051,6 @@ class MessageProcessing:
                     self.users[qq]['buffer']['id'] = 1
                     self.users[qq]['buffer']['buffer'] = group_id
                     dataManage.save_user(qq, self.users[qq])
-                    print(qq)
-                    print(self.users[qq]['buffer']['id'])
                     await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                 else:
                     reply_text = '权限不足，需要群管理或群主'
@@ -900,7 +1067,7 @@ class MessageProcessing:
 
         # 帮助内容
         if not need_reply:
-            if message == '帮助' or message == '指令':
+            if message == '帮助' or message == '指令' or message == '菜单':
                 reply_image = command.help_function()
                 if mode == 1:
                     reply_text = '在群内输入“模块列表”查询各个模块开关状态'
@@ -929,6 +1096,9 @@ class MessageProcessing:
                     if not self.groups[group_id]['config']['RPG']:
                         reply_text = '本群游戏模块为关闭状态，在群内输入“模块列表”查询各个模块开关状态'
                 need_reply = True
+            elif message == '游戏新手指南' or message == '新手指南':
+                reply_image = command.help_game_novice()
+                need_reply = True
             elif message == '模块管理帮助':
                 reply_image = command.help_modular()
                 need_reply = True
@@ -943,9 +1113,17 @@ class MessageProcessing:
                 self.statistics['help'] += 1
                 dataManage.save_statistics(self.statistics)
 
-        # 打卡&活动
+        # 打卡&活动&分组
         if not need_reply and mode == 1:
-            if message[:4] == '参加活动' or message[:4] == '参与活动':
+            if message[:4] == '加入分组':
+                group_name = message[4:].strip()
+                reply_text = operator.join_group(group_id, self.groups[group_id], group_name, qq)
+                need_reply = True
+            elif message[:4] == '退出分组':
+                group_name = message[4:].strip()
+                reply_text = operator.quit_group(group_id, self.groups[group_id], group_name, qq)
+                need_reply = True
+            elif message[:4] == '参加活动' or message[:4] == '参与活动':
                 activityName = message[4:].strip()
                 if len(activityName) == 0:
                     reply_text = '活动名不能为空'
@@ -1213,7 +1391,6 @@ class MessageProcessing:
                         right,
                         group_right)
 
-
             if need_reply:
                 self.statistics['operate'] += 1
                 dataManage.save_statistics(self.statistics)
@@ -1229,15 +1406,15 @@ class MessageProcessing:
                 RPG = True
 
             if RPG:
-                (need_reply, reply_text, reply_image, at_qq, need_at) = await rpg.menu(
+                (need_reply, reply_text, reply_image) = self.rpg.handle(
                     message,
-                    group_id,
-                    member,
-                    app,
+                    qq,
+                    name,
+                    self.get_user(qq),
                     self.config,
-                    right,
                     be_at,
-                    limit)
+                    limit
+                )
 
                 if need_reply:
                     self.statistics['game'] += 1
@@ -1255,7 +1432,7 @@ class MessageProcessing:
         # -----------------------------------------------------------------------------------
         # 群自己设定的关键词回复
         if not need_reply and mode == 1 and self.groups[group_id]['config']['autonomous_reply']:
-            (need_reply, reply_text, reply_image, at_qq, need_at) = keyReply.reply(
+            (need_reply, reply_text, reply_image, at_qq, need_at, need_complex_reply, complex_reply, complex_at) = keyReply.reply(
                 message,
                 member,
                 self.groups[group_id],
@@ -1305,20 +1482,25 @@ class MessageProcessing:
                     self.statistics['auto_reply'] += 1
                     dataManage.save_statistics(self.statistics)
 
-                    for key in self.groups[group_id]['prohibited_word']:
-                        if key in reply_text:
-                            print('原始回复：' + reply_text)
-                            print('屏蔽词：' + key)
-                            reply_text = '【神经网络回复内容包含群内设置的屏蔽词，已自动和谐】'
-                            break
+                    if mode == 1:
+                        for key in self.groups[group_id]['prohibited_word']:
+                            if key in reply_text:
+                                print('原始回复：' + reply_text)
+                                print('屏蔽词：' + key)
+                                reply_text = '【神经网络回复内容包含群内设置的屏蔽词，已自动和谐】'
+                                break
 
         if need_reply:
-            if reply_text != '':
-                self.last_reply = reply_text
             self.statistics['message'] += 1
             dataManage.save_statistics(self.statistics)
+            if not need_complex_reply:  # 非复杂回复
+                if reply_text != '':
+                    self.last_reply = reply_text
 
-            await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+            else:
+                await send_complex_message(app, mode, member, complex_reply, complex_at)
+        total_index -= 1
 
     async def new_friend(self, app, event):
         self.config = dataManage.read_config()
@@ -1381,26 +1563,26 @@ class MessageProcessing:
                 Plain('有新的群申请<' + event.groupName + '>(' + str(event.groupId) + ')！\n邀请人：<' + name + '>(' + str(
                     qq) + ')' + '\n')
             ]))
-        await event.accept()
-
-        time.sleep(10)
-
-        group = await app.getGroup(event.groupId)
-        print(group)
-        if group is not None:
-            reply = '已加入群，邀请人：<' + name + '>(' + str(qq) + ')' + '\n'
-            reply += '小柒的快速上手指南：\n'
-            reply += '可以通过输入“帮助”来获取所有的指令帮助，请仔细阅读其中的内容！！\n'
-            reply += '可以通过输入“骰娘帮助”来获取所有的骰娘指令帮助\n\n'
-            reply += '小柒的功能是分模块的，按需开启，可以在群内输入“模块列表”查询\n'
-            reply += '如果有任何疑问可以加小柒的官方Q群：479504567，在群聊里可以告诉主人解除黑名单，以及获取到管理员权限解锁一些新功能\n\n'
-            reply += '特别申明：\n'
-            reply += '1.不要将小柒踢出任何群聊，或者在任何群聊禁言小柒，这些都有专门的指令代替！！！如果直接踢出，踢出人和群将会无理由黑名单，禁言视情况（频繁程度）而定\n'
-            reply += '2.不要对机器人搞黄色，对机器人搞黄色你是有多饥渴？\n'
-            reply += '3.如果群主或管理员对该机器人有疑问请问邀请人，或者使用“*quit”指令'
-            await app.sendGroupMessage(group, MessageChain.create([
-                Plain(reply)
-            ]))
+        # await event.accept()
+        #
+        # time.sleep(10)
+        #
+        # group = await app.getGroup(event.groupId)
+        # print(group)
+        # if group is not None:
+        #     reply = '已加入群，邀请人：<' + name + '>(' + str(qq) + ')' + '\n'
+        #     reply += '小柒的快速上手指南：\n'
+        #     reply += '可以通过输入“帮助”来获取所有的指令帮助，请仔细阅读其中的内容！！\n'
+        #     reply += '可以通过输入“骰娘帮助”来获取所有的骰娘指令帮助\n\n'
+        #     reply += '小柒的功能是分模块的，按需开启，可以在群内输入“模块列表”查询\n'
+        #     reply += '如果有任何疑问可以加小柒的官方Q群：479504567，在群聊里可以告诉主人解除黑名单，以及获取到管理员权限解锁一些新功能\n\n'
+        #     reply += '特别申明：\n'
+        #     reply += '1.不要将小柒踢出任何群聊，或者在任何群聊禁言小柒，这些都有专门的指令代替！！！如果直接踢出，踢出人和群将会无理由黑名单，禁言视情况（频繁程度）而定\n'
+        #     reply += '2.不要对机器人搞黄色，对机器人搞黄色你是有多饥渴？\n'
+        #     reply += '3.如果群主或管理员对该机器人有疑问请问邀请人，或者使用“*quit”指令'
+        #     await app.sendGroupMessage(group, MessageChain.create([
+        #         Plain(reply)
+        #     ]))
 
             self.statistics['new_group'] += 1
             dataManage.save_statistics(self.statistics)
@@ -1427,8 +1609,8 @@ class MessageProcessing:
         if welcome is None:
             print('空值错误')
             return
-            
+
         await app.sendGroupMessage(member.group, MessageChain.create([
-                At(member.id)
-            ]).plusWith(welcome.asSendable()))
+            At(member.id)
+        ]).plusWith(welcome.asSendable()))
         logManage.group_log(getNow.toString(), member.id, member.group.id, member.group.name, '入群欢迎')

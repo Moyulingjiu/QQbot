@@ -41,6 +41,20 @@ class luck:
     def write_file(self):
         dataManage.save_obj(self.luck, self.luck_file)
 
+    def get_luck_number(self, qq):
+        self.load_file()
+        if self.luck["luck"].__contains__(qq):
+            return self.luck["luck"][qq]
+
+        number = random.normalvariate(50, 16)
+        if number < 0:
+            number = 0
+        elif number > 100:
+            number = 100
+        self.luck["luck"][qq] = int(number)
+        self.write_file()
+        return number
+
     def get_luck(self, qq):
         self.load_file()
         if self.luck["luck"].__contains__(qq):

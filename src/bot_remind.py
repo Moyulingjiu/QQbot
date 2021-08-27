@@ -58,8 +58,8 @@ app = GraiaMiraiApplication(
     broadcast=bcc,
     connect_info=Session(
         host="http://localhost:8080",  # 填入 httpapi 服务运行的地址
-        authKey="INITKEYJ5zXeZ5E",  # 填入 authKey
-        account=1812322920,  # 你的机器人的 qq 号
+        authKey="INITKEYvTyDBWZQ",  # 填入 authKey myBotXiaoQi
+        account=1622057984,  # 你的机器人的 qq 号
         websocket=True  # Graia 已经可以根据所配置的消息接收的方式来保证消息接收部分的正常运作.
     )
 )
@@ -233,7 +233,7 @@ async def timeWatcher():
                 if not groups['config']['mute']:
                     await sendMessage(groupId)
 
-        elif curr_time.hour == 17 and curr_time.minute == 24:
+        elif curr_time.hour == 0 and curr_time.minute == 0:
             print('重置打卡数据')
             loadFile()
             await resetClock()

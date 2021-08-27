@@ -26,10 +26,14 @@ def reply(message, be_at, config, statistics, nickname, group_id, qq, mode):
         need_reply, need_at, reply_text, reply_image = self_reply(statistics, config, bot_name, nickname, message)
     
     if need_reply:
-        print(screenWords)
         for i in screenWords:
             if i in reply_text:
-                reply_text = random.choice(unknown_reply)
+                if be_at:
+                    reply_text = random.choice(unknown_reply)
+                else:
+                    need_reply = False
+                    reply_text = ''
+                    reply_image = ''
                 break
 
     return need_reply, reply_text, reply_image, 0, need_at
@@ -41,7 +45,6 @@ def forced_reply(config, bot_name, nickname, message):
     reply_text = ''
     reply_image = ''
 
-    print('被艾特：' + message)
     need_reply, need_at, reply_text, reply_image = reply_word(bot_name, nickname, message)
 
     if not need_reply:
