@@ -181,7 +181,7 @@ def read_group(group_id):
             'limit': False,  # 是否限制
             'RPG': True,  # 是否开启RPG
             'limit_RPG': False,  # 是否开启RPG限制
-            'curse': False,  # 是否开启脏话
+            'curse': True,  # 是否开启脏话
             'image': False,  # 是否开启图片搜索
             'ai': False,  # 是否开启ai
             'autonomous_reply': True,  # 是否开启自动回复(群内自定义的)

@@ -1,56 +1,20 @@
-import asyncio
-from pathlib import Path
-# 所有事件监听都在entry中可以找到
-from graia.application.entry import (
-    GraiaMiraiApplication, Session,
-    MessageChain, Group, Friend, Member, MemberInfo,
-    Plain, Image, AtAll, At, Face, Source
-)
-from graia.application.entry import (
-    BotMuteEvent, BotGroupPermissionChangeEvent
-)
-from graia.broadcast import Broadcast
 
-import plugins.dataManage as dataManage
+
+from plugins import dataManage
 from plugins import talk
 from plugins import command
-from plugins import clockIn
 from plugins import logManage
 from plugins import getNow
 
 import sys
 
-
-# ==========================================================
-# 监听模块
-async def send_clock_message(group_id, clock, app):
-    group = await app.getGroup(group_id)
-
-    if clock['groupClock'].__contains__(group_id):
-        reply_text = '记得打卡呀：'
-        message = MessageChain.create([
-            Plain(reply_text)
-        ])
-        for key, value in clock['dictClockPeople'][group_id].items():
-            if not value['clockIn']:
-                message.plus(MessageChain.create([
-                    Plain('\n'),
-                    At(key)
-                ]))
-
-        await app.sendGroupMessage(group, message)
-        return True
-    return False
-
-
 # ==========================================================
 # 管理员模块
-async def administrator_operation(app, message, qq, name, group_id, mode, member, bot_config, config, statistics, right,
+async def administrator_operation(bot, event, message, qq, name, group_id, mode, bot_config, config, statistics, right,
                                   group_right):
     bot_qq = bot_config['qq']
     bot_name = bot_config['name']
     master_qq = bot_config['master']
-    clock = dataManage.read_clock()
 
     message_len = len(message)
     message4 = message[:4]
@@ -76,15 +40,7 @@ async def administrator_operation(app, message, qq, name, group_id, mode, member
     elif message == bot_name + '关机':
         if right < 1:
             logManage.log(getNow.toString(), bot_name + '关机！')
-            if group_id == 0:
-                await app.sendFriendMessage(member, MessageChain.create([
-                    Plain('小柒已关机~请手动重新启动小柒')
-                ]))
-            else:
-                await app.sendGroupMessage(member.group, MessageChain.create([
-                    Plain('小柒已关机~请手动重新启动小柒')
-                ]))
-
+            await bot.send(event, '小柒已关机~请手动重新启动小柒')
             print('退出')
             sys.exit()
         else:
@@ -406,51 +362,6 @@ async def administrator_operation(app, message, qq, name, group_id, mode, member
                 reply_text = '权限不足，请输入"我的权限"查看'
             need_reply = True
 
-        elif message == '添加打卡计划' and mode == 1:
-            if right < 3:
-                reply_text = clockIn.addClockIn(group_id)
-                need_at = True
-            else:
-                reply_text = '权限不足，请输入"我的权限"查看'
-            need_reply = True
-        elif message == '打卡提醒' and clock['groupClock'].__contains__(group_id):
-            if right < 3:
-                reply_text = await send_clock_message(group_id, clock, app)
-            else:
-                reply_text = '权限不足，请输入"我的权限"查看'
-            need_reply = False
-        elif message4 == '打卡情况' and message_len > 4:
-            if right < 3:
-                tmp = message[4:].strip()
-                if tmp.isdigit():
-                    tmp = int(tmp)
-                    if clock['groupClock'].__contains__(tmp):
-                        reply_text = '未打卡名单：\n'
-                        for key, value in clock['dictClockPeople'][tmp].items():
-                            if not value['clockIn']:
-                                member_tmp = await app.getMember(tmp, key)
-                                reply_text += member_tmp.name + '(' + str(key) + ')\n'
-                    else:
-                        reply_text = '该群没有打卡计划哦！'
-                else:
-                    reply_text = '格式错误'
-            else:
-                reply_text = '权限不足，请输入"我的权限"查看'
-            need_reply = False
-        elif message == '打卡情况' and mode == 1:
-            if right < 3:
-                if clock['groupClock'].__contains__(group_id):
-                    reply_text = '未打卡名单：\n'
-                    for key, value in clock['dictClockPeople'][group_id].items():
-                        if not value['clockIn']:
-                            member_tmp = await app.getMember(group_id, key)
-                            reply_text += member_tmp.name + '(' + str(key) + ')\n'
-                else:
-                    reply_text = '本群没有打卡计划哦！'
-            else:
-                reply_text = '权限不足，请输入"我的权限"查看'
-            need_reply = True
-
         elif message5 == '添加回复 ' and message_len > 5 and mode == 1:
             if right < 3:
                 stringList = message.split(' ')
@@ -580,69 +491,23 @@ async def administrator_operation(app, message, qq, name, group_id, mode, member
             else:
                 reply_text = '没有该触发词'
             need_reply = True
-
-        elif message4 == '发起活动' and message_len > 4 and mode == 1:
-            if right < 3:
-                stringList = message[4:].strip().split(' ')
-                if len(stringList) != 2:
-                    reply_text = '参数错误'
-                else:
-                    activity_name = stringList[0]
-                    lastMinute = 1
-                    if stringList[1][-2:] == '分钟':
-                        lastMinute = int(stringList[1][:-2])
-                    elif stringList[1][-2:] == '小时':
-                        lastMinute = int(stringList[1][:-2]) * 60
-                    elif stringList[1][-1:] == '天':
-                        lastMinute = int(stringList[1][:-1]) * 1440
-                    else:
-                        lastMinute = int(stringList[1])
-
-                    if len(activity_name) == 0:
-                        reply_text = '活动名不能为空'
-                    elif lastMinute <= 0:
-                        reply_text = '报名时间必须大于0'
-                    else:
-                        reply_text = add_activity(group_id, qq, activity_name, lastMinute)
-            else:
-                reply_text = '权限不足，请输入"我的权限"查看'
-            need_reply = True
-        elif message4 == '删除活动' and message_len > 4 and mode == 1:
-            if right < 3:
-                activity_name = message[4:].strip()
-                if len(activity_name) == 0:
-                    reply_text = '活动名不能为空'
-                else:
-                    reply_text = del_activity(group_id, qq, activity_name)
-            else:
-                reply_text = '权限不足，请输入"我的权限"查看'
-            need_reply = True
-        elif message6 == '查看活动名单' and message_len > 6 and mode == 1:
-            if right < 3:
-                activity_name = message[6:].strip()
-                if len(activity_name) == 0:
-                    reply_text = '活动名不能为空'
-                else:
-                    reply_text = await view_activity(group_id, activity_name, app)
-            else:
-                reply_text = '权限不足，请输入"我的权限"查看'
-            need_reply = True
-
+            
         elif message == '申请权限' and mode == 1:
-            if group_right == 0:
-                member_list = await app.memberList(group_id)
-                if len(member_list) > 5:
-                    reply_text = add_contributors(qq, bot_config)
-                    if reply_text == '添加成功~':
-                        reply_text = '申请贡献者权限成功，可以输入“贡献者帮助”获取管理指令，需要更高权限的请前往' + bot_name + '官方群(479504567)找主人要'
-                    elif '正确' in reply_text:
-                        reply_text = '因为未知原因申请失败，请稍后重试'
-                    else:
-                        reply_text = reply_text.replace('他', '你').replace('该成员', '你')
-                else:
-                    reply_text = '你的群需要超过5人，请去' + bot_name + '官方群(479504567)找主人要权限'
-            else:
-                reply_text = '你并非群主（群需要超过5人），请去' + bot_name + '官方群(479504567)找主人要权限'
+            # if group_right == 0:
+            #     member_list = await app.memberList(group_id)
+            #     if len(member_list) > 5:
+            #         reply_text = add_contributors(qq, bot_config)
+            #         if reply_text == '添加成功~':
+            #             reply_text = '申请贡献者权限成功，可以输入“贡献者帮助”获取管理指令，需要更高权限的请前往' + bot_name + '官方群(479504567)找主人要'
+            #         elif '正确' in reply_text:
+            #             reply_text = '因为未知原因申请失败，请稍后重试'
+            #         else:
+            #             reply_text = reply_text.replace('他', '你').replace('该成员', '你')
+            #     else:
+            #         reply_text = '你的群需要超过5人，请去' + bot_name + '官方群(479504567)找主人要权限'
+            # else:
+            #     reply_text = '你并非群主（群需要超过5人），请去' + bot_name + '官方群(479504567)找主人要权限'
+            reply_text = '申请权限功能暂时离开了，请前往官方群(479504567)找主人要权限'
             need_reply = True
 
         # 屏蔽词不用strip，因为可能有一些带空格屏蔽词
@@ -725,7 +590,8 @@ async def administrator_operation(app, message, qq, name, group_id, mode, member
             need_reply = True
         elif message5 == '查看分组 ' and message_len > 5:
             group_name = message[5:].strip()
-            reply_text = await view_group(app, group_id, config, group_name)
+            # reply_text = '暂时不能查看分组'
+            reply_text = await view_group(bot, group_id, config, group_name)
             need_reply = True
         elif message == '清空分组':
             reply_text = clear_group(group_id, config, qq)
@@ -1258,124 +1124,6 @@ def del_image_search_group(config, group_id):
     dataManage.save_group(group_id, config)
     return '已关闭，(灬°ω°灬) '
 
-
-# ==========================================================
-# 活动
-
-# 增加活动
-def add_activity(group_id, qq, activity_name, lastMinute):
-    activityList = dataManage.load_obj('data/ClockActivity/activity')
-    if activityList.__contains__(group_id):
-        if activityList[group_id].__contains__(activity_name):
-            return '已经存在该活动了'
-        else:
-            activityList[group_id][activity_name] = {
-                'admin': qq,
-                'beginTime': {
-                    'hour': getNow.getHour(),
-                    'minute': getNow.getMinute()
-                },
-                'lastMinute': lastMinute,
-                'member': []
-            }
-            dataManage.save_obj(activityList, 'data/ClockActivity/activity')
-            return '活动 ' + activity_name + '已开启，请在' + str(lastMinute) + '分钟内报名'
-    else:
-        activityList[group_id] = {}
-        activityList[group_id][activity_name] = {
-            'admin': qq,
-            'beginTime': {
-                'hour': getNow.getHour(),
-                'minute': getNow.getMinute()
-            },
-            'lastMinute': lastMinute,
-            'member': []
-        }
-        dataManage.save_obj(activityList, 'data/ClockActivity/activity')
-        return '活动 ' + activity_name + '已开启，请在' + str(lastMinute) + '分钟内输入\"参加活动 ' + activity_name + '\"报名'
-
-
-# 参与活动
-def join_activity(group_id, qq, activity_name):
-    activityList = dataManage.load_obj('data/ClockActivity/activity')
-    if activityList.__contains__(group_id):
-        if activityList[group_id].__contains__(activity_name):
-            if qq in activityList[group_id][activity_name]['member']:
-                return '你已经参加了该活动哦~'
-            else:
-                activityList[group_id][activity_name]['member'].append(qq)
-                dataManage.save_obj(activityList, 'data/ClockActivity/activity')
-                return '参加活动' + activity_name + '成功！'
-        else:
-            return '不存在该活动！'
-    else:
-        return '不存在该活动！'
-
-
-# 退出活动
-def quit_activity(group_id, qq, activity_name):
-    activityList = dataManage.load_obj('data/ClockActivity/activity')
-    if activityList.__contains__(group_id):
-        if activityList[group_id].__contains__(activity_name):
-            if qq in activityList[group_id][activity_name]['member']:
-                activityList[group_id][activity_name]['member'].remove(qq)
-                dataManage.save_obj(activityList, 'data/ClockActivity/activity')
-                return '退出成功！'
-            else:
-                return '你本来就没有参与这个活动~'
-        else:
-            return '不存在该活动！'
-    else:
-        return '不存在该活动！'
-
-
-# 删除活动
-def del_activity(group_id, qq, activity_name):
-    activityList = dataManage.load_obj('data/ClockActivity/activity')
-    if activityList.__contains__(group_id):
-        if activityList[group_id].__contains__(activity_name):
-            del activityList[group_id][activity_name]
-            if len(activityList[group_id]) == 0:
-                del activityList[group_id]
-            dataManage.save_obj(activityList, 'data/ClockActivity/activity')
-            return '删除成功！'
-        else:
-            return '不存在该活动！'
-    else:
-        return '不存在该活动！'
-
-
-# 活动名单
-async def view_activity(group_id, activity_name, app):
-    activityList = dataManage.load_obj('data/ClockActivity/activity')
-    if activityList.__contains__(group_id):
-        if activityList[group_id].__contains__(activity_name):
-            reply_text = '活动' + activity_name + '名单如下：'
-            for i in activityList[group_id][activity_name]['member']:
-                member = await app.getMember(group_id, i)
-                if member is None:
-                    continue
-                print(member)
-                print(i)
-                reply_text += '\n' + member.name + '(' + str(i) + ')'
-            return reply_text
-        else:
-            return '不存在该活动！'
-    else:
-        return '不存在该活动！'
-
-
-def get_activity_list(group_id, app):
-    activityList = dataManage.load_obj('data/ClockActivity/activity')
-    if activityList.__contains__(group_id):
-        if len(activityList[group_id]) > 0:
-            reply_text = '本群当前活动如下：'
-            for key, value in activityList[group_id].items():
-                reply_text += '\n' + key + '(参与人数：' + str(len(value['member'])) + ')'
-            return reply_text
-    return '本群暂无活动'
-
-
 # =========================================================
 def add_group(group_id, config, name, members, qq):
     if config['group'].__contains__(name):
@@ -1411,19 +1159,16 @@ def view_all_group(config):
 
 
 
-async def view_group(app, group_id, config, name):
+async def view_group(bot, group_id, config, name):
     if not config['group'].__contains__(name) or len(config['group'][name]) == 0:
         return '暂无任何成员'
     reply = '分组<' + name + '>成员如下：'
-    member_list = await app.memberList(group_id)
-    members = {}
     del_members = []
 
-    for i in member_list:
-        members[i.id] = i.name
     for i in config['group'][name]:
-        if members.__contains__(i):
-            reply += '\n' + members[i] + '（' + str(i) + '）'
+        member = await bot.get_group_member(group_id, i)
+        if member is not None:
+            reply += '\n' + member.get_name() + '（' + str(i) + '）'
         else:
             del_members.append(i)
     for i in del_members:

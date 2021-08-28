@@ -1,25 +1,15 @@
-import asyncio
-from pathlib import Path
-# 所有事件监听都在entry中可以找到
-from graia.application.entry import (
-    GraiaMiraiApplication, Session,
-    MessageChain, Group, Friend, Member, MemberInfo,
-    Plain, Image, AtAll, At, Face, Source
-)
-from graia.application.entry import (
-    BotMuteEvent, BotGroupPermissionChangeEvent
-)
-from graia.application.event.mirai import NewFriendRequestEvent
-from graia.broadcast import Broadcast
+from mirai import Mirai, WebSocketAdapter
+from mirai import FriendMessage, GroupMessage, TempMessage
+from mirai import Plain, At, AtAll, Face, Image
 
 import os
 import time
+import random
 
 from plugins import talk
 from plugins import weather
 from plugins import command
 from plugins import weiboHot
-from plugins import clockIn
 from plugins import operator
 from plugins import dataManage
 from plugins import autoReply
@@ -33,8 +23,69 @@ from plugins import Clash
 
 from plugins import RPG
 
-total_index = 0
-sum_out_range = 0
+async def send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq):
+    if reply_text is None:
+        reply_text = '【突发未知bug，请使用“*send 信息”指令，将如何触发的以及状态尽可能简略地告诉主人】'
+
+    if mode == 0 or mode == 2 or (mode == 1 and not need_at):
+        if reply_image != '':
+            await bot.send(event, await Image.from_local(filename=reply_image))
+        if reply_text != '':
+            await bot.send(event, reply_text)
+    else:
+        if at_qq > 0:
+            member = await bot.get_group_member(event.sender.group.id, at_qq)
+            if member is not None:
+                if reply_image != '':
+                    await bot.send(event, [At(at_qq), await Image.from_local(filename=reply_image)])
+                if reply_text != '':
+                    await bot.send(event, [At(at_qq), reply_text])
+            else:
+                if reply_image != '':
+                    await bot.send(event, await Image.from_local(filename=reply_image))
+                if reply_text != '':
+                    await bot.send(event, reply_text)
+        elif at_qq == 0:
+            if reply_image != '':
+                await bot.send(event, [At(event.sender.id), await Image.from_local(filename=reply_image)])
+            if reply_text != '':
+                await bot.send(event, [At(event.sender.id), reply_text])
+        elif at_qq == -1:
+            if reply_image != '':
+                await bot.send(event, [AtAll(), await Image.from_local(filename=reply_image)])
+            if reply_text != '':
+                await bot.send(event, [AtAll(), reply_text])
+
+async def send_complex_message(bot, event, mode, complex_reply, complex_at):
+    if mode == 0 or mode == 2:
+        await bot.send(event, complex_reply)
+    elif mode == 1:
+        if complex_at['at_type'] == -1:
+            await bot.send(event, complex_reply)
+        elif complex_at['at_type'] == 0:
+            if complex_at['at'] > 0:
+                member = await bot.get_group_member(event.sender.group.id, at_qq)
+                if member is not None:
+                    complex_reply.insert(0, At(complex_at['at']))
+                    await bot.send(event, complex_reply)
+            elif complex_at['at'] == 0:
+                complex_reply.insert(0, At(event.sender.id))
+                await bot.send(event, complex_reply)
+            elif complex_at['at'] == -1:
+                complex_reply.insert(0, AtAll())
+                await bot.send(event, complex_reply)
+        elif complex_at['at_type'] == 1:
+            group = dataManage.read_group(event.sender.group.id)
+            init = False
+            if not group['group'].__contains__(complex_at['at']):
+                complex_reply.insert(0, Plain('@' + str(complex_at['at']) + ' '))
+            else:
+                for qq in group['group'][complex_at['at']]:
+                    member = await bot.get_group_member(event.sender.group.id, qq)
+                    if member is not None:
+                        complex_reply.insert(0, At(qq))
+
+            await bot.send(event, complex_reply)
 
 # 布尔开关类型文案
 def bool_string(switch):
@@ -43,158 +94,9 @@ def bool_string(switch):
     else:
         return '已关闭'
 
-
-# 发送消息
-async def send_message(app, mode, member, reply_text, reply_image, need_at, at_qq):
-    if reply_text is None:
-        reply_text = '【突发未知bug，请使用“*send 信息”指令，将如何触发的以及状态尽可能简略地告诉主人】'
-    reply_text_len = len(reply_text)
-    reply_image_len = len(reply_image)
-
-    if mode == 0:
-        if reply_image_len > 0:
-            filepath = reply_image
-            if os.path.exists(filepath):
-                await app.sendFriendMessage(member, MessageChain.create([
-                    Image.fromLocalFile(filepath)
-                ]))
-        if reply_text_len > 0:
-            await app.sendFriendMessage(member, MessageChain.create([
-                Plain(reply_text)
-            ]))
-    elif mode == 1:
-        if need_at:
-            if at_qq == 0:  # At发言者
-                if reply_image_len > 0:
-                    filepath = reply_image
-                    if os.path.exists(filepath):
-                        await app.sendGroupMessage(member.group, MessageChain.create([
-                            Image.fromLocalFile(filepath)
-                        ]))
-                await app.sendGroupMessage(member.group, MessageChain.create([
-                    At(member.id),
-                    Plain(reply_text)
-                ]))
-            elif at_qq > 0:  # At指定人
-                member_target = await app.getMember(member.group.id, at_qq)
-                if member_target is not None:
-                    if reply_image_len > 0:
-                        filepath = reply_image
-                        if os.path.exists(filepath):
-                            await app.sendGroupMessage(member.group, MessageChain.create([
-                                Image.fromLocalFile(filepath)
-                            ]))
-                    await app.sendGroupMessage(member.group, MessageChain.create([
-                        At(at_qq),
-                        Plain(reply_text)
-                    ]))
-                else:
-                    if reply_image_len > 0:
-                        filepath = reply_image
-                        if os.path.exists(filepath):
-                            await app.sendGroupMessage(member.group, MessageChain.create([
-                                Image.fromLocalFile(filepath)
-                            ]))
-                    await app.sendGroupMessage(member.group, MessageChain.create([
-                        Plain('@' + str(at_qq) + ' '),
-                        Plain(reply_text)
-                    ]))
-            elif at_qq == -1:  # At全体
-                if reply_image_len > 0:
-                    filepath = reply_image
-                    if os.path.exists(filepath):
-                        await app.sendGroupMessage(member.group, MessageChain.create([
-                            Image.fromLocalFile(filepath)
-                        ]))
-                await app.sendGroupMessage(member.group, MessageChain.create([
-                    AtAll(),
-                    Plain(reply_text)
-                ]))
-        else:
-            if reply_image_len > 0:
-                filepath = reply_image
-                if os.path.exists(filepath):
-                    await app.sendGroupMessage(member.group, MessageChain.create([
-                        Image.fromLocalFile(filepath)
-                    ]))
-            if reply_text_len > 0:
-                await app.sendGroupMessage(member.group, MessageChain.create([
-                    Plain(reply_text)
-                ]))
-    elif mode == 2:
-        if reply_image_len > 0:
-            filepath = reply_image
-            if os.path.exists(filepath):
-                await app.sendTempMessage(member.group.id, member.id, MessageChain.create([
-                    Image.fromLocalFile(filepath)
-                ]))
-        if reply_text_len > 0:
-            await app.sendTempMessage(member.group.id, member.id, MessageChain.create([
-                Plain(reply_text)
-            ]))
-
-
-async def send_complex_message(app, mode, member, complex_reply, at):
-    if mode == 0:
-        await app.sendFriendMessage(member, complex_reply.asSendable())
-    elif mode == 1:  # 只有群聊消息有艾特
-        member_list = await app.memberList(member.group.id)
-        members = []
-        for i in member_list:
-            members.append(i.id)
-
-        if at['at_type'] == -1:
-            await app.sendGroupMessage(member.group, complex_reply.asSendable())
-        elif at['at_type'] == 0:
-            if at['at'] > 0:
-                if at['at'] in members:
-                    await app.sendGroupMessage(member.group, MessageChain.create([
-                        At(at['at'])
-                    ]).plusWith(complex_reply.asSendable()))
-                else:
-                    await app.sendGroupMessage(member.group, MessageChain.create([
-                        Plain('@' + str(at['at']))
-                    ]).plusWith(complex_reply.asSendable()))
-            elif at['at'] == 0:
-                    await app.sendGroupMessage(member.group, MessageChain.create([
-                        At(member.id)
-                    ]).plusWith(complex_reply.asSendable()))
-            elif at['at'] == -1:
-                    await app.sendGroupMessage(member.group, MessageChain.create([
-                        AtAll()
-                    ]).plusWith(complex_reply.asSendable()))
-        elif at['at_type'] == 1:
-            group = dataManage.read_group(member.group.id)
-            init = False
-            message = MessageChain.create([
-                        Plain('【未知错误】')
-            ])
-            if not group['group'].__contains__(at['at']):
-                message = MessageChain.create([
-                        Plain(at['at'])
-                ])
-            else:
-                for qq in group['group'][at['at']]:
-                    if qq in members:
-                        print(qq)
-                        if init:
-                            message = message.plusWith(MessageChain.create([
-                                    At(qq)
-                            ]))
-                        else:
-                            message = MessageChain.create([
-                                    At(qq)
-                            ])
-                            init = True
-            await app.sendGroupMessage(member.group, message.plusWith(complex_reply.asSendable()))
-    elif mode == 2:
-        await app.sendTempMessage(member.group.id, member.id, complex_reply.asSendable())
-
-
 class MessageProcessing:
     config = {}
     statistics = {}
-    clock = {}
     bot_qq = 0
     bot_name = '小柒'
 
@@ -223,7 +125,6 @@ class MessageProcessing:
         # 基本信息重置
         self.config = dataManage.read_config()
         self.statistics = dataManage.read_statistics()
-        self.clock = dataManage.read_clock()
         luck = dataManage.read_luck()
         screen = dataManage.read_screen_word()
 
@@ -280,22 +181,23 @@ class MessageProcessing:
         return self.bot_name
 
     # 0：朋友消息，1：群消息，2：临时消息
-    async def run(self, app, mode, member, message_source):
-        global total_index
-        total_index += 1
-        print('\t线程：' + str(total_index))
-
+    async def run(self, bot, event, mode, message_chain, be_at):
         self.config = dataManage.read_config()
         self.statistics = dataManage.read_statistics()
         self.bot_qq = self.config['qq']
         self.bot_name = self.config['name']
-        self.clock = dataManage.read_clock()
 
         # ===================================================================================
         # ===================================================================================
         # 消息表获取
-        get_message = await app.messageFromId(message_source)
-        message = str(get_message.messageChain.asDisplay())
+        message = ''
+        plain_list = message_chain[Plain]
+        for i in plain_list:
+            message += str(i)
+        at_list = message_chain[At]
+        for i in at_list:
+            if i != At(bot.qq):
+                message += '@' + str(i)[10:-1]
 
         # ===================================================================================
         # ===================================================================================
@@ -313,31 +215,24 @@ class MessageProcessing:
         need_at = False  # 是否需要at
         at_qq = 0  # at的qq是谁
         # 状态信息
-        be_at = False  # 是否被at
         group_right = 2  # 在群里的权限（群主、管理员、成员）
         if mode == 0:
-            name = member.nickname  # 发消息的人的名字
             group_id = 0  # 发消息的人的群号（如果是群聊消息）
         else:
-            name = member.name
-            group_id = member.group.id
-            tmp = str(member.permission)
-            if tmp == 'MemberPerm.Owner':
+            group_id = event.sender.group.id
+            tmp = str(event.sender.permission)
+            if tmp == 'Permission.Owner':
                 group_right = 0
-            elif tmp == 'MemberPerm.Administrator':
+            elif tmp == 'Permission.Administrator':
                 group_right = 1
 
-        qq = member.id  # (发消息人的qq)
+        qq = event.sender.id  # (发消息人的qq)
+        name = event.sender.get_name()
+
         right = self.get_right(qq)  # 对于小柒的权限（主人、管理员、贡献者）
         blacklist = self.get_blacklist(qq, group_id)
 
-        if mode == 1 and ('@' + str(self.bot_qq) in message or '@' + str(self.bot_name) in message):
-            be_at = True
-            message = message.replace('@' + str(self.bot_qq) + ' ', '')
-            message = message.replace('@' + str(self.bot_qq), '')
-            message = message.replace('@' + str(self.bot_name) + ' ', '')
-            message = message.replace('@' + str(self.bot_name), '')
-        elif mode == 0 or mode == 2:
+        if mode == 0 or mode == 2:
             be_at = True
 
         self.get_user(qq)
@@ -364,13 +259,13 @@ class MessageProcessing:
 
         be_mute = (mode == 1 and self.groups[group_id]['config']['mute'])
 
-        master = await app.getFriend(self.config['master'])
+        master = await bot.get_friend(self.config['master'])
 
         # print('\tmessage:' + message)
         # print('\tmessage_code:' + message_code)
         # print('\tqq:' + str(qq) + '<' + name + '>')
         # if mode == 1:
-        #     print('\tgroup:' + str(group_id) + '<' + member.group.name + '>')
+        #     print('\tgroup:' + str(group_id) + '<' + event.sender.group.get_name() + '>')
         #     print('\tmute:' + str(be_mute))
 
         # ===================================================================================
@@ -391,16 +286,16 @@ class MessageProcessing:
                 need_reply = True
                 need_at = True
                 if group_right == 2:
-                    try:
-                        await app.revokeMessage(message_source)
+                    if str(event.sender.group.permission) != 'Permission.Member':
+                        await bot.recall(message_chain.message_id)
                         reply_text += '，予以撤回~'
-                    except PermissionError:
+                    else:
                         reply_text += '，但是' + self.bot_name + '没有办法撤回诶~'
                 else:
                     reply_text += '，但是对方是管理员/群主，' + self.bot_name + '打不过，嘤嘤嘤~'
 
             if need_reply:
-                await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
 
         # 基本信息查看
@@ -423,12 +318,12 @@ class MessageProcessing:
                 reply_text += '\n在本群中' + self.bot_name + '被禁言了'
             self.statistics['help'] += 1
             dataManage.save_statistics(self.statistics)
-            await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+            await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
             return
         elif message.replace('查看', '').replace('查询', '') == '开关列表' or message.replace('查看', '').replace('查询',
                                                                                                         '') == '模块列表':
             if mode == 1:
-                reply_text = '群<' + member.group.name + '>模块开关情况如下：'
+                reply_text = '群<' + event.sender.group.get_name() + '>模块开关情况如下：'
                 reply_text += '\n输入“模块管理帮助”获取所有指令的详细说明'
                 reply_text += '\n格式：”字段【操作指令】：状态“\n'
                 reply_text += '\n是否禁言【mute/unmute】：' + bool_string(self.groups[group_id]['config']['mute'])
@@ -458,7 +353,7 @@ class MessageProcessing:
                 reply_text += '\n是否开启ai（时不时自主回复）【开启/关闭智能回复】：' + bool_string(self.users[qq]['config']['ai'])
             self.statistics['help'] += 1
             dataManage.save_statistics(self.statistics)
-            await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+            await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
             return
 
         # 如果是黑名单那么不会回复任何消息
@@ -467,7 +362,7 @@ class MessageProcessing:
         if message_len == 0:
             if be_at:
                 reply_text = '我在'
-                await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+            await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
             return
 
         # 如果被限制那么只回复at消息
@@ -485,7 +380,7 @@ class MessageProcessing:
 
             if self.users[qq]['buffer']['id'] == 1:  # 群欢迎语
                 self.get_group(self.users[qq]['buffer']['buffer'])
-                self.groups[self.users[qq]['buffer']['buffer']]['welcome'] = get_message.messageChain
+                self.groups[self.users[qq]['buffer']['buffer']]['welcome'] = message_chain
                 reply_text = self.bot_name + '已经记录下了~！'
                 need_reply = True
                 dataManage.save_group(self.users[qq]['buffer']['buffer'],
@@ -542,7 +437,7 @@ class MessageProcessing:
             elif self.users[qq]['buffer']['id'] == 6:  # 创建复杂回复的回复内容
                 if message != '*取消创建*':
                     self.users[qq]['buffer']['id'] = 7
-                    self.users[qq]['buffer']['buffer']['reply'] = get_message.messageChain
+                    self.users[qq]['buffer']['buffer']['reply'] = message_chain
                     dataManage.save_user(qq, self.users[qq])
                     reply_text += '小柒记录下来了，请问这条消息需要艾特谁吗（全体成员/分组/触发人/QQ号，这四种都是可以的哦~如果QQ号为0表示不艾特，如果不明白分组可以看“贡献者帮助”）？'
                     reset_buffer = False
@@ -591,7 +486,7 @@ class MessageProcessing:
                 dataManage.save_user(qq, self.users[qq])
             print(self.users[qq]['buffer']['id'])
             if need_reply:
-                await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
 
         # ===================================================================================
@@ -599,97 +494,88 @@ class MessageProcessing:
         if mode == 1:
             if message_code == 'quit' or message_code == 'dismiss':
                 if group_right < 2 or right < 3:
-                    await app.sendGroupMessage(member.group, MessageChain.create([
-                        Plain('再见啦~各位！我会想你们的')
-                    ]))
-                    await app.quit(member.group)
+                    await bot.send(event, '再见啦~各位！我会想你们的!')
+                    
+                    await bot.quit(group_id)
                     self.statistics['quit'] += 1
                     dataManage.save_statistics(self.statistics)
-                    logManage.group_log(getNow.toString(), qq, group_id, member.group.name, message + '; 小柒退群！')
+                    logManage.group_log(getNow.toString(), qq, group_id, event.sender.group.get_name(), message + '; 小柒退群！')
 
                     if master is not None:
-                        await app.sendFriendMessage(master, MessageChain.create([
+                        await bot.send_friend_message(master.id, [
                             Plain('已退出群聊：' + str(group_id) + '！')
-                        ]))
+                        ])
                 else:
                     reply_text = '权限不足，需要群管理或群主或者小柒的管理员'
-                    await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'mute' or message_code == 'bot off':
                 if not self.groups[group_id]['config']['mute']:
                     if group_right < 2 or right < 3:
                         self.groups[group_id]['config']['mute'] = True
                         dataManage.save_group(group_id, self.groups[group_id])
-                        await app.sendGroupMessage(member.group, MessageChain.create([
-                            Plain('QAQ，那我闭嘴了')
-                        ]))
+                        await bot.send(event, 'QAQ，那我闭嘴了')
                         self.statistics['mute'] += 1
                         dataManage.save_statistics(self.statistics)
-                        logManage.group_log(getNow.toString(), qq, group_id, member.group.name, message + '; 小柒禁言！')
+                        logManage.group_log(getNow.toString(), qq, group_id, event.sender.group.get_name(), message + '; 小柒禁言！')
 
                         if master is not None:
-                            await app.sendFriendMessage(master, MessageChain.create([
+                            await bot.send_friend_message(master.id, [
                                 Plain('在群' + str(group_id) + '被禁言！')
-                            ]))
+                            ])
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                        await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 else:
                     reply_text = '小柒本来就被禁言了！'
-                    await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'unmute' or message_code == 'bot on':
                 if self.groups[group_id]['config']['mute']:
                     if group_right < 2 or right < 3:
                         self.groups[group_id]['config']['mute'] = False
                         dataManage.save_group(group_id, self.groups[group_id])
-                        await app.sendGroupMessage(member.group, MessageChain.create([
-                            Plain('呜呜呜，憋死我了，终于可以说话了')
-                        ]))
+                        await bot.send(event, '呜呜呜，憋死我了，终于可以说话了')
                         self.statistics['unmute'] += 1
                         dataManage.save_statistics(self.statistics)
-                        logManage.group_log(getNow.toString(), qq, group_id, member.group.name, message + '; 小柒解除禁言！')
+                        logManage.group_log(getNow.toString(), qq, group_id, event.sender.group.get_name(), message + '; 小柒解除禁言！')
 
                         if master is not None:
-                            await app.sendFriendMessage(master, MessageChain.create([
+                            await bot.send_friend_message(master.id, [
                                 Plain('在群' + str(group_id) + '解除禁言！')
-                            ]))
+                            ])
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                        await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 else:
                     reply_text = '本来就没有禁言哦~'
-                    await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'limit on' or message == '开启限制模式':
                 if group_right < 2 or right < 3:
                     if not self.groups[group_id]['config']['limit']:
                         self.groups[group_id]['config']['limit'] = True
                         dataManage.save_group(group_id, self.groups[group_id])
-                        await app.sendGroupMessage(member.group, MessageChain.create([
-                            Plain('限制模式已开启，指令需艾特才能回复。解禁指令也别忘记艾特哦~')
-                        ]))
+                        await bot.send(event, '限制模式已开启，指令需艾特才能回复。解禁指令也别忘记艾特哦~')
                     self.statistics['operate'] += 1
                     dataManage.save_statistics(self.statistics)
-                    logManage.group_log(getNow.toString(), qq, group_id, member.group.name, message + '; 小柒解除禁言！')
+                    logManage.group_log(getNow.toString(), qq, group_id, event.sender.group.get_name(), message + '; 小柒开启限制！')
                 else:
                     reply_text = '权限不足，需要群管理或群主或小柒的管理'
-                    await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'limit off' or message == '关闭限制模式':
                 if group_right < 2 or right < 3:
                     if self.groups[group_id]['config']['limit']:
                         self.groups[group_id]['config']['limit'] = False
                         dataManage.save_group(group_id, self.groups[group_id])
-                        await app.sendGroupMessage(member.group, MessageChain.create([
-                            Plain('从现在起，指令无需艾特也能回复~')
-                        ]))
+                        await bot.send(event, '从现在起，指令无需艾特也能回复~')
                     self.statistics['operate'] += 1
                     dataManage.save_statistics(self.statistics)
-                    logManage.group_log(getNow.toString(), qq, group_id, member.group.name, message + '; 小柒解除限制！')
+                    logManage.group_log(getNow.toString(), qq, group_id, event.sender.group.get_name(), message + '; 小柒解除限制！')
                 else:
                     reply_text = '权限不足，需要群管理或群主或小柒的管理'
-                    await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
 
         # 如果被禁言那么直接返回
@@ -697,27 +583,22 @@ class MessageProcessing:
             return
 
         # 基本权限管理
-        if message_code[:9] == 'broadcast':
-            if right == 0:
-                temp = message_code[9:].strip() + '【全局广播内容无需回复】'
-                group_list = await app.groupList()
-                for i in group_list:
-                    print(i)
-                    await app.sendGroupMessage(i, MessageChain.create([
-                        Plain(temp)
-                    ]))
-
-            else:
-                reply_text = '智能回复本身就是开启的'
-            await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
-            return
-        elif message_code[:4] == 'send':
+        # if message_code[:9] == 'broadcast':
+        #     if right == 0:
+        #         temp = message_code[9:].strip() + '【全局广播内容无需回复】'
+        #         group_list = await app.groupList()
+        #         for i in group_list:
+        #             print(i)
+        #             await app.sendGroupMessage(i, MessageChain.create([
+        #                 Plain(temp)
+        #             ]))
+        if message_code[:4] == 'send':
             if master is not None and len(message) > 5:
-                await app.sendFriendMessage(master, MessageChain.create([
+                await bot.send_friend_message(master.id, [
                     Plain(name + '(' + str(qq) + ')：' + message[5:].strip())
-                ]))
+                ])
                 reply_text = '已经报告给主人了~'
-                await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
 
                 self.statistics['operate'] += 1
                 dataManage.save_statistics(self.statistics)
@@ -733,7 +614,7 @@ class MessageProcessing:
                     reply_text = '已开启智能回复~'
                 else:
                     reply_text = '智能回复本身就是开启的'
-                await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
             elif mode == 1:  # 如果是群聊则需要有权限，才能够操作
                 if group_right < 2 or right < 3:
                     if not self.groups[group_id]['config']['ai']:
@@ -745,10 +626,10 @@ class MessageProcessing:
                         reply_text = '本群已开启艾特的智能回复~'
                     else:
                         reply_text = '本群本身就是开启艾特智能回复的'
-                    await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 else:
                     reply_text = '权限不足，需要群管理或群主'
-                    await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
             return
         elif message_code == 'ai off' or message == '关闭智能回复':
             if mode == 0 or mode == 2:
@@ -761,7 +642,7 @@ class MessageProcessing:
                     reply_text = '已关闭智能回复~'
                 else:
                     reply_text = '智能回复本身就是关闭的'
-                await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
             elif mode == 1:
                 if group_right < 2 or right < 3:
                     if self.groups[group_id]['config']['ai']:
@@ -773,10 +654,9 @@ class MessageProcessing:
                         reply_text = '本群已关闭艾特的智能回复~'
                     else:
                         reply_text = '本群本身就是关闭艾特智能回复的'
-                    await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                 else:
                     reply_text = '权限不足，需要群管理或群主'
-                    await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
             return
         elif mode == 1:
             if message_code == 'curse on' or message == '开启脏话':
@@ -788,10 +668,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已开启脏话功能~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'curse off' or message == '关闭脏话':
                 if self.groups[group_id]['config']['curse']:
@@ -802,10 +681,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已关闭脏话功能~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'game on' or message == '开启游戏':
                 if not self.groups[group_id]['config']['RPG']:
@@ -816,10 +694,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已开启游戏功能~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'game off' or message == '关闭游戏':
                 if self.groups[group_id]['config']['RPG']:
@@ -830,10 +707,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已关闭游戏功能~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'game limit on' or message == '开启游戏限制模式':
                 if not self.groups[group_id]['config']['limit_RPG']:
@@ -844,10 +720,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已开启游戏限制~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'game limit off' or message == '关闭游戏限制模式':
                 if self.groups[group_id]['config']['limit_RPG']:
@@ -858,10 +733,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已关闭游戏限制~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
 
             elif message_code == 'image on' or message == '开启图片搜索':
@@ -873,10 +747,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已开启p站图片搜索功能~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要主人（发送图片及其占用资源所以只对部分开放）'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'image off' or message == '关闭图片搜索':
                 if self.groups[group_id]['config']['image']:
@@ -887,10 +760,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已关闭p站图片搜索功能~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要主人（发送图片及其占用资源所以只对部分开放）'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
 
             elif message_code == 'reply on' or message == '开启自定义回复':
@@ -902,10 +774,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已开启自定义回复功能~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'reply off' or message == '关闭自定义回复':
                 if self.groups[group_id]['config']['autonomous_reply']:
@@ -916,10 +787,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已关闭自定义回复功能~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'repeat on' or message == '开启自动加一':
                 if not self.groups[group_id]['config']['repeat']:
@@ -930,10 +800,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已开启自动加一功能~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'repeat off' or message == '关闭自动加一':
                 if self.groups[group_id]['config']['repeat']:
@@ -944,10 +813,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已关闭自动加一功能~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'trpg on' or message == '开启骰娘':
                 if not self.groups[group_id]['config']['TRPG']:
@@ -958,10 +826,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已开启骰娘功能~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'trpg off' or message == '关闭骰娘':
                 if self.groups[group_id]['config']['TRPG']:
@@ -972,10 +839,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已关闭骰娘功能~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'clash on' or message == '开启部落冲突查询':
                 if not self.groups[group_id]['config']['clash']:
@@ -986,10 +852,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已开启部落冲突查询功能~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要主人，因为部落冲突查询包含大量链接，容易被冻结，请去官方群（479504567）找主人审核后开启'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'clash off' or message == '关闭部落冲突查询':
                 if self.groups[group_id]['config']['clash']:
@@ -1000,10 +865,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已关闭部落冲突查询功能~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
 
             elif message_code == 'welcome on' or message == '开启新人欢迎':
@@ -1021,10 +885,9 @@ class MessageProcessing:
                             self.users[qq]['buffer']['id'] = 1
                             self.users[qq]['buffer']['buffer'] = group_id
                             dataManage.save_user(qq, self.users[qq])
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'welcome off' or message == '关闭新人欢迎':
                 if self.groups[group_id]['config']['welcome']:
@@ -1035,10 +898,9 @@ class MessageProcessing:
                         self.statistics['operate'] += 1
                         dataManage.save_statistics(self.statistics)
                         reply_text = '本群已关闭入群欢迎功能~'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                     else:
                         reply_text = '权限不足，需要群管理或群主'
-                        await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                    await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
             elif message_code == 'welcome set' or message == '设置新人欢迎':
                 if group_right < 2 or right < 3:
@@ -1051,10 +913,9 @@ class MessageProcessing:
                     self.users[qq]['buffer']['id'] = 1
                     self.users[qq]['buffer']['buffer'] = group_id
                     dataManage.save_user(qq, self.users[qq])
-                    await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
                 else:
                     reply_text = '权限不足，需要群管理或群主'
-                    await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
                 return
 
         # -----------------------------------------------------------------------------------
@@ -1123,77 +984,11 @@ class MessageProcessing:
                 group_name = message[4:].strip()
                 reply_text = operator.quit_group(group_id, self.groups[group_id], group_name, qq)
                 need_reply = True
-            elif message[:4] == '参加活动' or message[:4] == '参与活动':
-                activityName = message[4:].strip()
-                if len(activityName) == 0:
-                    reply_text = '活动名不能为空'
-                    need_reply = True
-                else:
-                    reply_text = operator.join_activity(group_id, qq, activityName)
-                    need_at = True
-                    need_reply = True
-            elif message[:4] == '退出活动':
-                activityName = message[4:].strip()
-                if len(activityName) == 0:
-                    reply_text = '活动名不能为空'
-                    need_reply = True
-                else:
-                    reply_text = operator.quit_activity(group_id, qq, activityName)
-                    need_at = True
-                    need_reply = True
-            elif message == '活动清单' or message == '活动列表':
-                reply_text = operator.get_activity_list(group_id, app)
-                need_reply = True
-            elif self.clock['groupClock'].__contains__(group_id):
-                if message == '打卡':
-                    reply_text = name + clockIn.clockIn(group_id, qq)
-                    need_reply = True
-                elif message == '加入打卡计划':
-                    reply_text = name + clockIn.joinClockIn(group_id, qq)
-                    need_reply = True
-                elif message == '退出打卡计划':
-                    reply_text = name + clockIn.quitClockIn(group_id, qq)
-                    need_reply = True
-                elif message == '终止打卡计划' and right < 3:
-                    reply_text = name + clockIn.stopClockIn(group_id)
-                    need_reply = True
-
-                elif message == '锁定打卡计划' and right < 3:
-                    reply_text = clockIn.lockClockIn(group_id)
-                    need_reply = True
-                elif message == '解锁打卡计划' and right < 3:
-                    reply_text = clockIn.unlockClockIn(group_id)
-                    need_reply = True
-                elif message == '锁定打卡计划 加入' and right < 3:
-                    reply_text = clockIn.lockClockInEnter(group_id)
-                    need_reply = True
-                elif message == '解锁打卡计划 加入' and right < 3:
-                    reply_text = clockIn.unlockClockInEnter(group_id)
-                    need_reply = True
-                elif message == '锁定打卡计划 退出' and right < 3:
-                    reply_text = clockIn.lockClockInExit(group_id)
-                    need_reply = True
-                elif message == '解锁打卡计划 退出' and right < 3:
-                    reply_text = clockIn.unlockClockInExit(group_id)
-                    need_reply = True
-
-                elif message == '取消打卡提醒' and right < 3:
-                    reply_text = clockIn.offRemind(group_id)
-                    need_reply = True
-                elif message == '开启打卡提醒' and right < 3:
-                    reply_text = clockIn.onRemind(group_id)
-                    need_reply = True
-                elif message == '取消打卡总结' and right < 3:
-                    reply_text = clockIn.offSummary(group_id)
-                    need_reply = True
-                elif message == '开启打卡总结' and right < 3:
-                    reply_text = clockIn.onSummary(group_id)
-                    need_reply = True
 
             if need_reply:
                 self.statistics['clock_activity'] += 1
                 dataManage.save_statistics(self.statistics)
-                logManage.group_log(getNow.toString(), qq, group_id, member.group.name,
+                logManage.group_log(getNow.toString(), qq, group_id, event.sender.group.get_name(),
                                     message + "; 执行结果：" + reply_text)
 
         # 基础功能
@@ -1291,34 +1086,8 @@ class MessageProcessing:
         # 涩图
         if not need_reply and mode == 1 and self.groups[group_id]['config']['image']:
             if message == '涩图':
-                await app.sendGroupMessage(member.group, MessageChain.create([
-                    Plain('该功能并未优化暂时被锁定，不开放。具体开放日期待定，是开发情况而定。')
-                ]))
+                await bot.send(event, '该功能并未优化暂时被锁定，不开放。具体开放日期待定，是开发情况而定。')
                 need_reply = True
-                # image = self.pixiv.search('lolicon')
-                # if len(image) > 0:
-                #     for url in image:
-                #         await app.sendGroupMessage(member.group, MessageChain.create([
-                #             Image.fromNetworkAddress(url)
-                #         ]))
-                #     need_reply = True
-                # else:
-                #     reply_text = '获取失败！请联系主人，可能梯子又挂了'
-                #     need_reply = True
-            elif message[:2] == '搜图':
-                await app.sendGroupMessage(member.group, MessageChain.create([
-                    Plain('稍等片刻，马上就来~(测试功能，不对外开放)')
-                ]))
-                image = self.pixiv.search(message[2:].strip())
-                if len(image) > 0:
-                    for url in image:
-                        await app.sendGroupMessage(member.group, MessageChain.create([
-                            Image.fromNetworkAddress(url)
-                        ]))
-                    need_reply = True
-                else:
-                    reply_text = '获取失败！请联系主人，可能梯子又挂了'
-                    need_reply = True
 
             if need_reply:
                 self.statistics['image_search'] += 1
@@ -1364,13 +1133,13 @@ class MessageProcessing:
             if not need_reply:
                 if mode == 1:
                     (need_reply, need_at, reply_text, reply_image) = await operator.administrator_operation(
-                        app,
+                        bot, 
+                        event,
                         message,
                         qq,
                         name,
                         group_id,
                         mode,
-                        member,
                         self.config,
                         self.groups[group_id],
                         self.statistics,
@@ -1378,13 +1147,13 @@ class MessageProcessing:
                         group_right)
                 else:
                     (need_reply, need_at, reply_text, reply_image) = await operator.administrator_operation(
-                        app,
+                        bot, 
+                        event,
                         message,
                         qq,
                         name,
                         group_id,
                         mode,
-                        member,
                         self.config,
                         self.users[qq],
                         self.statistics,
@@ -1434,7 +1203,7 @@ class MessageProcessing:
         if not need_reply and mode == 1 and self.groups[group_id]['config']['autonomous_reply']:
             (need_reply, reply_text, reply_image, at_qq, need_at, need_complex_reply, complex_reply, complex_at) = keyReply.reply(
                 message,
-                member,
+                group_id,
                 self.groups[group_id],
                 self.statistics)
 
@@ -1446,14 +1215,14 @@ class MessageProcessing:
         # 自动加一
         if not need_reply and mode == 1 and self.groups[group_id]['config']['repeat']:
             if not self.message_tmp.__contains__(group_id):
-                self.message_tmp[group_id] = get_message.messageChain
+                self.message_tmp[group_id] = message_chain
             else:
                 reply_chain = self.message_tmp[group_id]
-                tmp = str(reply_chain.asDisplay())
-                self.message_tmp[group_id] = get_message.messageChain  # 将记录的上一次的消息更改为这次收到的消息
+                tmp = str(reply_chain)
+                self.message_tmp[group_id] = message_chain  # 将记录的上一次的消息更改为这次收到的消息
                 if 'xml' not in tmp and tmp[0] != '[' and tmp[-1] != ']':
                     if tmp == message and tmp != self.last_reply:
-                        await app.sendGroupMessage(member.group, reply_chain.asSendable())
+                        await bot.send(event, message_chain)
                         need_reply = True
                         self.last_reply = tmp
 
@@ -1497,35 +1266,29 @@ class MessageProcessing:
                 if reply_text != '':
                     self.last_reply = reply_text
 
-                await send_message(app, mode, member, reply_text, reply_image, need_at, at_qq)
+                await send_message(bot, event, mode, reply_text, reply_image, need_at, at_qq)
             else:
-                await send_complex_message(app, mode, member, complex_reply, complex_at)
-        total_index -= 1
+                await send_complex_message(bot, event, mode, complex_reply, complex_at)
 
-    async def new_friend(self, app, event):
+    async def new_friend(self, bot, event):
         self.config = dataManage.read_config()
-        master = await app.getFriend(self.config['master'])
-        blacklist = self.get_blacklist(event.supplicant, 0)
+        master = await bot.get_friend(self.config['master'])
+        blacklist = self.get_blacklist(event.from_id, 0)
 
         if blacklist != 0:
-            await app.sendFriendMessage(master, MessageChain.create([
-                Plain('有新的好友申请<' + event.nickname + '>(' + str(event.supplicant) + ')！已拒绝，原因：黑名单')
-            ]))
-            await app.reject()
+            if master is not None:
+                await bot.send_friend_message(self.config['master'], '有新的好友申请<' + event.nick + '>(' + str(event.from_id) + ')！已拒绝，原因：黑名单')
+
+            await bot.decline(event)
             return
 
         if master is not None:
-            await app.sendFriendMessage(master, MessageChain.create([
-                Plain('有新的好友申请<' + event.nickname + '>(' + str(event.supplicant) + ')！')
-            ]))
-        await event.accept()
+            await bot.send_friend_message(self.config['master'], '有新的好友申请<' + event.nick + '>(' + str(event.from_id) + ')！')
 
-        time.sleep(10)
-
-        qq = event.supplicant
-        name = event.nickname
-        member = await app.getFriend(qq)
-        print(member)
+        await bot.allow(event)
+        qq = event.from_id
+        name = event.nick
+        member = await bot.get_friend(qq)
         if member is not None:
             reply = '你好呀！' + name + '\n'
             reply += '小柒的快速上手指南：\n'
@@ -1535,41 +1298,31 @@ class MessageProcessing:
             reply += '如果有任何疑问可以加小柒的官方Q群：479504567，在群聊里可以告诉主人解除黑名单，以及获取到管理员权限解锁一些新功能\n\n'
             reply += '特别申明：\n'
             reply += '1.不要将小柒踢出任何群聊，或者在任何群聊禁言小柒，这些都有专门的指令代替！！！如果直接踢出，踢出人和群将会无理由黑名单，禁言视情况（频繁程度）而定\n'
-            reply += '2.不要对机器人搞黄色，对机器人搞黄色你是有多饥渴？\n'
-            await app.sendFriendMessage(member, MessageChain.create([
-                Plain(reply)
-            ]))
+            reply += '2.不要对机器人搞黄色，对机器人搞黄色你是有多饥渴？'
+            await bot.send_friend_message(qq, reply)
 
             self.statistics['new_friend'] += 1
             dataManage.save_statistics(self.statistics)
 
-    async def new_group(self, app, event):
+    async def new_group(self, bot, event):
         self.config = dataManage.read_config()
-        master = await app.getFriend(self.config['master'])
+        master = await bot.get_friend(self.config['master'])
 
-        blacklist = self.get_blacklist(event.supplicant, event.groupId)
+        blacklist = self.get_blacklist(event.from_id, event.group_id)
 
         if blacklist != 0:
-            await app.sendFriendMessage(master, MessageChain.create([
-                Plain('有新的群申请<' + event.groupName + '>(' + str(event.groupId) + ')！已拒绝，原因：黑名单')
-            ]))
-            await app.reject()
+            await bot.send_friend_message(self.config['master'], '有新的群申请<' + event.group_name + '>(' + str(event.group_id) + ')！已拒绝，原因：黑名单')
+            await bot.decline(event)
             return
 
-        qq = event.supplicant
-        name = event.nickname
+        qq = event.from_id
+        name = event.nick
         if master is not None:
-            await app.sendFriendMessage(master, MessageChain.create([
-                Plain('有新的群申请<' + event.groupName + '>(' + str(event.groupId) + ')！\n邀请人：<' + name + '>(' + str(
-                    qq) + ')' + '\n')
-            ]))
-        # await event.accept()
-        #
-        # time.sleep(10)
-        #
-        # group = await app.getGroup(event.groupId)
-        # print(group)
-        # if group is not None:
+            await bot.send_friend_message(self.config['master'], '有新的群申请<' + event.group_name + '>(' + str(event.group_id) + ')！\n邀请人：<' + name + '>(' + str(qq) + ')')
+
+        member = await bot.get_friend(qq)
+        if member is not None:
+            await bot.send_friend_message(qq, '暂时不接受群邀请，请前往官方群（479504567）申请')
         #     reply = '已加入群，邀请人：<' + name + '>(' + str(qq) + ')' + '\n'
         #     reply += '小柒的快速上手指南：\n'
         #     reply += '可以通过输入“帮助”来获取所有的指令帮助，请仔细阅读其中的内容！！\n'
@@ -1580,37 +1333,71 @@ class MessageProcessing:
         #     reply += '1.不要将小柒踢出任何群聊，或者在任何群聊禁言小柒，这些都有专门的指令代替！！！如果直接踢出，踢出人和群将会无理由黑名单，禁言视情况（频繁程度）而定\n'
         #     reply += '2.不要对机器人搞黄色，对机器人搞黄色你是有多饥渴？\n'
         #     reply += '3.如果群主或管理员对该机器人有疑问请问邀请人，或者使用“*quit”指令'
-        #     await app.sendGroupMessage(group, MessageChain.create([
-        #         Plain(reply)
-        #     ]))
+        self.statistics['new_group'] += 1
+        dataManage.save_statistics(self.statistics)
 
-            self.statistics['new_group'] += 1
-            dataManage.save_statistics(self.statistics)
+    async def nudge(self, bot, event):
+        if event.target == bot.qq:
+            if str(event.subject.kind) == 'Group':
+                rand = random.randint(0, 15)
+                if rand == 0:
+                    reply_image = 'data/AutoReply/Nudge/打.gif'
+                    await bot.send_group_message(event.subject.id, [Plain('你再戳？你再戳？'), await Image.from_local(filename=reply_image)])
+                elif rand == 1:
+                    reply_image = 'data/AutoReply/Nudge/质疑.jpg'
+                    await bot.send_group_message(event.subject.id, [await Image.from_local(filename=reply_image)])
+                elif rand == 2:
+                    reply_image = 'data/AutoReply/Nudge/过分.jpg'
+                    await bot.send_group_message(event.subject.id, [Plain('别戳了'), await Image.from_local(filename=reply_image)])
+                elif rand == 3:
+                    reply_image = 'data/AutoReply/Nudge/乖巧.jpg'
+                    await bot.send_group_message(event.subject.id, [Plain('放过我吧'), await Image.from_local(filename=reply_image)])
+                elif rand == 4:
+                    reply_image = 'data/AutoReply/Nudge/无语.jpg'
+                    await bot.send_group_message(event.subject.id, [await Image.from_local(filename=reply_image)])
+                elif rand == 5:
+                    await bot.send_group_message(event.subject.id, '你再戳我就哭给你看，嘤嘤嘤~')
+                elif rand == 6:
+                    reply_image = 'data/AutoReply/Nudge/委屈2.jpg'
+                    await bot.send_group_message(event.subject.id, [Plain('别戳了呜呜'), await Image.from_local(filename=reply_image)])
+                elif rand == 7:
+                    reply_image = 'data/AutoReply/Nudge/上头.png'
+                    await bot.send_group_message(event.subject.id, [Plain('你是不是戳上头了'), await Image.from_local(filename=reply_image)])
+                elif rand == 8:
+                    reply_image = 'data/AutoReply/Nudge/质疑2.gif'
+                    await bot.send_group_message(event.subject.id, [Plain('为什么戳我'), await Image.from_local(filename=reply_image)])
+                elif rand == 9:
+                    reply_image = 'data/AutoReply/Nudge/委屈.jpg'
+                    await bot.send_group_message(event.subject.id, [Plain('别戳了呜呜'), await Image.from_local(filename=reply_image)])
+                elif rand == 10:
+                    reply_image = 'data/AutoReply/Nudge/不许戳.jpg'
+                    await bot.send_group_message(event.subject.id, [Plain('不许戳'), await Image.from_local(filename=reply_image)])
+                elif rand == 11:
+                    reply_image = 'data/AutoReply/Nudge/委屈3.jpg'
+                    await bot.send_group_message(event.subject.id, [await Image.from_local(filename=reply_image)])
+                else:
+                    await bot.send_group_message(event.subject.id, '别戳啦~')
+            elif str(event.subject.kind) == 'Friend':
+                await bot.send_friend_message(event.from_id, '别戳啦~')
 
-    async def nudge(self, app, event):
-        print(event.target)
-        print(event.subject)
-
-    async def kick(self, app, event):
-        master = await app.getFriend(self.config['baseInformation']['Master_QQ'])
+    async def kick(self, bot, event):
+        self.config = dataManage.read_config()
+        master = await bot.get_friend(self.config['master'])
 
         if master is not None:
-            await app.sendFriendMessage(master, MessageChain.create([
-                Plain('被踢出群<' + event.group.name + '>(' + str(event.group.id) + ')！')
-            ]))
+            await bot.send_friend_message(self.config['master'], '被踢出群<' + event.group.get_name() + '>(' + str(event.group.id) + ')！')
 
         self.statistics['kick'] += 1
         dataManage.save_statistics(self.statistics)
 
-    async def join(self, app, event):
-        member = event.member
-        self.get_group(member.group.id)
-        welcome: MessageChain = self.groups[member.group.id]['welcome']
+    async def join(self, bot, event):
+        self.get_group(event.group.id)
+        welcome = self.groups[event.group.id]['welcome']
         if welcome is None:
             print('空值错误')
             return
 
-        await app.sendGroupMessage(member.group, MessageChain.create([
-            At(member.id)
-        ]).plusWith(welcome.asSendable()))
-        logManage.group_log(getNow.toString(), member.id, member.group.id, member.group.name, '入群欢迎')
+        welcome.insert(0, At(event.member.id))
+        await bot.send_group_message(event.group.id, welcome)
+
+        logManage.group_log(getNow.toString(), event.member.id, event.group.id, event.group.get_name(), '入群欢迎')

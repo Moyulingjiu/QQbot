@@ -1,0 +1,50 @@
+# 怪物表
+
+# 维度
+# level 评级
+# armor 护甲
+# attack 攻击力
+# speed 速度
+# hp 血量
+# element 元素
+# comments 介绍
+# spoils 掉落物
+# 掉落物的特殊说明：
+#        多个掉落物以 掉落物x数量，掉落物x数量分割
+#        
+
+哥布林 level=1 armor=0 attack=5 speed=60  hp=18  comments=长着尖尖的耳朵的绿皮小矮子 spoils=木板x1，石头x1
+哥布林弓箭手 level=2 armor=0 attack=19 speed=100  hp=20  comments=哈哈！没想到哥布林也能学会远程攻击吧！ spoils=皮革x1
+哥布林战士 level=2 armor=1 attack=20 speed=75  hp=23  comments=强壮的肌肉！让你还小瞧哥布林 spoils=石头x3
+哥布林狼骑士 level=3 armor=3 attack=19 speed=140  hp=50  comments=与狼达成契约，当哥布林战士骑上野狼会发生什么？ spoils=铁锭x1
+哥布林法师 level=3 armor=0 attack=30 speed=100  hp=80  comments=哥布林也是可以学会魔法的！ spoils=精神药水x1
+哥布林祭祀 level=3 armor=1 attack=20 speed=80  hp=100  comments=鼓舞与治疗是任何一个军队都必不可少的 spoils=铝合金x1
+哥布林领主 level=4 armor=2 attack=41 speed=120  hp=300  comments=肥胖的哥布林领主看起来可真奇怪 spoils=金锭x1
+巨型哥布林 level=5 armor=8 attack=45 speed=50  hp=200  comments=这，这是什么？哥布林的秘密武器么？! spoils=铁锭x3，木板x5，铝合金x1
+
+民兵 level=1 armor=0 attack=5 speed=45  hp=24  comments=征召而来的民兵 spoils=木板x1，石头x1
+士兵 level=2 armor=2 attack=19 speed=40  hp=35  comments=受到严格训练的士兵 spoils=皮革x1
+弓箭手 level=2 armor=2 attack=20 speed=75  hp=18  comments=经过训练的弓箭手 spoils=石头x3
+剑士 level=3 armor=4 attack=20 speed=60  hp=80  comments=精湛的剑术，擅长双手剑 spoils=铁锭x1
+骑士 level=3 armor=4 attack=35 speed=60  hp=100  comments=当他们冲锋的时候应该没有什么能够阻挡 spoils=精神药水x1
+火枪手 level=3 armor=3 attack=38 speed=70  hp=70  comments=大人，时代变了！ spoils=铝合金x1
+法师 level=4 armor=5 attack=42 speed=50  hp=100  comments=人类也是一种亲近自然元素的种族，这是人族法师 spoils=金锭x1
+军队统领 level=5 armor=2 attack=45 speed=50  hp=300  comments=一将功成万骨枯！ spoils=铁锭x3，木板x5，铝合金x1
+
+骷髅 level=1 armor=0 attack=6 speed=50  hp=17  comments=骨头也可以站起来！ spoils=木板x1，石头x1
+骷髅战士 level=2 armor=0 attack=19 speed=80  hp=25  comments=当骷髅拿起剑与盾 spoils=皮革x1
+骷髅弓箭手 level=2 armor=0 attack=21 speed=120  hp=15  comments=这是小白吗？ spoils=石头x3
+骷髅法师 level=3 armor=2 attack=22 speed=70  hp=70  comments=灵魂如此强大，生前一定是个大法师 spoils=铁锭x1
+腐化骷髅 level=3 armor=4 attack=40 speed=50  hp=70  comments=他们虽然腐朽但是行动极其迅速，他们力求给予你最强一击 spoils=精神药水x1
+骷髅炸弹人 level=3 armor=0 attack=80 speed=60  hp=20  comments=他们只会与你同归于尽！ spoils=铝合金x1
+骷髅骑士 level=4 armor=5 attack=45 speed=80  hp=50  comments=骷髅+骷髅马，这是什么东西？ spoils=金锭x1
+骨龙 level=5 armor=5 attack=46 speed=90  hp=120  comments=龙族？！不，这是骷髅族从龙墓中挖出的骷髅！ spoils=铁锭x3，木板x5，铝合金x1
+
+精灵 level=1 armor=0 attack=4 speed=80  hp=20  comments=精灵的颜值与箭术让人望尘莫及 spoils=木板x1，石头x1
+精灵战士 level=2 armor=1 attack=19 speed=120  hp=15  comments=银色铠甲如此耀眼 spoils=皮革x1
+黑暗精灵 level=2 armor=0 attack=19 speed=130  hp=18  comments=献祭自己堕入黑暗的精灵 spoils=石头x3
+精灵剑士 level=3 armor=3 attack=20 speed=150  hp=35  comments=他们的剑相比于人类可美多了，纤细而又迅速 spoils=铁锭x1
+精灵法师 level=3 armor=2 attack=38 speed=100  hp=50  comments=与自然的亲和让他们的魔法更加强大 spoils=精神药水x1
+精灵弓箭手 level=4 armor=2 attack=41 speed=140  hp=50  comments=这可是她们极其擅长的领域 spoils=铝合金x1
+精灵灵剑士 level=4 armor=5 attack=40 speed=100  hp=70  comments=将魔法与剑术融合，这是其他种族难以想象的 spoils=金锭x1
+精灵精锐弓箭手 level=5 armor=4 attack=46 speed=160  hp=80  comments=这是精灵弓箭手中的精锐，她们速度更快，百发百中 spoils=铁锭x3，木板x5，铝合金x1

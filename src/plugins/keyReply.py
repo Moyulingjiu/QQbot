@@ -4,7 +4,7 @@ from plugins import dataManage
 import random
 
 
-def reply(strMessage, member, config, statistics):
+def reply(strMessage, group_id, config, statistics):
     questionReply = {}
     KeyReply = {}
     questionReplyAt = {}
@@ -37,7 +37,7 @@ def reply(strMessage, member, config, statistics):
     if not KeyReply.__contains__('RecoveryProbability'):
         KeyReply['RecoveryProbability'] = 100
         config['key_reply']['key'] = KeyReply
-        dataManage.save_group(member.group.id, config)
+        dataManage.save_group(group_id, config)
 
     # if statistics['last_minute'] <= 10:
     # 全字段匹配

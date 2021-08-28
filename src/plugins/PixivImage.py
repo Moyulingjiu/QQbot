@@ -57,14 +57,6 @@ class pixiv:
             url = re.sub(r'net', "cat", data_url)
             url = re.sub(r'pximg', "pixiv", url)
             image.append(url)
-            # await app.sendGroupMessage(group, MessageChain.create([
-            #     Image.fromNetworkAddress(url),
-            #     Plain("\n---------------------------------"),
-            #     Plain("\n标题:" + data['data'][i]['title']),
-            #     Plain("\nPID:" + str(data['data'][i]['id'])),
-            #     Plain("\nUID:" + str(data['data'][i]['artistId'])),
-            #     Plain("\nTag:" + data['data'][i]['tags'][0]['translatedName'])
-            # ]))
             i += 1
         print(image)
         return image

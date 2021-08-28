@@ -1,4 +1,4 @@
-version=0.5.6
+version=0.6.1
 qq=0
 name=小柒
 color=天蓝色

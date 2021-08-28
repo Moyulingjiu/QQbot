@@ -1,14 +1,4 @@
-# 一个rpg游戏，附带在小柒上
-import asyncio  # 异步
-from graia.application.entry import (
-    GraiaMiraiApplication, Session,
-    MessageChain, Group, Friend, Member, MemberInfo,
-    Plain, Image, AtAll, At, Face, Source
-)
-from graia.application.entry import (
-    BotMuteEvent, BotGroupPermissionChangeEvent
-)
-from graia.broadcast import Broadcast
+
 
 import random
 import datetime
@@ -3969,8 +3959,8 @@ class Core:
                     }
                 elif user['occupation']['work_level'] == 2:
                     item = {
-                        'name': '下界合金剑',
-                        'number': 1,
+                        'name': '灵石',
+                        'number': 5,
                         'enchanting': {
                             'sharp': 0,
                             'rapid': 0,
@@ -5809,7 +5799,6 @@ class RPG:
         reply += '\n攻击力：' + str(self.core.get_attack(user))
         reply += '\n护甲：' + str(self.core.get_armor(user))
         reply += '\n速度：' + str(self.core.get_speed(user))
-        reply += '\n强化次数：' + str(user['attribute']['strengthen']['times'])
 
         reply += '\n职业：'
         if user['occupation']['work'] == '' and user['occupation']['fight'] == '':
@@ -6101,7 +6090,8 @@ class RPG:
                         break
         
         return reply
-
+    
+    # 入口函数
     def handle(self, message, qq, name, config, bot_config, be_at, limit):
         bot_qq = bot_config['qq']
         bot_name = bot_config['name']
@@ -6124,6 +6114,11 @@ class RPG:
         user = self.core.get_user(qq)
         if not user['config']['init_name']:
             user['config']['name'] = name
+            self.core.update(qq, user, Result())
+        if user['attribute']['strengthen']['times'] != 0:
+            user['attribute']['strengthen']['times'] = 0
+            user['attribute']['strengthen']['attack'] = 0
+            user['attribute']['strengthen']['armor'] = 0
             self.core.update(qq, user, Result())
 
         # 数据查看
