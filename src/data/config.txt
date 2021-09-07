@@ -1,15 +1,13 @@
-version=0.6.1
-qq=0
+version=2.7
+qq=1812322920
 name=小柒
 color=天蓝色
 age=14
-master=0
+master=1597867839
 masterRight=
-administrator=
-contributor=
-RPGadministrator=
+administrator=2209882494
+contributor=791021961
+RPGadministrator=2209882494
 blacklistGroup=
 blacklistMember=
-
-# 官方群号，逗号分隔
-testGroup=0
+testGroup=753684495

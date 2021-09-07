@@ -2098,6 +2098,10 @@ class Core:
     def save_user_information(self):
         dataManage.save_obj(self.users, user_path)
         dataManage.save_obj(self.rank, rank_path)
+    
+    def backups_user_information(self):
+        dataManage.save_obj(self.users, user_path + '备份')
+        dataManage.save_obj(self.rank, rank_path + '备份')
 
     # ==========================================
     # 配置信息获取
@@ -3196,6 +3200,19 @@ class Core:
                 user['warehouse'].append(items)
         
         return reply, user
+
+    # 给所有人物品
+    def system_distribution(self, items):
+        number = 0
+        total = 0
+        for key, value in self.users.items():
+            reply, new_user = self.get_items(value, items)
+            self.users[key] = new_user
+            total += 1
+            if reply:
+                number += 1
+        self.save_user_information()
+        return number, total
 
     # 删除物品
     def remove_items(self, user, items):
@@ -4664,7 +4681,9 @@ class Core:
             'enchanting': enchanting
         }
         goods = self.get_goods(name)
-        if goods['sell'] == -1:
+        if goods is None:
+            sell['state'] = 'not for sale'
+        elif goods['sell'] == -1:
             sell['state'] = 'not for sale'
         else:
             gold = goods['sell'] * number
@@ -5753,10 +5772,11 @@ class Core:
                 operated = []
                 is_back = False
                 for i in items:
-                    reply, user = self.get_items(user, i)
+                    item = copy.deepcopy(i)
+                    reply, user = self.get_items(user, item)
                     if reply:
-                        operated.append(i)
-                        harvest['gets'].append(i)
+                        operated.append(item)
+                        harvest['gets'].append(item)
                     else:
                         is_back = True
                         break
@@ -5994,7 +6014,6 @@ class RPG:
         nurturer_synthesis = self.core.get_nurturer_synthesis()  # 培育师合成表
         enchanter_synthesis = self.core.get_enchanter_synthesis()  # 附魔师合成表
 
-        print(name)
         goods = self.core.get_goods(name)
         if goods is None:
             return '不存在该物品'
@@ -6248,22 +6267,30 @@ class RPG:
                 elif '@' in message:
                     temp_message = message.replace('赠送', '')
                     temp_message = temp_message.strip()
-                    if temp_message[0] == '@':
-                        right = 1
-                        for i in range(1, len(temp_message)):
-                            if temp_message[right].isdigit():
-                                right = i + 1
+
+                    left = temp_message.find('@') + 1
+                    right = left
+                    for i in range(left, len(temp_message)):
+                        if temp_message[right].isdigit():
+                            right = i + 1
+                        else:
+                            break
+                    if left < right <= len(temp_message):
+                        qq_received = int(temp_message[left:right])
+                        if qq_received > 0:
+                            temp_message = temp_message[:left - 1] + temp_message[right:]
+                            temp_message = temp_message.strip()
+                            if 'x' in temp_message:
+                                data = temp_message.split('x')
                             else:
-                                break
-                        
-                        if right < len(temp_message):
-                            data = temp_message[right:].strip().split(' ')
+                                data = temp_message.split(' ')
+
                             if len(data) == 1:
-                                result = self.core.give(qq, int(temp_message[1:right]), data[0], 1)
+                                result = self.core.give(qq, qq_received, data[0], 1)
                                 reply_text = result.show()
                                 need_reply = True
                             elif len(data) == 2 and data[1].isdigit():
-                                result = self.core.give(qq, int(temp_message[1:right]), data[0], int(data[1]))
+                                result = self.core.give(qq, qq_received, data[0], int(data[1]))
                                 reply_text = result.show()
                                 need_reply = True
 
@@ -6637,7 +6664,18 @@ class RPG:
                         else:
                             reply_text = '对方背包已满'
                 elif information[0] == '*':
-                    reply_text = '给予全部人物品' + information[1] + '，但是还未实现'
+                    name, enchanting = analysis_name(information[1])
+                    goods = self.core.get_goods(name)
+                    if goods is None:
+                        reply_text = '物品不存在！'
+                    else:
+                        items = {
+                            'name': name,
+                            'number': 1,
+                            'enchanting': enchanting
+                        }
+                        number, total = self.core.system_distribution(items)
+                        reply_text = '成功给予' + str(number) + '/' + str(total)
             elif len(information) == 3:
                 if information[0].isdigit() and information[2].isdigit():
                     name, enchanting = analysis_name(information[1])
@@ -6659,6 +6697,19 @@ class RPG:
                             reply_text = '给予成功~'
                         else:
                             reply_text = '对方背包已满'
+                elif information[0] == '*' and information[2].isdigit():
+                    name, enchanting = analysis_name(information[1])
+                    goods = self.core.get_goods(name)
+                    if goods is None:
+                        reply_text = '物品不存在！'
+                    else:
+                        items = {
+                            'name': name,
+                            'number': int(information[2]),
+                            'enchanting': enchanting
+                        }
+                        number, total = self.core.system_distribution(items)
+                        reply_text = '成功给予' + str(number) + '/' + str(total)
         elif message[:6] == '给予buff':
             reply_text = '格式错误'
             need_reply = True
@@ -6731,4 +6782,10 @@ class RPG:
                 reply_text = self.get_achievement(user)
                 need_reply = True
         
+        elif message == '备份游戏存档':
+            need_reply = True
+            reply_text = '备份成功'
+            self.core.backups_user_information()
+
+
         return need_reply, reply_text, reply_image

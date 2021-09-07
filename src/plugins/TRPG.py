@@ -6,6 +6,8 @@ from plugins import dataManage
 
 
 def dick_sys(max_range):
+    if max_range <= 1:
+        max_range = 100
     return random.randint(1, max_range)
 
 

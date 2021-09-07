@@ -74,7 +74,7 @@ if __name__ == '__main__':
         print('文件缺失！')
         exit(0)
         
-    qq = message_processing.get_qq()
+    qq = bot.qq
     name = message_processing.get_name()
     logManage.log(getNow.toString(), name + '(' + str(qq) + ')初始化成功，开始运行！')
 

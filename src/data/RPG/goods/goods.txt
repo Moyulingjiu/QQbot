@@ -135,13 +135,13 @@
 #=========================================
 # 药水
 #=========================================
-体力药水 cost=10 sell=1 strength=5 limit=10 comments=一瓶普通的体力药水，可以帮助恢复体力 type=21
+体力药水 cost=10 sell=1 strength=5 limit=20 comments=一瓶普通的体力药水，可以帮助恢复体力 type=21
 晨露 cost=20 sell=1 strength=-1 limit=1 comments=活力满满！直接回满体力 type=21
 
-生命药水 cost=10 sell=1 hp=10 limit=10 comments=一瓶普通的生命药水，可以帮助恢复生命 type=21
+生命药水 cost=10 sell=1 hp=10 limit=20 comments=一瓶普通的生命药水，可以帮助恢复生命 type=21
 甘霖 cost=30 sell=1 hp=-1 limit=1 comments=活力满满！直接回满生命 type=21
 
-精神药水 cost=10 sell=1 san=10 limit=10 comments=回复一部分精神力 type=21
+精神药水 cost=10 sell=1 san=10 limit=15 comments=回复一部分精神力 type=21
 
 复活药水 resurrection=1 cost=10 sell=5 limit=3 comments=复活吧勇士！继续战斗！ type=21
 #=========================================
@@ -272,6 +272,9 @@
 生命女神之叹息 cost=-1 comments=勇士，您现在没有足够的力量佩戴也无法窥探她 type=13
 
 不死图腾 resurrection=1 strength=-1 hp=-1 cost=-1 sell=10 limit=2 comments=可以自动复活哟，专业品质，值得信赖 type=10
+
+锦鲤项链 cost=-1 sell=-1 comments=由传统节日纪念品合成，它会给你带来好运的 type=13
+锦鲤戒指 hp-max=10 cost=-1 sell=-1 comments=它会给你带来好运的 type=14
 #=========================================
 # 卷轴
 #=========================================
@@ -291,6 +294,8 @@
 # 纪念品
 #=========================================
 内测玩家纪念品 cost=-1 sell=30 comments=一个看起来没什么用的摆件 type=42
+公测玩家纪念品 cost=-1 sell=30 comments=一个看起来没什么用的摆件 type=42
+
 元旦节纪念品 cost=-1 sell=50 comments=元旦节的摆件 type=41
 除夕纪念品 cost=-1 sell=50 comments=除夕的摆件 type=41
 春节纪念品 cost=-1 sell=50 comments=春节的摆件 type=41

@@ -179,6 +179,7 @@ def read_group(group_id):
         'config': {
             'mute': False,  # 是否禁言
             'limit': False,  # 是否限制
+            'nudge': True,  # 是否开启戳一戳
             'RPG': True,  # 是否开启RPG
             'limit_RPG': False,  # 是否开启RPG限制
             'curse': True,  # 是否开启脏话
@@ -188,6 +189,7 @@ def read_group(group_id):
             'repeat': True,  # 是否开启自动加一
             'TRPG': True,  # 是否开启头骰娘
             'clash': False,  # 是否开启部落冲突查询
+            'clash_tag': '',  # 部落标签
             'key': ['.', '。', '*'],  # 触发词
             'reply_limit': 0,  # 回复限制次数
             'welcome': False,  # 是否开启欢迎
@@ -217,6 +219,7 @@ def read_group(group_id):
             f.write('date=' + group['date'] + '\n')
             f.write('mute=' + str(group['config']['mute']) + '\n')
             f.write('limit=' + str(group['config']['limit']) + '\n')
+            f.write('nudge=' + str(group['config']['nudge']) + '\n')
             f.write('TRPG=' + str(group['config']['TRPG']) + '\n')
             f.write('RPG=' + str(group['config']['RPG']) + '\n')
             f.write('RPGlimit=' + str(group['config']['limit_RPG']) + '\n')
@@ -226,6 +229,7 @@ def read_group(group_id):
             f.write('autoReply=' + str(group['config']['autonomous_reply']) + '\n')
             f.write('repeat=' + str(group['config']['repeat']) + '\n')
             f.write('clash=' + str(group['config']['clash']) + '\n')
+            f.write('clashTag=' + str(group['config']['clash_tag']) + '\n')
             f.write('welcome=' + str(group['config']['welcome']) + '\n')
             f.write('key')
             for i in group['config']['key']:
@@ -295,6 +299,11 @@ def read_group(group_id):
                     group['config']['limit'] = True
                 else:
                     group['config']['limit'] = False
+            elif pair[0] == 'nudge':
+                if pair[1] == 'true':
+                    group['config']['nudge'] = True
+                else:
+                    group['config']['nudge'] = False
             elif pair[0] == 'TRPG':
                 if pair[1] == 'true':
                     group['config']['TRPG'] = True
@@ -340,6 +349,8 @@ def read_group(group_id):
                     group['config']['clash'] = True
                 else:
                     group['config']['clash'] = False
+            elif pair[0] == 'clashTag':
+                group['config']['clash_tag'] = pair[1].upper()
             elif pair[0] == 'welcome':
                 if pair[1] == 'true':
                     group['config']['welcome'] = True
@@ -393,6 +404,7 @@ def save_group(group_id, config):
         f.write('date=' + config['date'] + '\n')
         f.write('mute=' + str(config['config']['mute']) + '\n')
         f.write('limit=' + str(config['config']['limit']) + '\n')
+        f.write('nudge=' + str(config['config']['nudge']) + '\n')
         f.write('TRPG=' + str(config['config']['TRPG']) + '\n')
         f.write('RPG=' + str(config['config']['RPG']) + '\n')
         f.write('RPGlimit=' + str(config['config']['limit_RPG']) + '\n')
@@ -402,6 +414,7 @@ def save_group(group_id, config):
         f.write('autoReply=' + str(config['config']['autonomous_reply']) + '\n')
         f.write('repeat=' + str(config['config']['repeat']) + '\n')
         f.write('clash=' + str(config['config']['clash']) + '\n')
+        f.write('clashTag=' + str(config['config']['clash_tag']) + '\n')
         f.write('welcome=' + str(config['config']['welcome']) + '\n')
         f.write('key')
         for i in config['config']['key']:
@@ -422,6 +435,10 @@ def read_user(qq):
         'config': {
             'ai': True,
             'reputation': 5,
+            'clash_user_tag': [],  # 玩家标签
+            'main_clash_user_tag': 0,  # 默认玩家标签
+            'clash_tag': [],  # 部落标签
+            'main_clash_tag': 0,  # 默认部落标签
             'key': []
         },
         'buffer': {
@@ -441,6 +458,10 @@ def read_user(qq):
         with open(filePath + '.config', 'w', encoding='utf-8') as f:
             f.write('ai=false\n')
             f.write('reputation=5\n')
+            f.write('clashUserTag=\n')
+            f.write('mainClashUserTag=0\n')
+            f.write('clashTag=\n')
+            f.write('mainClashTag=0\n')
             f.write('key=*=.=。\n')
             f.write('date=' + user['date'] + '\n')
         if not os.path.exists(filePath + '.data'):
@@ -480,6 +501,18 @@ def read_user(qq):
 
             if pair[0] == 'date':
                 user['date'] = pair[1]
+            if pair[0] == 'clashUserTag':
+                for i in range(1, len(pair)):
+                    if len(pair[i]) > 0:
+                        user['config']['clash_user_tag'].append(pair[i].upper())
+            if pair[0] == 'mainClashUserTag' and pair[1].isdigit():
+                user['config']['main_clash_user_tag'] = int(pair[1])
+            if pair[0] == 'clashTag':
+                for i in range(1, len(pair)):
+                    if len(pair[i]) > 0:
+                        user['config']['clash_tag'].append(pair[i].upper())
+            if pair[0] == 'mainClashTag' and pair[1].isdigit():
+                user['config']['main_clash_tag'] = int(pair[1])
             elif pair[0] == 'ai':
                 if pair[1] == 'true':
                     user['config']['ai'] = True
@@ -504,6 +537,16 @@ def save_user(qq, user):
 
     with open(filePath + '.config', 'w', encoding='utf-8') as f:
         f.write('ai=' + str(user['config']['ai']) + '\n')
+        f.write('clashUserTag')
+        for i in range(0, len(user['config']['clash_user_tag'])):
+            f.write('=' + user['config']['clash_user_tag'][i])
+        f.write('\n')
+        f.write('mainClashUserTag=' + str(user['config']['main_clash_user_tag']) + '\n')
+        f.write('clashTag')
+        for i in range(0, len(user['config']['clash_tag'])):
+            f.write('=' + user['config']['clash_tag'][i])
+        f.write('\n')
+        f.write('mainClashTag=' + str(user['config']['main_clash_tag']) + '\n')
         f.write('key')
         for i in user['config']['key']:
             f.write('=' + i)
