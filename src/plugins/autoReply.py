@@ -47,7 +47,7 @@ def forced_reply(config, bot_name, nickname, message):
 
     need_reply, need_at, reply_text, reply_image = reply_word(bot_name, nickname, message)
 
-    if not need_reply:
+    if not need_reply:  # 调用ai
         reply_text = AIchat.getReply(config, message)
         need_reply = True
 
@@ -237,6 +237,10 @@ def reply_word(bot_name, nickname, message):
     elif message == '我不配':
         reply_list = ['人贵有自知之明', bot_name + '抱抱你，不要哭']
         reply_text = reply_list[random.randrange(0, len(reply_list))]
+        need_reply = True
+    
+    elif message == '你主人是谁':
+        reply_text = '你猜我的主人是谁~'
         need_reply = True
 
     return need_reply, need_at, reply_text, reply_image

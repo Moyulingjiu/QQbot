@@ -51,7 +51,7 @@
 下界核心斧 level=2 path=下界核心x1，钛合金x2
 下界核心枪 level=2 path=下界核心x1，铝合金x2
 下界核心火铳 level=2 path=下界核心x1，燧石x8，铁锭x2
-下界核心弩level=2 path=下界核心x1，钛合金x1，铝合金x2
+下界核心弩 level=2 path=下界核心x1，钛合金x1，铝合金x2
 
 灵剑 level=2 path=灵石x3，钛合金x1
 灵斧 level=2 path=灵石x3，铁锭x2

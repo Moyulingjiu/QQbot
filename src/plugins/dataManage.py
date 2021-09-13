@@ -705,7 +705,6 @@ def read_clock():
     filePath = 'data/ClockActivity/clockIn'
     clock = {
         'groupClock': {},
-        'dictClockPeople': {},
         'clockDate': 'xx-xx-xx'
     }
     if not os.path.exists(filePath + '.data'):

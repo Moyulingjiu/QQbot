@@ -81,7 +81,7 @@
 # 晶石
 #=========================================
 低级传送石 cost=-1 sell=1 comments=一块充斥着空间之力的石头，使用它或许有奇效 type=26
-中级传送石 cost=50 sell=1 comments=磅礴的空间之力简直快要溢出来 type=26
+中级传送石 cost=50 sell=1 comments=磅礴的空间之力简直快要溢出来，使用它或许有奇效 type=26
 高级传送石 cost=-1 sell=1 comments=磅礴的空间之力的背后直觉告诉你有一丝危险的气息 type=26
 
 #=========================================
@@ -92,6 +92,7 @@
 燧石 cost=-1 sell=1 comments=一小块燧石 type=31
 
 木板 cost=5 sell=1 comments=一小块木板 type=31
+灵木 cost=-1 sell=10 comments=充斥着魔法之力的木板，可以合成更强大的装备（暂未更新） type=31
 碎石 cost=-1 sell=-1 comments=小石头，可以合成石头 type=32
 石头 cost=-1 sell=1 comments=可以合成一些初始装备 type=32
 铁锭 cost=-1 sell=5 comments=光亮沉重，可以合成一些初始装备 type=32
@@ -127,6 +128,7 @@
 牛犊子 cost=-1 sell=1 limit=1 comments=怪物附近的一些牲畜，培育师可以把它们养大 type=27
 羊犊子 cost=-1 sell=1 limit=1 comments=怪物附近的一些牲畜，培育师可以把它们养大 type=27
 杂交水稻种子 cost=30 sell=1 comments=一粒水稻种子，在培育师手里有不一样的效果 type=27
+灵木树苗 cost=-1 sell=1 comments=一颗灵木树苗，可以种出来一些带有魔法的东西 type=27
 
 肉 cost=30 hp=1 strength=1 sell=3 comments=牲畜的肉，可以直接吃，也可以做成药水 type=22
 熟肉 cost=50 sell=-1 hp=4 strength=4 comments=一块烤熟的肉，尝起来还不错 type=22
@@ -141,9 +143,9 @@
 生命药水 cost=10 sell=1 hp=10 limit=20 comments=一瓶普通的生命药水，可以帮助恢复生命 type=21
 甘霖 cost=30 sell=1 hp=-1 limit=1 comments=活力满满！直接回满生命 type=21
 
-精神药水 cost=10 sell=1 san=10 limit=15 comments=回复一部分精神力 type=21
+精神药水 cost=5 sell=1 san=10 limit=50 comments=回复一部分精神力 type=21
 
-复活药水 resurrection=1 cost=10 sell=5 limit=3 comments=复活吧勇士！继续战斗！ type=21
+复活药水 resurrection=1 cost=20 sell=5 limit=6 comments=复活吧勇士！继续战斗！ type=21
 #=========================================
 # 木头装备
 #=========================================

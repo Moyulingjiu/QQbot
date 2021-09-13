@@ -19,7 +19,8 @@ from plugins import getNow
 from plugins import keyReply
 from plugins import PixivImage
 from plugins import BaseFunction
-from plugins import Clash2
+from plugins import Clash
+from plugins import Clock
 
 from plugins import RPG
 
@@ -67,7 +68,7 @@ async def send_complex_message(bot, event, mode, complex_reply, complex_at):
             await bot.send(event, complex_reply)
         elif complex_at['at_type'] == 0:
             if complex_at['at'] > 0:
-                member = await bot.get_group_member(event.sender.group.id, at_qq)
+                member = await bot.get_group_member(event.sender.group.id, complex_at['at'])
                 if member is not None:
                     complex_reply.insert(0, At(complex_at['at']))
                     await bot.send(event, complex_reply)
@@ -113,7 +114,9 @@ class MessageProcessing:
     bottle = BaseFunction.DriftingBottle()
 
     rpg = RPG.RPG()
-    clash = Clash2.Clash()
+    clash = Clash.Clash()
+
+    clock = Clock.Clock()
 
     def __init__(self):
         pass
@@ -450,6 +453,7 @@ class MessageProcessing:
                     reply_text = '已为您取消创建'
                 need_reply = True
             elif self.users[qq]['buffer']['id'] == 7:  # 创建复杂回复的艾特对象
+                message = message.replace('@', '').strip()
                 if message != '*取消创建*':
                     if message == '全体成员':
                         self.users[qq]['buffer']['buffer']['at_type'] = 0  # 0表示艾特
@@ -967,11 +971,6 @@ class MessageProcessing:
                 if mode == 0 or mode == 2:
                     reply_text = '这部分命令，只支持群聊哦~'
                 need_reply = True
-            elif message == '活动帮助':
-                reply_image = command.help_activity()
-                if mode == 0 or mode == 2:
-                    reply_text = '这部分命令，只支持群聊哦~'
-                need_reply = True
             elif message == '骰娘' or message == '骰娘帮助' or message == '骰娘指令':
                 reply_image = command.help_thrower()
                 if mode == 0 or mode == 2:
@@ -992,7 +991,7 @@ class MessageProcessing:
             elif message == '模块管理帮助':
                 reply_image = command.help_modular()
                 need_reply = True
-            elif message == '部落冲突查询帮助':
+            elif message == '部落冲突查询帮助' or message == 'coc帮助':
                 reply_image = command.help_clash()
                 need_reply = True
                 if mode == 1:
@@ -1013,6 +1012,13 @@ class MessageProcessing:
                 group_name = message[4:].strip()
                 reply_text = operator.quit_group(group_id, self.groups[group_id], group_name, qq)
                 need_reply = True
+
+            elif message == '打卡列表':
+                clock_data = self.clock.get_clock(group_id)
+            elif message[:4] == '添加打卡':
+                pass
+            elif message[:4] == '删除打卡':
+                pass
 
             if need_reply:
                 self.statistics['clock_activity'] += 1
