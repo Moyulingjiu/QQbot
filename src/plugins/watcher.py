@@ -1,7 +1,8 @@
 from mirai import Mirai, WebSocketAdapter
 from mirai import FriendMessage, GroupMessage, TempMessage
 from mirai import Plain, At, AtAll, Face
-from mirai.models.events import MemberJoinEvent, NewFriendRequestEvent, BotLeaveEventKick, BotInvitedJoinGroupRequestEvent
+from mirai.models.events import MemberJoinEvent, NewFriendRequestEvent, BotLeaveEventKick, \
+    BotInvitedJoinGroupRequestEvent
 from mirai.models.events import NudgeEvent
 
 # =============================================================
@@ -14,6 +15,8 @@ import datetime
 from plugins import getNow
 from plugins import logManage
 from plugins import dataManage
+from plugins import Clock
+
 
 # =============================================================
 # 主程序
@@ -72,3 +75,85 @@ async def new_day(bot):
 
     return True
 
+
+async def reset_clock(bot):
+    today = str(datetime.date.today())
+    clock = dataManage.read_clock()
+    del_key = []
+    for group_id, clock_dict in clock.items():
+        if 'int' not in str(type(group_id)):
+            del_key.append(group_id)
+            continue
+        member_list_origin = await bot.member_list(group_id)
+        member_list = {}
+        for member in member_list_origin.data:
+            if not member_list.__contains__(member.id):
+                member_list[member.id] = member.member_name
+
+        for name, members in clock_dict.items():
+            del_member = []
+            at_member = []
+            for member in members['member']:
+                if not member_list.__contains__(member['qq']):
+                    del_member.append(member)
+                elif not Clock.is_yesterday(member['last']):
+                    at_member.append(member['qq'])
+            message = []
+            if len(at_member) != 0:
+                message.append(Plain('打卡<' + name + '>昨日未打卡的人公示：'))
+                for qq in at_member:
+                    message.append(At(qq))
+                message.append(Plain('\n'))
+                await bot.send_group_message(group_id, message)
+            else:
+                message.append(Plain('打卡<' + name + '>昨日所有人都完成了打卡'))
+                await bot.send_group_message(group_id, message)
+
+            for member in del_member:
+                clock[group_id][name]['member'].remove(member)
+            dataManage.save_clock(clock)
+
+    for key in del_key:
+        del clock[key]
+    dataManage.save_clock(clock)
+
+
+async def clock_check(bot, hour, minute):
+    today = str(datetime.date.today())
+    clock = dataManage.read_clock()
+    del_key = []
+    for group_id, clock_dict in clock.items():
+        if 'int' not in str(type(group_id)):
+            del_key.append(group_id)
+            continue
+        member_list_origin = await bot.member_list(group_id)
+        member_list = {}
+        for member in member_list_origin.data:
+            if not member_list.__contains__(member.id):
+                member_list[member.id] = member.member_name
+
+        for name, members in clock_dict.items():
+            # 如果需要提醒才进行提醒
+            if members['remind']['hour'] and hour == members['remind']['hour'] and minute == members['remind']['minute']:
+                del_member = []
+                at_member = []
+                for member in members['member']:
+                    if not member_list.__contains__(member['qq']):
+                        del_member.append(member)
+                    elif member['last'] != today:
+                        at_member.append(member['qq'])
+                message = []
+                if len(at_member) != 0:
+                    message.append(Plain('打卡<' + name + '>还未打卡的人：'))
+                    for qq in at_member:
+                        message.append(At(qq))
+                    message.append(Plain('\n记得打卡呀~'))
+                    await bot.send_group_message(group_id, message)
+
+                for member in del_member:
+                    clock[group_id][name]['member'].remove(member)
+                dataManage.save_clock(clock)
+
+    for key in del_key:
+        del clock[key]
+    dataManage.save_clock(clock)

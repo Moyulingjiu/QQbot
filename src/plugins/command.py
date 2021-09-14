@@ -439,7 +439,7 @@ def function(code, qq, name, group_id, mode, bot_config, config, statistics):
         except ArithmeticError as e:
             err = str(e)
             if err == 'Non-expression':
-                print('Non-expression')
+                pass
             elif err == 'wrong format':
                 reply_text = '表达式无法解析'
 

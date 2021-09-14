@@ -20,7 +20,7 @@
 # 牲畜
 #=========================================
 羊犊子 additional=羊犊子x1，肉x2 level=2 path=羊犊子x1 time=60
-牛犊子 additional=牛犊子x1，肉x3 level=2 path=牛犊子x1 time=1
+牛犊子 additional=牛犊子x1，肉x3 level=2 path=牛犊子x1 time=90
 
 #=========================================
 # 药水

@@ -29,13 +29,12 @@ watcher_lock = True
 # ==========================================================
 # 定时器
 def watcher_bot():
-    new_loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(new_loop)
-
-    print('已运行')
+    print('定时器已启动')
+    time.sleep(30)
     global watcher_lock
     while watcher_lock:
         now = datetime.datetime.now()
+        print('%02d:%02d' % (now.hour, now.minute))
         statistics = dataManage.read_statistics()
         print('\t*上一分钟回复为：', statistics['last_minute'])
         statistics['last_minute'] = 0
@@ -43,10 +42,17 @@ def watcher_bot():
         print('\t*已将上一分钟回复其置为：0')
 
         if now.hour == 0 and now.minute == 0:  # 每日零点重置数据
-            tasks = [watcher.new_day(bot)]
-            loops = asyncio.get_event_loop()
+            loops = asyncio.new_event_loop()
+            asyncio.set_event_loop(loops)
+            tasks = [watcher.new_day(bot), watcher.reset_clock(bot)]
             loops.run_until_complete(asyncio.wait(tasks))
-        time.sleep(60)  
+
+        # 每分钟进行打卡检查
+        loops = asyncio.new_event_loop()
+        asyncio.set_event_loop(loops)
+        tasks = [watcher.clock_check(bot, now.hour, now.minute)]
+        loops.run_until_complete(asyncio.wait(tasks))
+        time.sleep(60)
 
 
 # 主程序类

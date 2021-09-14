@@ -1,28 +1,25 @@
-from mirai import Mirai, WebSocketAdapter
-from mirai import FriendMessage, GroupMessage, TempMessage
-from mirai import Plain, At, AtAll, Face, Image
-
+import datetime
 import os
-import time
 import random
 
-from plugins import talk
-from plugins import weather
-from plugins import command
-from plugins import weiboHot
-from plugins import operator
-from plugins import dataManage
-from plugins import autoReply
-from plugins import baidu
-from plugins import logManage
-from plugins import getNow
-from plugins import keyReply
-from plugins import PixivImage
+from mirai import Plain, At, AtAll, Image
+
 from plugins import BaseFunction
 from plugins import Clash
 from plugins import Clock
-
 from plugins import RPG
+from plugins import autoReply
+from plugins import baidu
+from plugins import command
+from plugins import dataManage
+from plugins import getNow
+from plugins import keyReply
+from plugins import logManage
+from plugins import operator
+from plugins import talk
+from plugins import weather
+from plugins import weiboHot
+
 
 async def send_message(bot, event, mode, merge_reply, reply_text, reply_image, need_at, at_qq):
     if reply_text is None:
@@ -60,6 +57,7 @@ async def send_message(bot, event, mode, merge_reply, reply_text, reply_image, n
             if reply_text != '':
                 await bot.send(event, [AtAll(), reply_text])
 
+
 async def send_complex_message(bot, event, mode, complex_reply, complex_at):
     if mode == 0 or mode == 2:
         await bot.send(event, complex_reply)
@@ -91,12 +89,14 @@ async def send_complex_message(bot, event, mode, complex_reply, complex_at):
 
             await bot.send(event, complex_reply)
 
+
 # 布尔开关类型文案
 def bool_string(switch):
     if switch:
         return '已开启'
     else:
         return '已关闭'
+
 
 class MessageProcessing:
     config = {}
@@ -487,7 +487,6 @@ class MessageProcessing:
                     reply_text = '已为您取消创建'
                 need_reply = True
 
-
             if reset_buffer:
                 self.users[qq]['buffer']['id'] = 0
                 self.users[qq]['buffer']['buffer'] = None
@@ -502,11 +501,12 @@ class MessageProcessing:
             if message_code == 'quit' or message_code == 'dismiss':
                 if group_right < 2 or right < 3:
                     await bot.send(event, '再见啦~各位！我会想你们的!')
-                    
+
                     await bot.quit(group_id)
                     self.statistics['quit'] += 1
                     dataManage.save_statistics(self.statistics)
-                    logManage.group_log(getNow.toString(), qq, group_id, event.sender.group.get_name(), message + '; 小柒退群！')
+                    logManage.group_log(getNow.toString(), qq, group_id, event.sender.group.get_name(),
+                                        message + '; 小柒退群！')
 
                     if master is not None:
                         await bot.send_friend_message(master.id, [
@@ -524,7 +524,8 @@ class MessageProcessing:
                         await bot.send(event, 'QAQ，那我闭嘴了')
                         self.statistics['mute'] += 1
                         dataManage.save_statistics(self.statistics)
-                        logManage.group_log(getNow.toString(), qq, group_id, event.sender.group.get_name(), message + '; 小柒禁言！')
+                        logManage.group_log(getNow.toString(), qq, group_id, event.sender.group.get_name(),
+                                            message + '; 小柒禁言！')
 
                         if master is not None:
                             await bot.send_friend_message(master.id, [
@@ -545,7 +546,8 @@ class MessageProcessing:
                         await bot.send(event, '呜呜呜，憋死我了，终于可以说话了')
                         self.statistics['unmute'] += 1
                         dataManage.save_statistics(self.statistics)
-                        logManage.group_log(getNow.toString(), qq, group_id, event.sender.group.get_name(), message + '; 小柒解除禁言！')
+                        logManage.group_log(getNow.toString(), qq, group_id, event.sender.group.get_name(),
+                                            message + '; 小柒解除禁言！')
 
                         if master is not None:
                             await bot.send_friend_message(master.id, [
@@ -566,7 +568,8 @@ class MessageProcessing:
                         await bot.send(event, '限制模式已开启，指令需艾特才能回复。解禁指令也别忘记艾特哦~')
                     self.statistics['operate'] += 1
                     dataManage.save_statistics(self.statistics)
-                    logManage.group_log(getNow.toString(), qq, group_id, event.sender.group.get_name(), message + '; 小柒开启限制！')
+                    logManage.group_log(getNow.toString(), qq, group_id, event.sender.group.get_name(),
+                                        message + '; 小柒开启限制！')
                 else:
                     reply_text = '权限不足，需要群管理或群主或小柒的管理'
                     await send_message(bot, event, mode, merge_reply, reply_text, reply_image, need_at, at_qq)
@@ -579,7 +582,8 @@ class MessageProcessing:
                         await bot.send(event, '从现在起，指令无需艾特也能回复~')
                     self.statistics['operate'] += 1
                     dataManage.save_statistics(self.statistics)
-                    logManage.group_log(getNow.toString(), qq, group_id, event.sender.group.get_name(), message + '; 小柒解除限制！')
+                    logManage.group_log(getNow.toString(), qq, group_id, event.sender.group.get_name(),
+                                        message + '; 小柒解除限制！')
                 else:
                     reply_text = '权限不足，需要群管理或群主或小柒的管理'
                     await send_message(bot, event, mode, merge_reply, reply_text, reply_image, need_at, at_qq)
@@ -991,7 +995,7 @@ class MessageProcessing:
             elif message == '模块管理帮助':
                 reply_image = command.help_modular()
                 need_reply = True
-            elif message == '部落冲突查询帮助' or message == 'coc帮助':
+            elif message == '部落冲突查询帮助' or message.lower() == 'coc帮助':
                 reply_image = command.help_clash()
                 need_reply = True
                 if mode == 1:
@@ -1002,7 +1006,7 @@ class MessageProcessing:
                 self.statistics['help'] += 1
                 dataManage.save_statistics(self.statistics)
 
-        # 打卡&活动&分组
+        # 打卡&分组
         if not need_reply and mode == 1:
             if message[:4] == '加入分组':
                 group_name = message[4:].strip()
@@ -1015,10 +1019,89 @@ class MessageProcessing:
 
             elif message == '打卡列表':
                 clock_data = self.clock.get_clock(group_id)
-            elif message[:4] == '添加打卡':
-                pass
+                need_reply = True
+                if clock_data is None or len(clock_data) == 0:
+                    reply_text = '暂无任何打卡~'
+                else:
+                    reply_text = '本群现有打卡如下：'
+                    for key, value in clock_data.items():
+                        reply_text += '\n' + key + '（' + str(len(value['member'])) + '人）'
+            elif message[:4] == '添加打卡' and '@' not in message:
+                name = message[4:].strip()
+                need_reply = True
+                if self.clock.insert_clock(group_id, name):
+                    reply_text = '添加成功！群成员可以输入“加入打卡' + name + '”'
+                else:
+                    reply_text = '添加失败！已有同名的打卡计划或者打卡已满10个'
             elif message[:4] == '删除打卡':
-                pass
+                name = message[4:].strip()
+                need_reply = True
+                if self.clock.remove_clock(group_id, name):
+                    reply_text = '删除成功！'
+                else:
+                    reply_text = '删除失败！没有该打卡'
+            elif message[:4] == '查看打卡':
+                name = message[4:].strip()
+                clock_data = self.clock.get_clock_single(group_id, name)
+                need_reply = True
+                if clock_data is None:
+                    reply_text = '不存在该打卡'
+                else:
+                    today = str(datetime.date.today())
+                    reply_text = '打卡<' + name + '>情况如下：'
+                    if clock_data['remind']['switch']:
+                        reply_text += '\n提醒时间-%02d:%02d' % (clock_data['remind']['hour'], clock_data['remind']['minute'])
+                    if clock_data['summary']['switch']:
+                        reply_text += '\n总结时间-%02d:%02d' % (clock_data['remind']['hour'], clock_data['remind']['minute'])
+                    reply_text += '\n参与打卡的成员：'
+                    member_list_origin = await bot.member_list(group_id)
+                    member_list = {}
+                    for member in member_list_origin.data:
+                        if not member_list.__contains__(member.id):
+                            member_list[member.id] = member.member_name
+
+                    for member in clock_data['member']:
+                        if member_list.__contains__(member['qq']):
+                            state = '已签' if today == member['last'] else '未签'
+                            reply_text += '\n' + member_list[member['qq']] + '<' + str(
+                                member['qq']) + '>：' + state + '（连续' + str(member['continuity']) + '天） '
+            elif message[:4] == '加入打卡':
+                name = message[4:].strip()
+                ans = self.clock.join_clock(group_id, qq, name)
+                need_reply = True
+                if ans == 0:
+                    reply_text = '加入打卡' + name + '成功\n你可以输入“打卡' + name + '”来进行打卡\n输入“退出打卡' + name + '”来退出'
+                elif ans == 1:
+                    reply_text = '不存在打卡' + name
+                elif ans == 2:
+                    reply_text = '你已在打卡' + name + '中'
+                else:
+                    reply_text = '达到人数上限（单个打卡30人）'
+            elif message[:4] == '退出打卡':
+                name = message[4:].strip()
+                ans = self.clock.quit_clock(group_id, qq, name)
+                need_reply = True
+                if ans == 0:
+                    reply_text = '退出打卡' + name + '成功'
+                elif ans == 1:
+                    reply_text = '不存在打卡' + name
+                elif ans == 2:
+                    reply_text = '你不在打卡' + name + '中'
+            elif message[:2] == '打卡' and message_len > 2 and '@' not in message:
+                name = message[2:].strip()
+                ans = self.clock.sign(group_id, qq, name)
+                need_at = True
+                need_reply = True
+                if ans >= 0:
+                    reply_text = '打卡' + name + '成功！已经连续打卡' + str(ans) + '天'
+                elif ans == -1:
+                    need_reply = False
+                    need_at = False
+                    reply_text = '不存在打卡<' + name + '>'
+                elif ans == -2:
+                    reply_text = '你没有加入打卡<' + name + '>'
+                elif ans == -3:
+                    reply_text = '你今天已经打过卡了~'
 
             if need_reply:
                 self.statistics['clock_activity'] += 1
@@ -1168,7 +1251,7 @@ class MessageProcessing:
             if not need_reply:
                 if mode == 1:
                     (need_reply, need_at, reply_text, reply_image) = await operator.administrator_operation(
-                        bot, 
+                        bot,
                         event,
                         message,
                         qq,
@@ -1182,7 +1265,7 @@ class MessageProcessing:
                         group_right)
                 else:
                     (need_reply, need_at, reply_text, reply_image) = await operator.administrator_operation(
-                        bot, 
+                        bot,
                         event,
                         message,
                         qq,
@@ -1227,7 +1310,8 @@ class MessageProcessing:
         # -----------------------------------------------------------------------------------
         # 部落冲突
         if not need_reply and mode == 1 and self.groups[group_id]['config']['clash']:
-            need_reply, reply_text, reply_image = self.clash.handle(message, group_id, qq, self.groups[group_id], self.users[qq])
+            need_reply, reply_text, reply_image = self.clash.handle(message, group_id, qq, self.groups[group_id],
+                                                                    self.users[qq])
             if need_reply:
                 merge_reply = True
 
@@ -1238,7 +1322,8 @@ class MessageProcessing:
         # -----------------------------------------------------------------------------------
         # 群自己设定的关键词回复
         if not need_reply and mode == 1 and self.groups[group_id]['config']['autonomous_reply']:
-            (need_reply, reply_text, reply_image, at_qq, need_at, need_complex_reply, complex_reply, complex_at) = keyReply.reply(
+            (need_reply, reply_text, reply_image, at_qq, need_at, need_complex_reply, complex_reply,
+             complex_at) = keyReply.reply(
                 message,
                 group_id,
                 self.groups[group_id],
@@ -1312,13 +1397,15 @@ class MessageProcessing:
 
         if blacklist != 0:
             if master is not None:
-                await bot.send_friend_message(self.config['master'], '有新的好友申请<' + event.nick + '>(' + str(event.from_id) + ')！已拒绝，原因：黑名单')
+                await bot.send_friend_message(self.config['master'],
+                                              '有新的好友申请<' + event.nick + '>(' + str(event.from_id) + ')！已拒绝，原因：黑名单')
 
             await bot.decline(event)
             return
 
         if master is not None:
-            await bot.send_friend_message(self.config['master'], '有新的好友申请<' + event.nick + '>(' + str(event.from_id) + ')！')
+            await bot.send_friend_message(self.config['master'],
+                                          '有新的好友申请<' + event.nick + '>(' + str(event.from_id) + ')！')
 
         await bot.allow(event)
         qq = event.from_id
@@ -1346,14 +1433,16 @@ class MessageProcessing:
         blacklist = self.get_blacklist(event.from_id, event.group_id)
 
         if blacklist != 0:
-            await bot.send_friend_message(self.config['master'], '有新的群申请<' + event.group_name + '>(' + str(event.group_id) + ')！已拒绝，原因：黑名单')
+            await bot.send_friend_message(self.config['master'],
+                                          '有新的群申请<' + event.group_name + '>(' + str(event.group_id) + ')！已拒绝，原因：黑名单')
             await bot.decline(event)
             return
 
         qq = event.from_id
         name = event.nick
         if master is not None:
-            await bot.send_friend_message(self.config['master'], '有新的群申请<' + event.group_name + '>(' + str(event.group_id) + ')！\n邀请人：<' + name + '>(' + str(qq) + ')')
+            await bot.send_friend_message(self.config['master'], '有新的群申请<' + event.group_name + '>(' + str(
+                event.group_id) + ')！\n邀请人：<' + name + '>(' + str(qq) + ')')
 
         member = await bot.get_friend(qq)
         if member is not None:
@@ -1385,16 +1474,19 @@ class MessageProcessing:
                 rand = random.randint(0, 26)
                 if rand == 0:
                     reply_image = 'data/AutoReply/Nudge/打.gif'
-                    await bot.send_group_message(event.subject.id, [Plain('你再戳？你再戳？'), await Image.from_local(filename=reply_image)])
+                    await bot.send_group_message(event.subject.id,
+                                                 [Plain('你再戳？你再戳？'), await Image.from_local(filename=reply_image)])
                 elif rand == 1:
                     reply_image = 'data/AutoReply/Nudge/质疑.jpg'
                     await bot.send_group_message(event.subject.id, [await Image.from_local(filename=reply_image)])
                 elif rand == 2:
                     reply_image = 'data/AutoReply/Nudge/过分.jpg'
-                    await bot.send_group_message(event.subject.id, [Plain('别戳了'), await Image.from_local(filename=reply_image)])
+                    await bot.send_group_message(event.subject.id,
+                                                 [Plain('别戳了'), await Image.from_local(filename=reply_image)])
                 elif rand == 3:
                     reply_image = 'data/AutoReply/Nudge/乖巧.jpg'
-                    await bot.send_group_message(event.subject.id, [Plain('放过我吧'), await Image.from_local(filename=reply_image)])
+                    await bot.send_group_message(event.subject.id,
+                                                 [Plain('放过我吧'), await Image.from_local(filename=reply_image)])
                 elif rand == 4:
                     reply_image = 'data/AutoReply/Nudge/无语.jpg'
                     await bot.send_group_message(event.subject.id, [await Image.from_local(filename=reply_image)])
@@ -1402,19 +1494,24 @@ class MessageProcessing:
                     await bot.send_group_message(event.subject.id, '你再戳我就哭给你看，嘤嘤嘤~')
                 elif rand == 6:
                     reply_image = 'data/AutoReply/Nudge/委屈2.jpg'
-                    await bot.send_group_message(event.subject.id, [Plain('别戳了呜呜'), await Image.from_local(filename=reply_image)])
+                    await bot.send_group_message(event.subject.id,
+                                                 [Plain('别戳了呜呜'), await Image.from_local(filename=reply_image)])
                 elif rand == 7:
                     reply_image = 'data/AutoReply/Nudge/上头.png'
-                    await bot.send_group_message(event.subject.id, [Plain('你是不是戳上头了'), await Image.from_local(filename=reply_image)])
+                    await bot.send_group_message(event.subject.id,
+                                                 [Plain('你是不是戳上头了'), await Image.from_local(filename=reply_image)])
                 elif rand == 8:
                     reply_image = 'data/AutoReply/Nudge/质疑2.gif'
-                    await bot.send_group_message(event.subject.id, [Plain('为什么戳我'), await Image.from_local(filename=reply_image)])
+                    await bot.send_group_message(event.subject.id,
+                                                 [Plain('为什么戳我'), await Image.from_local(filename=reply_image)])
                 elif rand == 9:
                     reply_image = 'data/AutoReply/Nudge/委屈.jpg'
-                    await bot.send_group_message(event.subject.id, [Plain('别戳了呜呜'), await Image.from_local(filename=reply_image)])
+                    await bot.send_group_message(event.subject.id,
+                                                 [Plain('别戳了呜呜'), await Image.from_local(filename=reply_image)])
                 elif rand == 10:
                     reply_image = 'data/AutoReply/Nudge/不许戳.jpg'
-                    await bot.send_group_message(event.subject.id, [Plain('不许戳'), await Image.from_local(filename=reply_image)])
+                    await bot.send_group_message(event.subject.id,
+                                                 [Plain('不许戳'), await Image.from_local(filename=reply_image)])
                 elif rand == 11:
                     reply_image = 'data/AutoReply/Nudge/委屈3.jpg'
                     await bot.send_group_message(event.subject.id, [await Image.from_local(filename=reply_image)])
@@ -1423,7 +1520,8 @@ class MessageProcessing:
                     await bot.send_group_message(event.subject.id, [await Image.from_local(filename=reply_image)])
                 elif rand == 13:
                     reply_image = 'data/AutoReply/Nudge/不开心2.jpg'
-                    await bot.send_group_message(event.subject.id, [Plain('不可以再戳了'), await Image.from_local(filename=reply_image)])
+                    await bot.send_group_message(event.subject.id,
+                                                 [Plain('不可以再戳了'), await Image.from_local(filename=reply_image)])
                 elif rand == 14:
                     reply_image = 'data/AutoReply/Nudge/无语2.jpg'
                     await bot.send_group_message(event.subject.id, [await Image.from_local(filename=reply_image)])
@@ -1432,22 +1530,27 @@ class MessageProcessing:
                     await bot.send_group_message(event.subject.id, [await Image.from_local(filename=reply_image)])
                 elif rand == 16:
                     reply_image = 'data/AutoReply/Nudge/哭.bmp'
-                    await bot.send_group_message(event.subject.id, [Plain('不可以做这种事情哦~'), await Image.from_local(filename=reply_image)])
+                    await bot.send_group_message(event.subject.id,
+                                                 [Plain('不可以做这种事情哦~'), await Image.from_local(filename=reply_image)])
                 elif rand == 17:
                     reply_image = 'data/AutoReply/Nudge/别戳了.bmp'
-                    await bot.send_group_message(event.subject.id, [Plain('不可以再戳了~'), await Image.from_local(filename=reply_image)])
+                    await bot.send_group_message(event.subject.id,
+                                                 [Plain('不可以再戳了~'), await Image.from_local(filename=reply_image)])
                 elif rand == 18:
                     reply_image = 'data/AutoReply/Nudge/质疑3.bmp'
-                    await bot.send_group_message(event.subject.id, [Plain('你再戳你是笨蛋'), await Image.from_local(filename=reply_image)])
+                    await bot.send_group_message(event.subject.id,
+                                                 [Plain('你再戳你是笨蛋'), await Image.from_local(filename=reply_image)])
                 elif rand == 19:
                     reply_image = 'data/AutoReply/Nudge/骂骂咧咧.png'
                     await bot.send_group_message(event.subject.id, [await Image.from_local(filename=reply_image)])
                 elif rand == 20:
                     reply_image = 'data/AutoReply/Nudge/质疑4.bmp'
-                    await bot.send_group_message(event.subject.id, [Plain('真够无聊的呢'), await Image.from_local(filename=reply_image)])
+                    await bot.send_group_message(event.subject.id,
+                                                 [Plain('真够无聊的呢'), await Image.from_local(filename=reply_image)])
                 elif rand == 21:
                     reply_image = 'data/AutoReply/Nudge/打2.jpg'
-                    await bot.send_group_message(event.subject.id, [Plain('突死你'), await Image.from_local(filename=reply_image)])
+                    await bot.send_group_message(event.subject.id,
+                                                 [Plain('突死你'), await Image.from_local(filename=reply_image)])
                 elif rand == 22:
                     reply_image = 'data/AutoReply/Nudge/无语4.gif'
                     await bot.send_group_message(event.subject.id, [await Image.from_local(filename=reply_image)])
@@ -1467,7 +1570,8 @@ class MessageProcessing:
         master = await bot.get_friend(self.config['master'])
 
         if master is not None:
-            await bot.send_friend_message(self.config['master'], '被踢出群<' + event.group.get_name() + '>(' + str(event.group.id) + ')！')
+            await bot.send_friend_message(self.config['master'],
+                                          '被踢出群<' + event.group.get_name() + '>(' + str(event.group.id) + ')！')
 
         self.statistics['kick'] += 1
         dataManage.save_statistics(self.statistics)

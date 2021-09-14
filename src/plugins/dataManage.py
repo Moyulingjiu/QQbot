@@ -703,10 +703,7 @@ def read_weather():
 
 def read_clock():
     filePath = 'data/ClockActivity/clockIn'
-    clock = {
-        'groupClock': {},
-        'clockDate': 'xx-xx-xx'
-    }
+    clock = {}
     if not os.path.exists(filePath + '.data'):
         save_obj(clock, filePath)
     else:

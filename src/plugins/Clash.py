@@ -1,5 +1,6 @@
 import requests
 import json
+
 from bs4 import BeautifulSoup
 import random
 import time
@@ -12,7 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 from plugins import dataManage
 
 # 家庭测试api
-# api_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjA2ODJmYjA1LTE3NmEtNGFmMC04MmU2LTliYzQyYmRjZmU0MiIsImlhdCI6MTYzMTAwMzEyNiwic3ViIjoiZGV2ZWxvcGVyLzUzNTVmZDI5LTc4NDEtYTVjNC0wN2M2LTE2MGNiYTBiN2MwNSIsInNjb3BlcyI6WyJjbGFzaCJdLCJsaW1pdHMiOlt7InRpZXIiOiJkZXZlbG9wZXIvc2lsdmVyIiwidHlwZSI6InRocm90dGxpbmcifSx7ImNpZHJzIjpbIjE4My4yMjYuNTYuNDkiXSwidHlwZSI6ImNsaWVudCJ9XX0.4G8CQ6QhYKg3JD7lfADaGtCJklDy5dj0v-_ybWj8XwQeEDw4PIk_b9qxBCtVghuHYnjFtP6n0LRoURKrWjH9vw'
+# api_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjAzYmU5ZWE3LTQxNWYtNDM2Yi1hMWU0LTI1MmRjOGU0MzM5OCIsImlhdCI6MTYzMTYwNzY0OCwic3ViIjoiZGV2ZWxvcGVyLzUzNTVmZDI5LTc4NDEtYTVjNC0wN2M2LTE2MGNiYTBiN2MwNSIsInNjb3BlcyI6WyJjbGFzaCJdLCJsaW1pdHMiOlt7InRpZXIiOiJkZXZlbG9wZXIvc2lsdmVyIiwidHlwZSI6InRocm90dGxpbmcifSx7ImNpZHJzIjpbIjEwMy4xMjIuMTE5LjIzNSJdLCJ0eXBlIjoiY2xpZW50In1dfQ.6TE5jKULIbOHsF-P1FQRx7_aeEQ_mjZZzGQEDR6LDscOUcstbXgML8p4ULhV2WIeuRhVKoeXGheNtMFVlSoI2w'
 # 服务器api
 api_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjdjMzEyYTE1LTcyN2EtNGQ3NC04Mzg5LTRhN2VhY2QwNDU5OSIsImlhdCI6MTYzMDY3Nzg4MCwic3ViIjoiZGV2ZWxvcGVyLzUzNTVmZDI5LTc4NDEtYTVjNC0wN2M2LTE2MGNiYTBiN2MwNSIsInNjb3BlcyI6WyJjbGFzaCJdLCJsaW1pdHMiOlt7InRpZXIiOiJkZXZlbG9wZXIvc2lsdmVyIiwidHlwZSI6InRocm90dGxpbmcifSx7ImNpZHJzIjpbIjE1MC4xNTguMTgwLjcxIl0sInR5cGUiOiJjbGllbnQifV19.8lcRUoWtpFQJaxzFFubCDlKul58eKK59F5Y7KP9xQ43p89BVhISYWqV2P8XZDAyTaWwjYPq2iPmGOa1zuBSBhA'
 
@@ -253,8 +254,11 @@ class Clash:
             image1 = Image.open(image_path)
             image1 = image1.resize((145, 145),Image.ANTIALIAS)
             base.paste(image1, (40, 135))
-            
-            image_path = 'data/Clash/大本营/BuilderHall' + str(user_dict['builderHallLevel']) + '.jpg'
+
+            if user_dict.__contains__('builderHallLevel'):
+                image_path = 'data/Clash/大本营/BuilderHall' + str(user_dict['builderHallLevel']) + '.jpg'
+            else:
+                image_path = 'data/Clash/大本营/空白大本营.jpg'
             image1 = Image.open(image_path)
             image1 = image1.resize((145, 145),Image.ANTIALIAS)
             base.paste(image1, (485, 135))
@@ -630,7 +634,7 @@ class Clash:
         if res.status_code == 200:
             clan_dict = json.loads(res.text)
             reply = clan_dict['name'] + ' - #' + tag.upper()
-            reply += '\n介绍：' + clan_dict['description']
+            # reply += '\n介绍：' + clan_dict['description']
             reply += '\n成员：' + str(len(clan_dict['memberList'])) + '人'
             return reply
         elif res.status_code == 404:
@@ -670,6 +674,7 @@ class Clash:
                     reply_text = '已经绑定了该标签'
         elif message[:8] == 'coc绑定部落#':
             if len(message) > 8:
+                need_reply = True
                 if message[8:] not in user_config['config']['clash_tag']:
                     user_config['config']['clash_tag'].append(message[8:])
                     dataManage.save_user(qq, user_config)
@@ -758,7 +763,7 @@ class Clash:
         elif message == 'coc部落':
             need_reply = True
             if len(user_config['config']['clash_tag']) > 0:
-                reply_text = self.player(user_config['config']['clash_tag'][user_config['config']['main_clash_tag']])
+                reply_text = self.clan(user_config['config']['clash_tag'][user_config['config']['main_clash_tag']])
             else:
                 reply_text = '你目前没有绑定部落标签'
         elif message == 'coc玩家':
@@ -784,7 +789,7 @@ class Clash:
         elif message[:5] == 'coc部落' and message[5:].isdigit():
             index = int(message[5:]) - 1
             if len(user_config['config']['clash_tag']) > index >= 0:
-                reply_text = self.player(user_config['config']['clash_tag'][index])
+                reply_text = self.clan(user_config['config']['clash_tag'][index])
             else:
                 reply_text = '没有序号对应的标签'
             need_reply = True
@@ -803,7 +808,7 @@ class Clash:
             new_user = dataManage.read_user(new_qq)
             need_reply = True
             if len(new_user['config']['clash_tag']) > 0:
-                reply_text = self.player(new_user['config']['clash_tag'][new_user['config']['main_clash_tag']])
+                reply_text = self.clan(new_user['config']['clash_tag'][new_user['config']['main_clash_tag']])
             else:
                 reply_text = '你目前没有绑定部落标签'
         elif message[:6] == 'coc玩家@' and message[6:].isdigit():
