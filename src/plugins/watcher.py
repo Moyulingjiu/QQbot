@@ -47,6 +47,8 @@ async def new_day(bot):
     reply += '\n部落冲突调用次数：' + str(statistics['clash'])
     reply += '\n新好友：' + str(statistics['new_friend'])
     reply += '\n新群：' + str(statistics['new_group'])
+    reply += '\n戳一戳：' + str(statistics['nudge'])
+    reply += '\n发送消息：' + str(statistics['message'])
 
     statistics['kick'] = 0
     statistics['quit'] = 0
@@ -67,13 +69,15 @@ async def new_day(bot):
     statistics['auto_repeat'] = 0
     statistics['auto_reply'] = 0
     statistics['clash'] = 0
+    statistics['nudge'] = 0
+    statistics['message'] = 0
     dataManage.save_statistics(statistics)
 
     config = dataManage.read_config()
     for group_id in config['test_group']:
         await bot.send_group_message(group_id, reply)
 
-    return True
+    return
 
 
 async def reset_clock(bot):
@@ -157,3 +161,12 @@ async def clock_check(bot, hour, minute):
     for key in del_key:
         del clock[key]
     dataManage.save_clock(clock)
+
+
+async def static_message(bot):
+    config = dataManage.read_config()
+    master = config['master']
+    text = '当前版本：' + config['version']
+    text += '\n' + config['name'] + '仍然在稳定运行'
+    await bot.send_friend_message(master, text)
+    return

@@ -7,7 +7,6 @@ from plugins import logManage
 from plugins import getNow
 
 import sys
-
 # ==========================================================
 # 管理员模块
 async def administrator_operation(bot, event, message, qq, name, group_id, mode, bot_config, config, statistics, right,

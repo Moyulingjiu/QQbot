@@ -1,8 +1,9 @@
 from mirai import Mirai, WebSocketAdapter
 from mirai import FriendMessage, GroupMessage, TempMessage
 from mirai import Plain, At, AtAll, Face
-from mirai.models.events import MemberJoinEvent, NewFriendRequestEvent, BotLeaveEventKick, BotInvitedJoinGroupRequestEvent
-from mirai.models.events import NudgeEvent
+from mirai.models.message import FlashImage
+from mirai.models.events import MemberJoinEvent, NewFriendRequestEvent, BotLeaveEventKick, BotInvitedJoinGroupRequestEvent, BotJoinGroupEvent
+from mirai.models.events import NudgeEvent, MemberJoinRequestEvent, MemberLeaveEventQuit, MemberLeaveEventKick, MemberCardChangeEvent
 
 # =============================================================
 # 需求类
@@ -40,6 +41,12 @@ def watcher_bot():
         statistics['last_minute'] = 0
         dataManage.save_statistics(statistics)
         print('\t*已将上一分钟回复其置为：0')
+
+        if now.hour == 12 and now.minute == 0:  # 每日中午提醒版本
+            loops = asyncio.new_event_loop()
+            asyncio.set_event_loop(loops)
+            tasks = [watcher.static_message(bot)]
+            loops.run_until_complete(asyncio.wait(tasks))
 
         if now.hour == 0 and now.minute == 0:  # 每日零点重置数据
             loops = asyncio.new_event_loop()
@@ -91,19 +98,43 @@ if __name__ == '__main__':
     
     # 新群请求
     @bot.on(BotInvitedJoinGroupRequestEvent)
-    async def new_friend(event: BotInvitedJoinGroupRequestEvent):
+    async def new_group(event: BotInvitedJoinGroupRequestEvent):
         await message_processing.new_group(bot, event)
+    
+    # 加入群
+    @bot.on(BotJoinGroupEvent)
+    async def join_group(event: BotJoinGroupEvent):
+        await message_processing.join_group(bot, event)
     
     # 被踢出群
     @bot.on(BotLeaveEventKick)
-    async def new_friend(event: BotLeaveEventKick):
+    async def kick(event: BotLeaveEventKick):
         await message_processing.kick(bot, event)
     
     # 戳一戳
     @bot.on(NudgeEvent)
-    async def new_friend(event: NudgeEvent):
+    async def nudge(event: NudgeEvent):
         await message_processing.nudge(bot, event)
+    
+    # 入群申请
+    @bot.on(MemberJoinRequestEvent)
+    async def request_group(event: MemberJoinRequestEvent):
+        await message_processing.request_group(bot, event)
+    
+    # 退群
+    @bot.on(MemberLeaveEventQuit)
+    async def leave_group(event: MemberLeaveEventQuit):
+        await message_processing.leave_group(bot, event)
 
+    # 退群
+    @bot.on(MemberLeaveEventKick)
+    async def kick_group(event: MemberLeaveEventKick):
+        await message_processing.kick_group(bot, event)
+    
+    # 群名片修改
+    @bot.on(MemberCardChangeEvent)
+    async def member_change(event: MemberCardChangeEvent):
+        await message_processing.member_change(bot, event)
 
     # ==========================================================
     # 启动机器人

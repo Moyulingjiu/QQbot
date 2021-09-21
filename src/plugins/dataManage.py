@@ -196,7 +196,13 @@ def read_group(group_id):
             'right_train': [],  # 谁可以训练小柒
             'right_activity': [],  # 谁可以发起活动
             'right_mute': [],  # 谁可以禁言
-            'right_RPG': []  # 谁可以开关游戏
+            'right_RPG': [],  # 谁可以开关游戏
+            # =============================
+            'flash': False,  # 解除闪照
+            'member_wather': False,  # 群成员监控
+            'revoke': False,  # 防止撤回
+            'automatic': False,  # 自动审核
+            'pass': ''  # 加群暗号
         },
         'key_reply': {
             'key_at': {},
@@ -240,6 +246,11 @@ def read_group(group_id):
             f.write('activityRight=' + list_string(group['config']['right_activity']) + '\n')
             f.write('muteRight=' + list_string(group['config']['right_mute']) + '\n')
             f.write('gameRight=' + list_string(group['config']['right_RPG']) + '\n')
+            f.write('flash=' + str(group['config']['flash']) + '\n')
+            f.write('memberWather=' + str(group['config']['member_wather']) + '\n')
+            f.write('revoke=' + str(group['config']['revoke']) + '\n')
+            f.write('automatic=' + str(group['config']['automatic']) + '\n')
+            f.write('pass=' + str(group['config']['pass']) + '\n')
         data = {
             'key_reply': group['key_reply'],
             'welcome': group['welcome'],
@@ -385,6 +396,31 @@ def read_group(group_id):
                 for i in qq_list:
                     if i.isdigit():
                         group['config']['right_RPG'].append(int(i))
+
+            elif pair[0] == 'flash':
+                if pair[1] == 'true':
+                    group['config']['flash'] = True
+                else:
+                    group['config']['flash'] = False
+            elif pair[0] == 'memberWather':
+                if pair[1] == 'true':
+                    group['config']['member_wather'] = True
+                else:
+                    group['config']['member_wather'] = False
+            elif pair[0] == 'revoke':
+                if pair[1] == 'true':
+                    group['config']['revoke'] = True
+                else:
+                    group['config']['revoke'] = False
+            elif pair[0] == 'automatic':
+                if pair[1] == 'true':
+                    group['config']['automatic'] = True
+                else:
+                    group['config']['automatic'] = False
+            elif pair[0] == 'pass':
+                pair = datas[0].split('=')
+                pair[1] = pair[1].strip()
+                group['config']['pass'] = pair[1]
     return group
 
 
@@ -425,6 +461,11 @@ def save_group(group_id, config):
         f.write('activityRight=' + list_string(config['config']['right_activity']) + '\n')
         f.write('muteRight=' + list_string(config['config']['right_mute']) + '\n')
         f.write('gameRight=' + list_string(config['config']['right_RPG']) + '\n')
+        f.write('flash=' + str(config['config']['flash']) + '\n')
+        f.write('memberWather=' + str(config['config']['member_wather']) + '\n')
+        f.write('revoke=' + str(config['config']['revoke']) + '\n')
+        f.write('automatic=' + str(config['config']['automatic']) + '\n')
+        f.write('pass=' + str(config['config']['pass']) + '\n')
 
 
 # 读取用户
@@ -577,7 +618,8 @@ def read_statistics():
         'new_friend': 0,  # 新的朋友
         'new_group': 0,  # 新加入的群
         'message': 0,  # 发送消息量
-        'last_minute': 0  # 上一分钟回复量
+        'last_minute': 0,  # 上一分钟回复量
+        'nudge': 0  # 戳一戳
     }
     if not os.path.exists(filePath):
         with open (filePath, 'w', encoding='utf-8') as f:
@@ -601,6 +643,7 @@ def read_statistics():
             f.write('new_group=0\n')
             f.write('message=0\n')
             f.write('last_minute=0\n')
+            f.write('nudge=0\n')
         return statistics
 
     with open(filePath, 'r', encoding='utf-8') as f:
@@ -648,6 +691,7 @@ def save_statistics(statistics):
         f.write('new_group=' + str(statistics['new_group']) + '\n')
         f.write('message=' + str(statistics['message']) + '\n')
         f.write('last_minute=' + str(statistics['last_minute']) + '\n')
+        f.write('nudge=' + str(statistics['nudge']) + '\n')
 
 
 def list_string(data):
