@@ -1,5 +1,7 @@
 import requests
 import json
+import asyncio
+import datetime
 
 from bs4 import BeautifulSoup
 import random
@@ -13,7 +15,7 @@ from PIL import Image, ImageDraw, ImageFont
 from plugins import dataManage
 
 # 家庭测试api
-# api_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjAzYmU5ZWE3LTQxNWYtNDM2Yi1hMWU0LTI1MmRjOGU0MzM5OCIsImlhdCI6MTYzMTYwNzY0OCwic3ViIjoiZGV2ZWxvcGVyLzUzNTVmZDI5LTc4NDEtYTVjNC0wN2M2LTE2MGNiYTBiN2MwNSIsInNjb3BlcyI6WyJjbGFzaCJdLCJsaW1pdHMiOlt7InRpZXIiOiJkZXZlbG9wZXIvc2lsdmVyIiwidHlwZSI6InRocm90dGxpbmcifSx7ImNpZHJzIjpbIjEwMy4xMjIuMTE5LjIzNSJdLCJ0eXBlIjoiY2xpZW50In1dfQ.6TE5jKULIbOHsF-P1FQRx7_aeEQ_mjZZzGQEDR6LDscOUcstbXgML8p4ULhV2WIeuRhVKoeXGheNtMFVlSoI2w'
+# api_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjBjMjY4ZTdiLWE4ZWUtNDBlYy1hMWEwLTEwNzFlYmI4MjIzMyIsImlhdCI6MTYzMjU1MTAyMywic3ViIjoiZGV2ZWxvcGVyLzUzNTVmZDI5LTc4NDEtYTVjNC0wN2M2LTE2MGNiYTBiN2MwNSIsInNjb3BlcyI6WyJjbGFzaCJdLCJsaW1pdHMiOlt7InRpZXIiOiJkZXZlbG9wZXIvc2lsdmVyIiwidHlwZSI6InRocm90dGxpbmcifSx7ImNpZHJzIjpbIjExNy4zMC4xNzkuODEiXSwidHlwZSI6ImNsaWVudCJ9XX0.A3JLf1HSobT8RoEXMvxhc92UajItFC14jyr0qxeM6AhPKw6y3teeBp8dK04V23EARxMLDDPFkwIbH4tKwNOrOQ'
 # 服务器api
 api_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjdjMzEyYTE1LTcyN2EtNGQ3NC04Mzg5LTRhN2VhY2QwNDU5OSIsImlhdCI6MTYzMDY3Nzg4MCwic3ViIjoiZGV2ZWxvcGVyLzUzNTVmZDI5LTc4NDEtYTVjNC0wN2M2LTE2MGNiYTBiN2MwNSIsInNjb3BlcyI6WyJjbGFzaCJdLCJsaW1pdHMiOlt7InRpZXIiOiJkZXZlbG9wZXIvc2lsdmVyIiwidHlwZSI6InRocm90dGxpbmcifSx7ImNpZHJzIjpbIjE1MC4xNTguMTgwLjcxIl0sInR5cGUiOiJjbGllbnQifV19.8lcRUoWtpFQJaxzFFubCDlKul58eKK59F5Y7KP9xQ43p89BVhISYWqV2P8XZDAyTaWwjYPq2iPmGOa1zuBSBhA'
 
@@ -144,19 +146,65 @@ def get_html(url, data=None):
         except socket.error as e:
             print("4:", e)
             time.sleep(random.choice(range(20, 60)))
-        except http.client.BadStatusLine as e:
-            print("5:", e)
-            time.sleep(random.choice(range(30, 80)))
-
-        except http.client.IncompleteRead as e:
-            print("6:", e)
-            time.sleep(random.choice(range(5, 15)))
 
     return rep.text
+
+# 解析罗马数字
+def get_roman_number(text: str) -> str:
+  if text.endswith('III'):
+    return '3'
+  elif text.endswith('II'):
+    return '2'
+  elif text.endswith('I'):
+    return '1'
+  return ''
+
+# 将透明图片转变为白色底
+def transparence2white(img: Image) -> Image:
+    sp=img.size
+    width=sp[0]
+    height=sp[1]
+    for yh in range(height):
+        for xw in range(width):
+            dot=(xw,yh)
+            color_d=img.getpixel(dot)  # 与cv2不同的是，这里需要用getpixel方法来获取维度数据
+            if(color_d[3]==0):
+                color_d=(255,255,255,255)
+                img.putpixel(dot,color_d)  # 赋值的方法是通过putpixel
+    return img
 
 class Clash:
     def __init__(self):
         super().__init__()
+        self.lock_date: str = str(datetime.date.today())
+        self.lock_hour: int = -1
+        self.lock_minute: int = -1
+        self.set_lock: bool = False
+        self.clan_cache: dict = dataManage.load_obj('data/Clash/cache/clan')
+        self.user_cache: dict = dataManage.load_obj('data/Clash/cache/user')
+        self.today: str = str(datetime.date.today())
+        self.refresh: bool = False
+
+    def set_refresh(self) -> None:
+        self.refresh = True
+    
+    def refresh_chache(self) -> None:
+        today = str(datetime.date.today())
+        if self.refresh:
+            self.clan_cache = dataManage.load_obj('data/Clash/cache/clan')
+            self.user_cache: dict = dataManage.load_obj('data/Clash/cache/user')
+            self.today = today
+            self.refresh = False
+    
+    def is_lock(self) -> bool:
+        today = str(datetime.date.today())
+        now = datetime.datetime.now()
+        if self.set_lock:
+            if self.lock_date == today:
+                if self.lock_hour > now.hour or (self.lock_hour == now.hour and self.lock_minute > now.minute):
+                    return True
+        self.set_lock = False
+        return False
 
     def fish(self):
         url = "https://www.cocservice.top/search/"
@@ -623,6 +671,9 @@ class Clash:
             return '爬虫已失效（code：' + str(res.status_code) + '），请前往官方群反馈给主人，群号可以通过添加小柒好友获得'
 
     def clan(self, tag):
+        if self.clan_cache.__contains__(tag):
+            pass
+
         global api_token
         url = "https://api.clashofclans.com/v1/clans/%23" + tag
 
@@ -633,21 +684,160 @@ class Clash:
         res = requests.get(url=url, params=params)
         if res.status_code == 200:
             clan_dict = json.loads(res.text)
-            reply = clan_dict['name'] + ' - #' + tag.upper()
-            # reply += '\n介绍：' + clan_dict['description']
-            reply += '\n成员：' + str(len(clan_dict['memberList'])) + '人'
-            return reply
+            base = Image.open('data/Clash/部落空白卡.jpg').convert('RGBA')
+            # make a blank image for the text, initialized to transparent text color
+            txt = Image.new('RGBA', base.size, (255,255,255,0))
+            # 设置字体
+            font_size = 60
+            fnt = ImageFont.truetype('data/Font/FZHTJT.TTF', font_size)
+            font_size2 = 38
+            fnt2 = ImageFont.truetype('data/Font/FZHTJT.TTF', font_size2)
+            # get a drawing context
+            d = ImageDraw.Draw(txt)
+
+            fill_black = '#000000'
+            gray_color = '#E77524'
+            green_color = '#00EE00'
+            red_color = '#FF4500'
+
+            icon = requests.get(url=clan_dict['badgeUrls']['small'], params=params)
+            if icon.status_code == 200:
+                image_path = 'data/clash/temp/icon_' + tag + '.png'
+                with open(image_path, 'wb') as f:
+                    f.write(icon.content)
+                image1 = Image.open(image_path)
+                image1 = image1.resize((350, 350),Image.ANTIALIAS)
+                base.paste(image1, (100, 150))
+            else:
+                text = '【图标获取失败】'
+                d.text((200,200), text, font=fnt, fill=gray_color)
+
+            # ====================================
+            # 基本信息
+            text = str(clan_dict['name'])
+            d.text((890,110), text, font=fnt, fill=fill_black)
+            text = str(clan_dict['tag'])
+            d.text((890,210), text, font=fnt, fill=fill_black)
+            text = str(len(clan_dict['memberList']))
+            d.text((890,305), text, font=fnt, fill=fill_black)
+            text = str(clan_dict['warLeague']['name'])
+            if text == 'Unranked':
+                text = '未排位'
+            elif text.startswith('Bronze'):
+                text = '青铜' + get_roman_number(text)
+            elif text.startswith('Silver'):
+                text = '白银' + get_roman_number(text)
+            elif text.startswith('Gold'):
+                text = '黄金' + get_roman_number(text)
+            elif text.startswith('Crystal'):
+                text = '水晶' + get_roman_number(text)
+            elif text.startswith('Master'):
+                text = '大师' + get_roman_number(text)
+            elif text.startswith('Champion'):
+                text = '冠军' + get_roman_number(text)
+            elif text.startswith('Titan'):
+                text = '泰坦' + get_roman_number(text)
+            elif text.startswith('Legend'):
+                text = '传奇'
+            d.text((890,400), text, font=fnt, fill=fill_black)
+
+            text = '主' + str(clan_dict['clanPoints']) + '/夜' + str(clan_dict['clanVersusPoints'])
+            d.text((1840,110), text, font=fnt, fill=fill_black)
+            text = str(clan_dict['type'])
+            if text == 'inviteOnly':
+                text = '只有被批准才能加入'
+            elif text == 'closed':
+                text = '不可加入'
+            elif text == 'open':
+                text = '任何人都可加入'
+            d.text((1840,210), text, font=fnt, fill=fill_black)
+            text = '主' + str(clan_dict['requiredTrophies']) + '/夜' + str(clan_dict['requiredVersusTrophies'])
+            d.text((1840,305), text, font=fnt, fill=fill_black)
+            text = '主' + str(clan_dict['requiredTownhallLevel'])
+            d.text((1900,400), text, font=fnt, fill=fill_black)
+
+            # ====================================
+            # 成员信息
+            first_line = 820
+            space = 52.9
+            index = 0
+            level_14 = 0
+            level_13 = 0
+            level_12 = 0
+            level_11 = 0
+            level_10 = 0
+            level_9 = 0
+
+            for member in clan_dict['memberList']:
+                user_name = member['name']
+                if len(user_name) > 6:
+                    user_name = user_name[:6] + '…'
+                user_tag = member['tag']
+                user_level = '（获取失败）'
+                user_donation = member['donations']
+                user_recieve = member['donationsReceived']
+                user_win = '（获取失败）'
+                
+                user_url = "https://api.clashofclans.com/v1/players/%23" + user_tag[1:]
+                user_res = requests.get(url=user_url, params=params)
+                if user_res.status_code == 200:
+                    user_dict = json.loads(user_res.text)
+                    if user_dict['townHallLevel'] == 14:
+                        level_14 += 1
+                    if user_dict['townHallLevel'] == 13:
+                        level_13 += 1
+                    if user_dict['townHallLevel'] == 12:
+                        level_12 += 1
+                    if user_dict['townHallLevel'] == 11:
+                        level_11 += 1
+                    if user_dict['townHallLevel'] == 10:
+                        level_10 += 1
+                    if user_dict['townHallLevel'] <= 9:
+                        level_9 += 1
+                    user_level = str(user_dict['townHallLevel']) + '本'
+                    if user_dict.__contains__('townHallWeaponLevel'):
+                        user_level += str(user_dict['townHallWeaponLevel']) + '星'
+                    user_win = str(user_dict['attackWins'])
+
+                d.text((80,first_line + space * index), user_name, font=fnt2, fill=fill_black)
+                d.text((350,first_line + space * index), user_tag, font=fnt2, fill=fill_black)
+                d.text((700,first_line + space * index), user_level, font=fnt2, fill=fill_black)
+
+                d.text((935,first_line + space * index), '%6d' % (user_donation), font=fnt2, fill=fill_black)
+                d.text((1055,first_line + space * index), '/', font=fnt2, fill=fill_black)
+                d.text((1080,first_line + space * index), '%-6d' % (user_recieve), font=fnt2, fill=fill_black)
+
+                d.text((1300,first_line + space * index), user_win, font=fnt2, fill=fill_black)
+                d.text((1500,first_line + space * index), '（未启用）', font=fnt2, fill=fill_black)
+                index += 1
+
+            d.text((700,533), str(level_14), font=fnt, fill=fill_black)
+            d.text((1000,533), str(level_13), font=fnt, fill=fill_black)
+            d.text((1300,533), str(level_12), font=fnt, fill=fill_black)
+            d.text((1600,533), str(level_11), font=fnt, fill=fill_black)
+            d.text((1900,533), str(level_10), font=fnt, fill=fill_black)
+            d.text((2350,533), str(level_9), font=fnt, fill=fill_black)
+
+            out = Image.alpha_composite(base, txt)
+            out = transparence2white(out)
+            file_path = 'data/clash/temp/clan_' + tag + '.png'
+            out.save(file_path)
+            return '完成'
         elif res.status_code == 404:
             return '部落#' + tag + '不存在'
         else:
+            print(res.text)
             return '爬虫已失效（code：' + str(res.status_code) + '），请前往官方群反馈给主人，群号可以通过添加小柒好友获得'
 
-    def handle(self, message, group_id, qq, group_config, user_config):
+    async def handle(self, bot, event, message, group_id, qq, group_config, user_config):
         need_reply = False
         reply_text = ''
         reply_image = ''
 
         message = message.replace(' ', '').lower()
+
+        clan_wait_reply = '部落查询可能需要几分钟的时间，请耐心等待。\n请勿利用频繁部落查询卡死小柒，一旦查到如此情况直接拉黑。'
+        clan_refuse = '目前访问量过高，自动拒绝查询'
 
         if message == 'coc鱼情' or message == 'coc鱼':
             need_reply = True
@@ -763,7 +953,11 @@ class Clash:
         elif message == 'coc部落':
             need_reply = True
             if len(user_config['config']['clash_tag']) > 0:
+                await bot.send(event, clan_wait_reply)
                 reply_text = self.clan(user_config['config']['clash_tag'][user_config['config']['main_clash_tag']])
+                if reply_text == '完成':
+                    reply_image = 'data/clash/temp/clan_' + user_config['config']['clash_tag'][user_config['config']['main_clash_tag']] + '.png'
+                    reply_text = ''
             else:
                 reply_text = '你目前没有绑定部落标签'
         elif message == 'coc玩家':
@@ -776,6 +970,7 @@ class Clash:
             else:
                 reply_text = '你目前没有绑定玩家标签'
         elif message[:6] == 'coc部落#':
+            await bot.send(event, clan_wait_reply)
             need_reply = True
             tag = message[6:]
             reply_text = self.clan(tag)
@@ -789,7 +984,11 @@ class Clash:
         elif message[:5] == 'coc部落' and message[5:].isdigit():
             index = int(message[5:]) - 1
             if len(user_config['config']['clash_tag']) > index >= 0:
+                await bot.send(event, clan_wait_reply)
                 reply_text = self.clan(user_config['config']['clash_tag'][index])
+                if reply_text == '完成':
+                    reply_image = 'data/clash/temp/clan_' + user_config['config']['clash_tag'][user_config['config']['main_clash_tag']] + '.png'
+                    reply_text = ''
             else:
                 reply_text = '没有序号对应的标签'
             need_reply = True
@@ -808,7 +1007,11 @@ class Clash:
             new_user = dataManage.read_user(new_qq)
             need_reply = True
             if len(new_user['config']['clash_tag']) > 0:
+                await bot.send(event, clan_wait_reply)
                 reply_text = self.clan(new_user['config']['clash_tag'][new_user['config']['main_clash_tag']])
+                if reply_text == '完成':
+                    reply_image = 'data/clash/temp/clan_' + user_config['config']['clash_tag'][user_config['config']['main_clash_tag']] + '.png'
+                    reply_text = ''
             else:
                 reply_text = '你目前没有绑定部落标签'
         elif message[:6] == 'coc玩家@' and message[6:].isdigit():

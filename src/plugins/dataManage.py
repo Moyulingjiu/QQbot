@@ -542,17 +542,17 @@ def read_user(qq):
 
             if pair[0] == 'date':
                 user['date'] = pair[1]
-            if pair[0] == 'clashUserTag':
+            elif pair[0] == 'clashUserTag':
                 for i in range(1, len(pair)):
                     if len(pair[i]) > 0:
                         user['config']['clash_user_tag'].append(pair[i].upper())
-            if pair[0] == 'mainClashUserTag' and pair[1].isdigit():
+            elif pair[0] == 'mainClashUserTag' and pair[1].isdigit():
                 user['config']['main_clash_user_tag'] = int(pair[1])
-            if pair[0] == 'clashTag':
+            elif pair[0] == 'clashTag':
                 for i in range(1, len(pair)):
                     if len(pair[i]) > 0:
                         user['config']['clash_tag'].append(pair[i].upper())
-            if pair[0] == 'mainClashTag' and pair[1].isdigit():
+            elif pair[0] == 'mainClashTag' and pair[1].isdigit():
                 user['config']['main_clash_tag'] = int(pair[1])
             elif pair[0] == 'ai':
                 if pair[1] == 'true':
@@ -593,6 +593,7 @@ def save_user(qq, user):
             f.write('=' + i)
         f.write('\n')
         f.write('date=' + user['date'] + '\n')
+
 
 
 def read_statistics():

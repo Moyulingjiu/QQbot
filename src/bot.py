@@ -47,12 +47,21 @@ def watcher_bot():
             asyncio.set_event_loop(loops)
             tasks = [watcher.static_message(bot)]
             loops.run_until_complete(asyncio.wait(tasks))
+        
+        if now.hour == 12 and now.minute == 5:  # 每日健康打卡
+            loops = asyncio.new_event_loop()
+            asyncio.set_event_loop(loops)
+            tasks = [watcher.daily_health_report(bot)]
+            loops.run_until_complete(asyncio.wait(tasks))
 
         if now.hour == 0 and now.minute == 0:  # 每日零点重置数据
             loops = asyncio.new_event_loop()
             asyncio.set_event_loop(loops)
             tasks = [watcher.new_day(bot), watcher.reset_clock(bot)]
             loops.run_until_complete(asyncio.wait(tasks))
+        
+        if now.hour == 3 and now.minute == 0:  # 每日凌晨3点刷新
+            message_processing.clash.set_refresh()
 
         # 每分钟进行打卡检查
         loops = asyncio.new_event_loop()

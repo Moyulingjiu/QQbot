@@ -145,3 +145,15 @@ class DriftingBottle:
         self.bottle['message'].remove(data)
         dataManage.save_obj(self.bottle, 'data/Function/Bottle/bottle')
         return data['text'] + '——' + data['date']
+
+
+# ==========================================================
+# 随机字符
+def random_char(length):
+    origin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+
+    salt = ''
+    for i in range(length):
+        salt += random.choice(origin)
+
+    return salt

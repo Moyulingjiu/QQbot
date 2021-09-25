@@ -1,6 +1,7 @@
 import datetime
 import os
 import random
+import base64
 
 from mirai import Plain, At, AtAll, Image
 from mirai.models.message import FlashImage
@@ -895,6 +896,45 @@ class MessageProcessing:
                 need_reply = True
                 dataManage.save_group(self.users[qq]['buffer']['buffer'],
                                       self.groups[self.users[qq]['buffer']['buffer']])
+            elif self.users[qq]['buffer']['id'] == 9:  # XMU服务条款同意
+                need_reply = True
+                if message == '同意':
+                    reply_text = '很高兴您订阅“厦大自动健康打卡”服务，请问您的厦大统一身份认证账号是什么？'
+                    reset_buffer = False
+                    self.users[qq]['buffer']['id'] = 10
+                    self.users[qq]['buffer']['buffer'] = {
+                        'account': '',
+                        'password': ''
+                    }
+                    dataManage.save_user(qq, self.users[qq])
+                else:
+                    reply_text = '已取消为您取消订阅“厦大自动健康打卡”服务'
+            elif self.users[qq]['buffer']['id'] == 10:  # XMU服务账号
+                need_reply = True
+                reply_text = '请问您的厦大统一身份认证密码是什么？（请再次确保您在私聊！）'
+                reset_buffer = False
+                self.users[qq]['buffer']['id'] = 11
+                self.users[qq]['buffer']['buffer'] = {
+                    'account': message,
+                    'password': ''
+                }
+                dataManage.save_user(qq, self.users[qq])
+            elif self.users[qq]['buffer']['id'] == 11:  # XMU服务密码
+                need_reply = True
+                reply_text = '好的~已为您记录下来了，将会在每天12:05自动打卡，并私聊告诉你打卡的结果，请确保有添加' + self.get_name() + '的好友'
+                reply_text += '\n你可以通过输入“AsYNARTvgt”来退订此服务'
+                self.users[qq]['buffer']['id'] = 11
+                self.users[qq]['buffer']['buffer']['password'] = message
+
+                password_byte = bytes(message, encoding = "utf8")
+                ciphertext = base64.b64encode(password_byte)
+
+                xmu = dataManage.load_obj('lib/account')
+                xmu[qq] = {
+                    'account': self.users[qq]['buffer']['buffer']['account'],
+                    'password': ciphertext
+                }
+                dataManage.save_obj(xmu, 'lib/account')
 
             if reset_buffer:
                 self.users[qq]['buffer']['id'] = 0
@@ -1091,7 +1131,7 @@ class MessageProcessing:
         
         # 禁言操作
         if mode == 1 and group_right != 2:
-            if message[:2] == '禁言':
+            if message[:2] == '禁言' and len(at_list) > 0:
                 need_reply = True
                 mute_seconds = 60 * 10
 
@@ -1173,15 +1213,16 @@ class MessageProcessing:
                         elif char != '钟' and char != '时':
                             valid = False
                             break
-                    if not valid:
+                    if not valid and message_plain[2:].isdigit():
+                        mute_seconds = int(message_plain[2:]) * 60
+                    elif not valid:
                         mute_seconds = 60 * 10
 
-                if mute_seconds < 600:
-                    mute_seconds = 600
+                if mute_seconds < 60:
+                    mute_seconds = 60
                 if mute_seconds > 30 * 24 * 3600:
                     mute_seconds = 30 * 24 * 3600
                 number = 0
-                print(mute_seconds)
 
                 for qq in at_list:
                     if str(event.sender.group.permission) != 'Permission.Member':
@@ -1198,6 +1239,50 @@ class MessageProcessing:
                     reply_text = '成功禁言' + str(number) + '人'
                 elif reply_text == '':
                     reply_text = '啊嘞？好像全是管理员或群主呢'
+            elif message[:4] == '解除禁言' and len(at_list) > 0:
+                if str(event.sender.group.permission) != 'Permission.Member':
+                    need_reply = True
+                    number = 0
+                    for qq in at_list:
+                        member = await bot.get_group_member(group_id, qq.target)
+                        if member is not None:
+                            await bot.unmute(member_id = qq.target, target = group_id)
+                            number += 1
+                    reply_text = '成功解除' + str(number) + '人禁言'
+            elif message == '开启全体禁言':
+                if str(event.sender.group.permission) != 'Permission.Member':
+                    await bot.mute_all(target = group_id)
+                    need_reply = True
+                    reply_text = '已开启全体禁言'
+            elif message == '解除全体禁言' or message == '关闭全体禁言':
+                if str(event.sender.group.permission) != 'Permission.Member':
+                    await bot.unmute_all(target = group_id)
+                    need_reply = True
+                    reply_text = '已关闭全体禁言'
+
+        # -----------------------------------------------------------------------------------
+        # 定制功能
+        if message == 'XKoTVtvG2P':
+            need_reply = True
+            reply_text = '欢迎订阅' + self.get_name() + '的“厦大自动健康打卡”服务，请确保你了解以下需知：'
+            reply_text += '\n1.不得利用本软件进行瞒报，以此造成的责任应由使用者自行承担，如有前往其他城市，请及时手动登陆打卡系统更新相关信息'
+            reply_text += '\n2.使用者的厦大账号密码，将会采用加密算法加密后存储到数据库，开发者可以使用特定的解密工具看到你的密码，但是我们保证不会如此做或者泄露你的密码，也不会向任何人透露加密密钥，信不信任由你自行决定。'
+            reply_text += '\n3.请确保你目前在私聊告诉小柒密码，而不是在群聊之中，因此造成的损失应该由使用者自行承担'
+            reply_text += '\n4.自动打卡不保证一直有效，或许接口更改，服务器忙等造成打卡失败，应配合辅导员的提醒自行检查。（由于学业原因不一定及时更新接口）'
+            reply_text += '\n----------------------------'
+            reply_text += '\n回复“同意”表示你同意以上服务条款，其余任何回复表示不同意'
+            self.users[qq]['buffer']['id'] = 9
+            dataManage.save_user(qq, self.users[qq])
+        elif message == 'AsYNARTvgt':
+            need_reply = True
+            xmu = dataManage.load_obj('lib/account')
+            if xmu.__contains__(qq):
+                reply_text = '已为您取消订阅“厦大自动健康打卡”服务'
+                del xmu[qq]
+                dataManage.save_obj(xmu, 'lib/account')
+            else:
+                reply_text = '您没有订阅“厦大自动健康打卡”服务'
+
 
         # -----------------------------------------------------------------------------------
         # 通过名字唤醒
@@ -1429,6 +1514,13 @@ class MessageProcessing:
                     reply_text = self.bottle.throw(qq, text)
                     need_reply = True
 
+            elif message[:5] == '随机字符串' and message_len > 5:
+                text = message[5:].strip()
+                if text.isdigit():
+                    need_reply = True
+                    reply_text = BaseFunction.random_char(int(text))
+
+
             if need_reply:
                 self.statistics['base_function'] += 1
                 dataManage.save_statistics(self.statistics)
@@ -1559,7 +1651,7 @@ class MessageProcessing:
         # -----------------------------------------------------------------------------------
         # 部落冲突
         if not need_reply and mode == 1 and self.groups[group_id]['config']['clash']:
-            need_reply, reply_text, reply_image = self.clash.handle(message, group_id, qq, self.groups[group_id],
+            need_reply, reply_text, reply_image = await self.clash.handle(bot, event, message, group_id, qq, self.groups[group_id],
                                                                     self.users[qq])
             if need_reply:
                 merge_reply = True
@@ -1885,8 +1977,8 @@ class MessageProcessing:
             reply = '有一成员（' + str(event.member.id) + '）修改了群名片'
             reply += '\n原始名字：' + event.origin
             if event.origin == '':
-                reply += event.member.member_name
+                reply += event.member.member_name + '（QQ昵称）'
             reply += '\n新名字：' + event.current
             if event.current == '':
-                reply += event.member.member_name
+                reply += event.member.member_name + '（QQ昵称）'
             await bot.send_group_message(event.group.id, reply)
