@@ -124,7 +124,6 @@ async def reset_clock(bot):
     dataManage.save_clock(clock)
 
 
-
 async def clock_check(bot, hour, minute):
     today = str(datetime.date.today())
     clock = dataManage.read_clock()
@@ -134,6 +133,10 @@ async def clock_check(bot, hour, minute):
             del_key.append(group_id)
             continue
         member_list_origin = await bot.member_list(group_id)
+        if member_list_origin is None:
+            del_key.append(group_id)
+            continue
+
         member_list = {}
         for member in member_list_origin.data:
             if not member_list.__contains__(member.id):
@@ -173,6 +176,7 @@ async def static_message(bot):
     text += '\n' + config['name'] + '仍然在稳定运行'
     await bot.send_friend_message(master, text)
     return
+
 
 async def daily_health_report(bot):
     xmu = dataManage.load_obj('lib/account')
@@ -248,3 +252,28 @@ async def daily_health_report(bot):
             reply += '\n因为未知原因打卡失败。\nDEBUG日志：' + result
         if member is not None:
             await bot.send_friend_message(key, reply)
+
+
+async def muteall_schedule(bot, hour, minute):
+    muteall_schedule = dataManage.load_obj('data/Function/muteall')  # 禁言计划
+    del_list = []
+
+    for group_id, value in muteall_schedule.items():
+        group = await bot.get_group(group_id)
+        if group is None:
+            del_list.append(group_id)
+            continue
+
+        if value['hour1'] == hour and value['minute1'] == minute:
+            if await bot.is_admin(group):
+                await bot.send(group, '按照计划开启全体禁言——由群成员' + str(value['id']) + '编辑')
+                await bot.mute_all(group_id)
+            else:
+                await bot.send(group, '按照计划开启全体禁言，但小柒权限不足——由群成员' + str(value['id'] + '编辑'))
+        if value['hour2'] == hour and value['minute2'] == minute:
+            if await bot.is_admin(group):
+                await bot.send(group, '按照计划关闭全体禁言——由群成员' + str(value['id']) + '编辑')
+                await bot.unmute_all(group_id)
+            else:
+                await bot.send(group, '按照计划关闭全体禁言，但小柒权限不足——由群成员' + str(value['id'] + '编辑'))
+

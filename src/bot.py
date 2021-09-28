@@ -66,7 +66,7 @@ def watcher_bot():
         # 每分钟进行打卡检查
         loops = asyncio.new_event_loop()
         asyncio.set_event_loop(loops)
-        tasks = [watcher.clock_check(bot, now.hour, now.minute)]
+        tasks = [watcher.clock_check(bot, now.hour, now.minute), watcher.muteall_schedule(bot, now.hour, now.minute)]
         loops.run_until_complete(asyncio.wait(tasks))
         time.sleep(60)
 

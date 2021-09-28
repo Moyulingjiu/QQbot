@@ -130,6 +130,7 @@ def get_html(url, data=None):
         'Accept-Encoding': 'gzip, deflate, sdch',
         'Accept-Language': 'zh-CN,zh;q=0.8',
         'Connection': 'keep-alive',
+        # 'Connection': 'close',
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.235'
     }
     # 设定超时时间，取随机数是因为防止被网站认为是爬虫
@@ -974,6 +975,9 @@ class Clash:
             need_reply = True
             tag = message[6:]
             reply_text = self.clan(tag)
+            if reply_text == '完成':
+                reply_image = 'data/clash/temp/clan_' + user_config['config']['clash_tag'][user_config['config']['main_clash_tag']] + '.png'
+                reply_text = ''
         elif message[:6] == 'coc玩家#':
             need_reply = True
             tag = message[6:]

@@ -7,7 +7,7 @@ from plugins import getNow
 from plugins import logManage
 
 
-key_allow = [
+key_allow: list = [
     '#', '*',
     ',', '，',
     '.', '。',
@@ -21,13 +21,13 @@ key_allow = [
 ]
 
 
-def save_obj(obj, name):
+def save_obj(obj, name: str) -> None:
     filePath = name + '.data'
     with open(filePath, 'wb') as f:
         pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
 
 
-def load_obj(name):
+def load_obj(name: str) -> dict:
     filePath = name + '.data'
     if not os.path.exists(filePath):
         return {}

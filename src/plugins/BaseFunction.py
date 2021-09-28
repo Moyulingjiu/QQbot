@@ -1,10 +1,13 @@
 import random
 import datetime
 import linecache
+from PIL import Image, ImageDraw, ImageFont
+import requests
+from bs4 import BeautifulSoup
 
 from plugins import dataManage
 from plugins import getNow
-
+from plugins import Clash
 
 # ==========================================================
 # 硬币
@@ -20,6 +23,46 @@ def coin():
 def dice():
     return '你丢出的点数是：' + str(random.randint(1, 6))
 
+
+# ==========================================================
+# 微博热搜
+def getHot():
+    url = 'https://s.weibo.com/top/summary/'
+    timeout = random.choice(range(80, 180))
+    header = {
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Accept-Language': 'zh-CN,zh;q=0.9',
+      'Cache-Control': 'max-age=0',
+      'Connection': 'keep-alive',
+      'Cookie': 'SUB=_2AkMWDOpbf8NxqwJRmPETzWzraIVzzg3EieKgUBuAJRMxHRl-yT9jqmAutRB6PYzEtE_p5IYGJyYeNqcLVtTfJ0SCqJhV; SUBP=0033WrSXqPxfM72-Ws9jqgMF55529P9D9WFEZnhsbjpNJ4BDcsuh_zEe; SINAGLOBAL=2647896765706.4746.1632658796711; _s_tentry=-; Apache=2912749181224.8384.1632727196301; ULV=1632727196310:2:2:2:2912749181224.8384.1632727196301:1632658796723; WBStorage=6ff1c79b|undefined',
+      'Host': 's.weibo.com',
+      'sec-ch-ua': '"Chromium";v="94", "Google Chrome";v="94", ";Not A Brand";v="99"',
+      'sec-ch-ua-mobile': '?0',
+      'sec-ch-ua-platform': '"Windows"',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-User': '?1',
+      'Upgrade-Insecure-Requests': '1',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.54 Safari/537.36'
+    }
+    strhtml = requests.get(url, headers=header, timeout=timeout)
+    soup = BeautifulSoup(strhtml.text,'html.parser')
+
+    data = soup.select('#pl_top_realtimehot > table > tbody > tr > td.td-02 > a')
+
+    result = ''
+    for index in range(0, 7):
+        i = data[index]
+        link = i.get('href')
+        contain = i.get_text()
+        if index != 0:
+            result +=  '\n' + str(index) + ':' + contain
+        else:
+            result += '微博置顶:' + contain
+
+    return result
 
 # ==========================================================
 # 运势
@@ -157,3 +200,104 @@ def random_char(length):
         salt += random.choice(origin)
 
     return salt
+
+
+# 
+# 生成模块列表
+def paste_switch(switch: bool, back: Image, image_on: Image, image_off: Image, left: int, top: int) -> Image:
+    if switch:
+        back.paste(image_on, (left, top))
+    else:
+        back.paste(image_off, (left, top))
+    return back
+
+def generate_module_list(group_id: int, group_config: dict) -> str:
+    base = Image.open('data/__IMAGE__/模块列表.png').convert('RGBA')
+    out_file = 'data/__TEMP__/' + str(group_id) + '.png'
+    txt = Image.new('RGBA', base.size, (255,255,255,0))
+    d = ImageDraw.Draw(txt)
+
+    font_size = 20
+    fnt = ImageFont.truetype('data/Font/FZHTJT.TTF', font_size)
+    fill_black = '#000000'
+
+    image_on = Image.open('data/__IMAGE__/on.png')
+    image_on = Clash.transparence2white(image_on)
+    image_on = image_on.resize((50, 50),Image.ANTIALIAS)
+    image_off = Image.open('data/__IMAGE__/off.png')
+    image_off = Clash.transparence2white(image_off)
+    image_off = image_off.resize((50, 50),Image.ANTIALIAS)
+
+    index = 0
+    space = 89
+    space2 = 84
+    first_line = 100
+    first_left = 450
+    second_left = 950
+    third_left = 1490
+
+    base = paste_switch(group_config['config']['mute'], base, image_on, image_off, first_left, first_line + space * index)
+    index += 1
+    base = paste_switch(group_config['config']['limit'], base, image_on, image_off, first_left, first_line + space * index)
+    index += 1
+    base = paste_switch(group_config['config']['welcome'], base, image_on, image_off, first_left, first_line + space * index)
+    index += 1
+    base = paste_switch(group_config['config']['flash'], base, image_on, image_off, first_left, first_line + space * index)
+    index += 1
+    base = paste_switch(group_config['config']['member_wather'], base, image_on, image_off, first_left, first_line + space * index)
+    index += 1
+    key_allow = group_config['config']['key']
+    text = ''
+    if len(key_allow) == 0:
+        text = '（没有任何触发词）'
+    for key in key_allow:
+        text += key + ' '
+    d.text((155,554), text, font=fnt, fill=fill_black)
+    index += 1
+    base = paste_switch(group_config['config']['automatic'], base, image_on, image_off, first_left, 610)
+    text = group_config['config']['pass']
+    d.text((130,653), text, font=fnt, fill=fill_black)
+
+    index = 0
+    base = paste_switch(group_config['config']['nudge'], base, image_on, image_off, second_left, first_line + space2 * index)
+    index += 1
+    base = paste_switch(group_config['config']['curse'], base, image_on, image_off, second_left, first_line + space2 * index)
+    index += 1
+    base = paste_switch(group_config['config']['image'], base, image_on, image_off, second_left, first_line + space2 * index)
+    index += 1
+    base = paste_switch(group_config['config']['ai'], base, image_on, image_off, second_left, first_line + space2 * index)
+    index += 1
+    base = paste_switch(group_config['config']['TRPG'], base, image_on, image_off, second_left, first_line + space2 * index)
+    index += 1
+    base = paste_switch(group_config['config']['clash'], base, image_on, image_off, second_left, first_line + space2 * index)
+    index += 1
+    base = paste_switch(group_config['config']['repeat'], base, image_on, image_off, second_left, first_line + space2 * index)
+    index += 1
+    base = paste_switch(group_config['config']['autonomous_reply'], base, image_on, image_off, second_left, first_line + space2 * index)
+
+    index = 0
+    base = paste_switch(group_config['config']['RPG'], base, image_on, image_off, third_left, 115)
+    index += 1
+    base = paste_switch(group_config['config']['limit_RPG'], base, image_on, image_off, third_left, 220)
+
+    service_left = 1030
+    service_top = 360
+    service_space = 30
+    service_index = 0
+
+    muteall_schedule = dataManage.load_obj('data/Function/muteall')  # 禁言计划
+    if muteall_schedule.__contains__(group_id):
+        text = '定时全体禁言服务（%2d:%2d——%2d:%2d）' % (
+                    muteall_schedule[group_id]['hour1'],
+                    muteall_schedule[group_id]['minute1'],
+                    muteall_schedule[group_id]['hour2'],
+                    muteall_schedule[group_id]['minute2']
+                )
+        d.text((service_left,service_top + service_space * service_index), text, font=fnt, fill=fill_black)
+        service_index += 1
+
+
+    out = Image.alpha_composite(base, txt)
+    # out.show()
+    out.save(out_file)
+    return out_file

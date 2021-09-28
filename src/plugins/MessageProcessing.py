@@ -20,7 +20,6 @@ from plugins import logManage
 from plugins import operator
 from plugins import talk
 from plugins import weather
-from plugins import weiboHot
 
 
 async def send_message(bot, event, mode, merge_reply, reply_text, reply_image, need_at, at_qq):
@@ -100,6 +99,23 @@ def bool_string(switch):
     else:
         return '已关闭'
 
+# 时间预处理
+def time_pretreatment(time: str) -> str:
+    time = time.replace('\\', '').strip()
+    if len(time) == 2:
+        if time == '00':
+            return '0'
+        if time[0] == '0' and time[1] != '0':
+            return time[1]
+    return time
+
+# 合法的时间
+def valid_time(hour: int, minute: int) -> bool:
+    if not (hour >= 0 and hour < 24):
+        return False
+    if not (minute >= 0 and minute < 60):
+        return False
+    return True
 
 class MessageProcessing:
     config = {}
@@ -194,6 +210,7 @@ class MessageProcessing:
         reply_image = ''
         need_at = False
         at_qq = 0
+        muteall_schedule = dataManage.load_obj('data/Function/muteall')  # 禁言计划
 
         if message_code == 'nudge on' or message == '开启戳一戳':
             if not self.groups[group_id]['config']['nudge']:
@@ -582,6 +599,35 @@ class MessageProcessing:
             await send_message(bot, event, mode, merge_reply, reply_text, reply_image, need_at, at_qq)
             return
 
+        elif message_code == 'muteall schedule on' or message == '开启定时全员禁言' or message == '开启定时全体禁言':
+            if not muteall_schedule.__contains__(group_id):
+                if group_right < 2 or right < 2:
+                    self.users[qq]['buffer']['id'] = 12
+                    self.users[qq]['buffer']['buffer'] = group_id
+                    dataManage.save_user(qq, self.users[qq])
+                    await bot.send(event, '欢迎订阅“定时全体禁言”服务！请用以下格式告诉我您的开始和结束时间：\nxx:xx xx:xx（采用24小时制，不足两位补0）\n例如您想从凌晨两点半禁言到早上六点，可以输入：“02:30 06:00”')
+                else:
+                    await bot.send(event, '权限不足，需要群主或群管理')
+            else:
+                await bot.send(event, '现在已有了定时全员禁言的计划，不可重复添加。当前计划：%2d：%2d—%2d：%2d' % (
+                    muteall_schedule[group_id]['hour1'],
+                    muteall_schedule[group_id]['minute1'],
+                    muteall_schedule[group_id]['hour2'],
+                    muteall_schedule[group_id]['minute2']
+                ))
+            return
+        elif message_code == 'muteall schedule off' or message == '关闭定时全员禁言' or message == '关闭定时全体禁言':
+            if muteall_schedule.__contains__(group_id):
+                if group_right < 2 or right < 2:
+                    del muteall_schedule[group_id]
+                    dataManage.save_obj(muteall_schedule, 'data/Function/muteall')
+                    await bot.send(event, '已成功关闭')
+                else:
+                    await bot.send(event, '权限不足，需要群主或群管理')
+            else:
+                await bot.send(event, '现在没有定时全员禁言的计划')
+            return
+
         return 1
 
     # 0：朋友消息，1：群消息，2：临时消息
@@ -735,30 +781,7 @@ class MessageProcessing:
         elif message.replace('查看', '').replace('查询', '') == '开关列表' or message.replace('查看', '').replace('查询',
                                                                                                         '') == '模块列表':
             if mode == 1:
-                reply_text = '群<' + event.sender.group.get_name() + '>模块开关情况如下：'
-                reply_text += '\n输入“模块管理帮助”获取所有指令的详细说明'
-                reply_text += '\n格式：”字段【操作指令】：状态“\n'
-                reply_text += '\n是否禁言【mute/unmute】：' + bool_string(self.groups[group_id]['config']['mute'])
-                reply_text += '\n是否限制（限制模式下仅响应艾特消息）【开启/关闭限制模式】：' + bool_string(self.groups[group_id]['config']['limit'])
-                reply_text += '\n是否开启戳一戳【开启/关闭戳一戳】：' + bool_string(self.groups[group_id]['config']['nudge'])
-                reply_text += '\n是否开启RPG游戏【开启/关闭游戏】：' + bool_string(self.groups[group_id]['config']['RPG'])
-                reply_text += '\n是否开启RPG游戏限制模式【开启/关闭游戏限制模式】：' + bool_string(
-                    self.groups[group_id]['config']['limit_RPG'])
-                reply_text += '\n是否开启脏话【开启/关闭脏话】：' + bool_string(self.groups[group_id]['config']['curse'])
-                reply_text += '\n是否开启P站图片搜索【开启/关闭图片搜索】：' + bool_string(self.groups[group_id]['config']['image'])
-                reply_text += '\n是否开启ai（时不时自主回复）【开启/关闭智能回复】：' + bool_string(self.groups[group_id]['config']['ai'])
-                reply_text += '\n是否开启群内自定义回复【开启/关闭自定义回复】：' + bool_string(
-                    self.groups[group_id]['config']['autonomous_reply'])
-                reply_text += '\n是否开启自动加一【开启/关闭自动加一】：' + bool_string(self.groups[group_id]['config']['repeat'])
-                reply_text += '\n是否开启骰娘【开启/关闭骰娘】：' + bool_string(self.groups[group_id]['config']['TRPG'])
-                reply_text += '\n是否开启部落冲突数据查询【开启/关闭部落冲突查询】：' + bool_string(self.groups[group_id]['config']['clash'])
-                reply_text += '\n启用的触发词如下【key add/remove/clear】：'
-                if len(key_allow) == 0:
-                    reply_text += '未启用任何触发词，英文指令不必加任何前缀'
-                else:
-                    for i in key_allow:
-                        reply_text += i
-                reply_text += '\n是否开启新成员欢迎【开启/关闭/设置新人欢迎】：' + bool_string(self.groups[group_id]['config']['welcome'])
+                reply_image = BaseFunction.generate_module_list(group_id, self.groups[group_id])
             else:
                 reply_text = '用户<' + name + '>模块开关情况如下：'
                 reply_text += '\n输入“模块管理帮助”获取所有指令的详细说明'
@@ -923,8 +946,6 @@ class MessageProcessing:
                 need_reply = True
                 reply_text = '好的~已为您记录下来了，将会在每天12:05自动打卡，并私聊告诉你打卡的结果，请确保有添加' + self.get_name() + '的好友'
                 reply_text += '\n你可以通过输入“AsYNARTvgt”来退订此服务'
-                self.users[qq]['buffer']['id'] = 11
-                self.users[qq]['buffer']['buffer']['password'] = message
 
                 password_byte = bytes(message, encoding = "utf8")
                 ciphertext = base64.b64encode(password_byte)
@@ -935,6 +956,55 @@ class MessageProcessing:
                     'password': ciphertext
                 }
                 dataManage.save_obj(xmu, 'lib/account')
+            elif self.users[qq]['buffer']['id'] == 12:  # 订阅定时全局禁言服务
+                need_reply = True
+                get_time = True
+                value = {
+                    'id': qq,
+                    'hour1': 0,
+                    'minute1': 0,
+                    'hour2': 0,
+                    'minute2': 0
+                }
+                list1 = message.replace('：', ':').split(' ')
+                if len(list1) != 2:
+                    get_time = False
+                else:
+                    list1_1 = list1[0].split(':')
+                    list1_2 = list1[1].split(':')
+                    if len(list1_1) != 2 or len(list1_2) != 2:
+                        get_time = False
+                    else:
+                        list1_1[0] = time_pretreatment(list1_1[0])
+                        list1_1[1] = time_pretreatment(list1_1[1])
+                        list1_2[0] = time_pretreatment(list1_2[0])
+                        list1_2[1] = time_pretreatment(list1_2[1])
+                        if not list1_1[0].isdigit() or not list1_1[1].isdigit or not list1_2[0].isdigit() or not list1_2[1].isdigit:
+                            get_time = False
+                        else:
+                            value['hour1'] = int(list1_1[0])
+                            value['minute1'] = int(list1_1[1])
+                            value['hour2'] = int(list1_2[0])
+                            value['minute2'] = int(list1_2[1])
+                            if not valid_time(value['hour1'], value['minute1']) or not valid_time(value['hour2'], value['minute2']):
+                                get_time = False
+                
+                if not get_time:
+                    if message != '取消':
+                        reset_buffer = False
+                        await bot.send(event, '这好像不是一个正确的格式，你可以输入“取消”来取消创建。请再次告诉我时间：')
+                    else:
+                        await bot.send(event, '已为您取消创建')
+                else:
+                    muteall_schedule = dataManage.load_obj('data/Function/muteall')  # 禁言计划
+                    if value['hour1'] == value['hour2'] and value['minute1'] == value['minute2']:
+                        reset_buffer = False
+                        await bot.send(event, '这好像只有一分钟呢，你可以输入“取消”来取消创建。请再次告诉我时间：')
+                    else:
+                        muteall_schedule[group_id] = value
+                        dataManage.save_obj(muteall_schedule, 'data/Function/muteall')
+                        await bot.send(event, '创建成功！你可以输入“模块列表”来查看订阅的服务')
+                    
 
             if reset_buffer:
                 self.users[qq]['buffer']['id'] = 0
@@ -1328,6 +1398,7 @@ class MessageProcessing:
                 need_reply = True
             elif message == '模块管理帮助':
                 reply_image = command.help_modular()
+                reply_text = '您可以使用“模块列表”来查看开关状态'
                 need_reply = True
             elif message == '部落冲突查询帮助' or message.lower() == 'coc帮助':
                 reply_image = command.help_clash()
@@ -1478,7 +1549,7 @@ class MessageProcessing:
                 need_reply = True
 
             elif message == '微博热搜':
-                reply_text = weiboHot.getHot()
+                reply_text = BaseFunction.getHot()
                 need_reply = True
             elif message == '百度热搜':
                 reply_text = baidu.getHot()
@@ -1659,6 +1730,9 @@ class MessageProcessing:
             if need_reply:
                 self.statistics['clash'] += 1
                 dataManage.save_statistics(self.statistics)
+        if not need_reply and mode == 0 and message.startswith('coc'):
+            need_reply = True
+            reply_text = '暂不支持私聊查询，请在群聊内查询。后续会慢慢支持私聊查询。'
 
         # -----------------------------------------------------------------------------------
         # 群自己设定的关键词回复
