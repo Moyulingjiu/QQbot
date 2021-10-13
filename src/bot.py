@@ -1,9 +1,10 @@
 from mirai import Mirai, WebSocketAdapter
 from mirai import FriendMessage, GroupMessage, TempMessage
 from mirai import Plain, At, AtAll, Face
+from mirai.adapters import websocket
 from mirai.models.message import FlashImage
 from mirai.models.events import MemberJoinEvent, NewFriendRequestEvent, BotLeaveEventKick, BotInvitedJoinGroupRequestEvent, BotJoinGroupEvent
-from mirai.models.events import NudgeEvent, MemberJoinRequestEvent, MemberLeaveEventQuit, MemberLeaveEventKick, MemberCardChangeEvent
+from mirai.models.events import NudgeEvent, MemberJoinRequestEvent, MemberLeaveEventQuit, MemberLeaveEventKick, MemberCardChangeEvent, GroupRecallEvent
 
 # =============================================================
 # 需求类
@@ -144,6 +145,11 @@ if __name__ == '__main__':
     @bot.on(MemberCardChangeEvent)
     async def member_change(event: MemberCardChangeEvent):
         await message_processing.member_change(bot, event)
+    
+    # 群消息撤回
+    @bot.on(GroupRecallEvent)
+    async def member_change(event: GroupRecallEvent):
+        await message_processing.group_recall_message(bot, event)
 
     # ==========================================================
     # 启动机器人
@@ -158,5 +164,14 @@ if __name__ == '__main__':
     qq = bot.qq
     name = message_processing.get_name()
     logManage.log(getNow.toString(), name + '(' + str(qq) + ')初始化成功，开始运行！')
-
-    bot.run()  # 机器人启动
+    
+    while True:
+        try:
+            bot.run()  # 机器人启动
+        except websocket.exceptions.NetworkError:
+            print('网络错误')
+        except SystemExit:
+            print('通道意外关闭，自动重连')
+        except:
+            print('未知错误自动重连')
+        time.sleep(5)

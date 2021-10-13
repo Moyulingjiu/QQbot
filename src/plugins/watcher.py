@@ -132,6 +132,10 @@ async def clock_check(bot, hour, minute):
         if 'int' not in str(type(group_id)):
             del_key.append(group_id)
             continue
+        group = await bot.get_group(group_id)
+        if group is None:
+            del_key.append(group_id)
+            continue
         member_list_origin = await bot.member_list(group_id)
         if member_list_origin is None:
             del_key.append(group_id)

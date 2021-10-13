@@ -492,21 +492,20 @@ async def administrator_operation(bot, event, message, qq, name, group_id, mode,
             need_reply = True
             
         elif message == '申请权限' and mode == 1:
-            # if group_right == 0:
-            #     member_list = await app.memberList(group_id)
-            #     if len(member_list) > 5:
-            #         reply_text = add_contributors(qq, bot_config)
-            #         if reply_text == '添加成功~':
-            #             reply_text = '申请贡献者权限成功，可以输入“贡献者帮助”获取管理指令，需要更高权限的请前往' + bot_name + '官方群(479504567)找主人要'
-            #         elif '正确' in reply_text:
-            #             reply_text = '因为未知原因申请失败，请稍后重试'
-            #         else:
-            #             reply_text = reply_text.replace('他', '你').replace('该成员', '你')
-            #     else:
-            #         reply_text = '你的群需要超过5人，请去' + bot_name + '官方群(479504567)找主人要权限'
-            # else:
-            #     reply_text = '你并非群主（群需要超过5人），请去' + bot_name + '官方群(479504567)找主人要权限'
-            reply_text = '申请权限功能暂时离开了，请前往官方群(479504567)找主人要权限'
+            if group_right == 0:
+                member_list = await bot.member_list(group_id)
+                if len(member_list.data) > 10:
+                    reply_text = add_contributors(qq, bot_config)
+                    if reply_text == '添加成功~':
+                        reply_text = '申请贡献者权限成功，可以输入“贡献者帮助”获取管理指令，需要更高权限的请前往' + bot_name + '官方群(479504567)找主人要'
+                    elif '正确' in reply_text:
+                        reply_text = '因为未知原因申请失败，请稍后重试'
+                    else:
+                        reply_text = reply_text.replace('他', '你').replace('该成员', '你')
+                else:
+                    reply_text = '你的群需要超过10人，请去' + bot_name + '官方群(479504567)找主人要权限'
+            else:
+                reply_text = '你并非群主（群需要超过10人），请去' + bot_name + '官方群(479504567)找主人要权限'
             need_reply = True
 
         # 屏蔽词不用strip，因为可能有一些带空格屏蔽词

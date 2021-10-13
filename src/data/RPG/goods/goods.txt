@@ -57,6 +57,7 @@
 #     卷轴类 5
 #     晶石类 6
 #     种子&树苗&牲畜 7
+#     特殊药剂 8
 # 材料类 3
 #     杂项 1
 #     矿石 2
@@ -70,44 +71,79 @@
 # 纪念品类 4
 #     节日纪念品类 1
 #     活动纪念品类 2
+#     传说之证 3
+#     活动道具纪念品 4
+
+无 cost=-1 sell=-1 comments=色即是空，空即是色。 type=31
 
 #=========================================
 # 礼包
 #=========================================
-体力补偿礼包 cost=-1 sell=-1 strength=20 comments=体力补偿礼包可以帮助你回复体力 type=24
-积分补偿礼包 cost=-1 sell=-1 gold=5 comments=积分补偿礼包可以开出积分 type=24
+体力补偿礼包 cost=-1 sell=-1 strength=1 comments=体力补偿礼包可以帮助你回复体力 type=24
+积分补偿礼包 cost=-1 sell=-1 gold=1 comments=积分补偿礼包可以开出积分 type=24
 
 #=========================================
 # 晶石
 #=========================================
 低级传送石 cost=-1 sell=1 comments=一块充斥着空间之力的石头，使用它或许有奇效 type=26
-中级传送石 cost=50 sell=1 comments=磅礴的空间之力简直快要溢出来，使用它或许有奇效 type=26
+中级传送石 cost=50 sell=1 limit=10 comments=磅礴的空间之力简直快要溢出来，使用它或许有奇效 type=26
 高级传送石 cost=-1 sell=1 comments=磅礴的空间之力的背后直觉告诉你有一丝危险的气息 type=26
+传奇传送石 cost=-1 sell=1 comments=只有真正的传奇才敢使用它！ type=26
 
 #=========================================
 # 材料
 #=========================================
 
+棉花 cost=-1 sell=1 comments=一小团棉花 type=31
+布 cost=-1 sell=1 comments=一小块布 type=31
 皮革 cost=-1 sell=1 comments=一小块皮革 type=31
 燧石 cost=-1 sell=1 comments=一小块燧石 type=31
 
 木板 cost=5 sell=1 comments=一小块木板 type=31
-灵木 cost=-1 sell=10 comments=充斥着魔法之力的木板，可以合成更强大的装备（暂未更新） type=31
+灵木 cost=-1 sell=10 comments=充斥着魔法之力的木板，可以合成更强大的装备 type=31
+
+火灵木 cost=-1 sell=10 comments=被赋予了火元素之力的灵木 type=31
+雷击木 cost=-1 sell=10 comments=被赋予了雷元素之力的灵木 type=31
+
 碎石 cost=-1 sell=-1 comments=小石头，可以合成石头 type=32
 石头 cost=-1 sell=1 comments=可以合成一些初始装备 type=32
+沙子 cost=-1 sell=1 comments=一小团沙子，可以合成一些东西 type=32
 铁锭 cost=-1 sell=5 comments=光亮沉重，可以合成一些初始装备 type=32
 铝锭 cost=-1 sell=10 comments=灰暗轻便，可以合成一些合金 type=32
 钛矿石 cost=-1 sell=10 comments=光洁明亮，可以合成一些合金 type=32
 下界石英 cost=-1 sell=25 comments=幽暗扭曲，可以合成一些装备 type=32
 灵石 cost=-1 sell=40 comments=釉白圣洁，可以合成一些装备 type=32
-魔法石 cost=-1 sell=40 comments=具有神奇力量的石头，可以合成一些装备 type=32
+魔法石 cost=-1 sell=40 comments=具有神奇力量的石头，它的内部有着汹涌的魔法之力 type=32
 末地水晶 cost=-1 sell=40 comments=具有神奇力量的水晶，可以合成一些装备 type=32
+
+黑火药 cost=-1 sell=-1 comments=BOOM！！ type=34
+
+寒铁 cost=-1 sell=10 comments=从寒冷地方而来，坚硬无比 type=32
+星钢岩 cost=-1 sell=15 comments=从天上掉下来的陨石 type=32
+秘银 cost=-1 sell=15 comments=它十分珍贵，外表呈银白色，比钢铁坚固的多却很轻巧 type=32
+太古岩石 cost=-1 sell=30 comments=从远古时代流传下来的宝贝 type=32
+钨矿石 cost=-1 sell=5 comments=单质为银白色有光泽的金属，硬度高，熔点高，常温下不受空气侵蚀，化学性质比较稳定 type=32
+铬矿石 cost=-1 sell=5 comments=地表最坚硬的金属 type=32
+
+水元素晶石 cost=-1 sell=10 comments=附带着水元素的石头 type=32
+火元素晶石 cost=-1 sell=10 comments=附带着火元素的石头 type=32
+雷元素晶石 cost=-1 sell=10 comments=附带着雷元素的石头 type=32
+木元素晶石 cost=-1 sell=10 comments=附带着木元素的石头 type=32
+
+
+九天玄铁 cost=-1 sell=20 comments=经过加工后的星钢岩 type=34
+空间碎片 cost=-1 sell=20 comments=经过精密加工后的末地石 type=34
+太古合金 cost=-1 sell=50 comments=极其优秀的合金 type=34
+钨合金 cost=-1 sell=20 comments=由钨矿石合成的合金 type=34
+铬合金 cost=-1 sell=20 comments=由铬矿石合成的合金 type=34
+
 
 铝合金 cost=-1 sell=20 comments=经过加工而成的合金，具有不错的性能，可以合成装备 type=34
 钛合金 cost=-1 sell=20 comments=经过加工而成的合金，具有不错的性能，可以合成装备 type=34
 下界合金 cost=-1 sell=40 comments=经过加工而成的合金，具有不错的性能，可以合成装备 type=34
 下界核心 cost=-1 sell=60 comments=经过中和加工而成的装备核心，具有不错的性能，可以合成装备 type=34
 灵魂结晶 cost=-1 sell=80 comments=一个强韧的灵魂中和了下界石英，再用灵石固定，就成了灵魂结晶 type=34
+
 
 玛瑙 cost=-1 sell=60 comments=附魔师所需要的石头，我也不知道这些材料怎么合成的玛瑙 type=34
 天蓝石 cost=-1 sell=70 comments=附魔师所需要的石头，蕴含了锋利 type=34
@@ -119,16 +155,30 @@
 蓝水晶 cost=-1 sell=70 comments=附魔师所需要的水晶，蕴含了坚固 type=34
 紫水晶 cost=-1 sell=80 comments=附魔师所需要的水晶，蕴含了坚固 type=34
 
+锆石 cost=-1 sell=80 comments=附魔师所需要的石头 ，蕴含了锋利 type=34
+绿松石 cost=-1 sell=80 comments=附魔师所需要的石头 ，蕴含了锋利 type=34
+
+珊瑚 cost=-1 sell=80 comments=附魔师所需要的石头 ，蕴含了迅捷 type=34
+欧珀 cost=-1 sell=80 comments=附魔师所需要的石头 ，蕴含了迅捷 type=34
+
+红宝石 cost=-1 sell=80 comments=附魔师所需要的石头 ，蕴含了坚固 type=34
+蓝宝石 cost=-1 sell=80 comments=附魔师所需要的石头 ，蕴含了坚固 type=34
+
+
 钻石 cost=1000 sell=50 comments=璀璨闪亮，可以用来合成很多东西以及附魔 type=32
 金锭 cost=50 sell=13 comments=灿烂明亮，可以用来合成很多东西以及附魔 type=32
+
 
 橡树苗 cost=15 sell=1 comments=一颗像树苗，在培育师手里有不一样的效果 type=27
 水稻种子 cost=5 sell=1 comments=一粒水稻种子，在培育师手里有不一样的效果 type=27
 苹果苗 cost=10 sell=1 comments=苹果树的树苗，在培育师手里有不一样的效果 type=27
 牛犊子 cost=-1 sell=1 limit=1 comments=怪物附近的一些牲畜，培育师可以把它们养大 type=27
 羊犊子 cost=-1 sell=1 limit=1 comments=怪物附近的一些牲畜，培育师可以把它们养大 type=27
+空间兽 cost=-1 sell=1 limit=1 comments=一种蕴含空间之力的生物，培育他们可以获得一些东西 type=27
 杂交水稻种子 cost=30 sell=1 comments=一粒水稻种子，在培育师手里有不一样的效果 type=27
 灵木树苗 cost=-1 sell=1 comments=一颗灵木树苗，可以种出来一些带有魔法的东西 type=27
+棉花种子 cost=-1 sell=1 comments=一颗棉花种子 type=27
+
 
 肉 cost=30 hp=1 strength=1 sell=3 comments=牲畜的肉，可以直接吃，也可以做成药水 type=22
 熟肉 cost=50 sell=-1 hp=4 strength=4 comments=一块烤熟的肉，尝起来还不错 type=22
@@ -143,9 +193,9 @@
 生命药水 cost=10 sell=1 hp=10 limit=20 comments=一瓶普通的生命药水，可以帮助恢复生命 type=21
 甘霖 cost=30 sell=1 hp=-1 limit=1 comments=活力满满！直接回满生命 type=21
 
-精神药水 cost=5 sell=1 san=10 limit=50 comments=回复一部分精神力 type=21
+精神药水 cost=5 sell=1 san=10 limit=20 comments=回复一部分精神力，强大的精神才可以释放出强大的技能 type=21
 
-复活药水 resurrection=1 cost=20 sell=5 limit=6 comments=复活吧勇士！继续战斗！ type=21
+复活药水 resurrection=1 cost=20 sell=5 limit=10 comments=复活吧勇士！继续战斗！ type=21
 #=========================================
 # 木头装备
 #=========================================
@@ -216,7 +266,7 @@
 钛合金剑 attack=16 armor=4 cost=-1 sell=50 comments=顶尖的合金工艺 type=111 enchanting-sharp=2 enchanting-rapid=2
 钛合金斧 attack=20 armor=0 cost=-1 sell=50 comments=重量刚刚好！ type=112 enchanting-sharp=2 enchanting-rapid=2
 钛合金枪 attack=24 armor=-2 cost=-1 sell=50 comments=有些沉，但很好用 type=113 enchanting-sharp=2 enchanting-rapid=2
-钛合金火铳 attack=18 armor=0 speed=20 cost=-1 sell=50 comments=口径就是正义 type=115 enchanting-sharp=2 enchanting-rapid=2
+钛合金火统 attack=18 armor=0 speed=20 cost=-1 sell=50 comments=口径就是正义 type=115 enchanting-sharp=2 enchanting-rapid=2
 钛合金弩 attack=10 armor=0 speed=50 cost=-1 sell=50 comments=十字弩，双连发！ type=116 enchanting-sharp=2 enchanting-rapid=2
 
 #=========================================
@@ -253,22 +303,93 @@
 飞剑 attack=32 armor=2 speed=40 cost=-1 sell=-1 comments=脚下三尺飞剑，掌中三寸人间！ type=114 enchanting-sharp=3 enchanting-rapid=3
 灵弩 attack=18 armor=2 speed=60 cost=-1 sell=-1 comments=弩箭会自动索敌哟 type=115 enchanting-sharp=3 enchanting-rapid=3
 
+
+#=========================================
+# 铬合金装备
+#=========================================
+铬合金头盔 attack=3 armor=8 speed=-10 cost=-1 sell=50 comments=这是很硬的一件头盔，带着不舒服，但很安全 type=15 enchanting-rapid=3 enchanting-strong=3
+铬合金甲 attack=3 armor=9 speed=-10 cost=-1 sell=50 comments=闪闪亮亮，安全感爆膨！ type=16 enchanting-rapid=3 enchanting-strong=3
+铬合金护腿 attack=3 armor=9 speed=-10 cost=-1 sell=50 comments=总有些怪物喜欢攻击下盘 type=17 enchanting-rapid=3 enchanting-strong=3
+铬合金靴 attack=3 armor=8 speed=-10 cost=-1 sell=50 comments=还是好硬啊，穿着不舒服 type=18 enchanting-rapid=3 enchanting-strong=3
+
+铬合金剑 attack=36 armor=6 cost=-1 sell=60 comments=很不错的合金工艺 type=111 enchanting-sharp=3 enchanting-rapid=3
+铬合金斧 attack=40 armor=0 cost=-1 sell=60 comments=重量刚刚好！ type=112 enchanting-sharp=3 enchanting-rapid=3
+铬合金枪 attack=42 armor=-6 cost=-1 sell=60 comments=有些沉，但很好用 type=113 enchanting-sharp=3 enchanting-rapid=3
+铬合金火铳 attack=42 armor=0 speed=20 cost=-1 sell=60 comments=口径就是正义 type=115 enchanting-sharp=3 enchanting-rapid=3
+铬合金弩 attack=40 armor=0 speed=50 cost=-1 sell=60 comments=十字弩，双连发！ type=116 enchanting-sharp=3 enchanting-rapid=3
+
+#=========================================
+# 钨合金装备
+#=========================================
+钨合金头盔 attack=3 armor=10 speed=-8 cost=-1 sell=60 comments=想要个涂装，可惜是文字游戏 type=15 enchanting-rapid=4 enchanting-strong=4
+钨合金甲 attack=4 armor=12 speed=-8 cost=-1 sell=60 comments=I Am Iron Man type=16 enchanting-rapid=4 enchanting-strong=4
+钨合金护腿 attack=4 armor=12 speed=-8 cost=-1 sell=60 comments=很完美的外观，但是缺乏了颜色 type=17 enchanting-rapid=4 enchanting-strong=4
+钨合金靴 attack=3 armor=10 speed=-8 cost=-1 sell=60 comments=没有推进器，不然就可以飞行了 type=18 enchanting-rapid=4 enchanting-strong=4
+
+钨合金剑 attack=42 armor=10 cost=-1 sell=70 comments=顶尖的合金工艺，锋利十足 type=111 enchanting-sharp=4 enchanting-rapid=4
+钨合金斧 attack=46 armor=0 cost=-1 sell=70 comments=有了套装提升了力量，从而解决了武器重量的问题！ type=112 enchanting-sharp=4 enchanting-rapid=4
+钨合金枪 attack=52 armor=-12 cost=-1 sell=70 comments=有些沉，但很坚韧 type=113 enchanting-sharp=4 enchanting-rapid=4
+钨合金火铳 attack=44 armor=0 speed=20 cost=-1 sell=70 comments=耐热性很好，火力十足 type=115 enchanting-sharp=4 enchanting-rapid=4
+钨合金弩 attack=42 armor=0 speed=50 cost=-1 sell=70 comments=看上去十分坚韧，双连发！ type=116 enchanting-sharp=4 enchanting-rapid=4
+
+#=========================================
+# 九天玄铁装备
+#=========================================
+九天玄铁头盔 attack=4 armor=13 speed=-6 cost=-1 sell=80 comments=散发着寒气，会不会把人冻傻？ type=15 enchanting-rapid=4 enchanting-strong=4
+九天玄铁甲 attack=4 armor=15 speed=-6 cost=-1 sell=80 comments=咄咄逼人的寒气，给人一种难以逼近的感觉 type=16 enchanting-rapid=4 enchanting-strong=4
+九天玄铁护腿 attack=4 armor=15 speed=-6 cost=-1 sell=80 comments=外表寒冷，但是里面却十分保暖，是怎么做到的？ type=17 enchanting-rapid=4 enchanting-strong=4
+九天玄铁靴 attack=4 armor=13 speed=-6 cost=-1 sell=80 comments=还是好硬啊，穿着有些凉 type=18 enchanting-rapid=4 enchanting-strong=4
+
+九天玄铁剑 attack=62 armor=4 cost=-1 sell=90 comments=寒气逼人，锋利无比 type=111 enchanting-sharp=4 enchanting-rapid=4
+九天玄铁斧 attack=66 armor=0 cost=-1 sell=90 comments=散发着寒气，重量刚刚好！有着很好的手感 type=112 enchanting-sharp=4 enchanting-rapid=4
+九天玄铁镐 attack=70 armor=-6 cost=-1 sell=100 comments=有了它真的可以挖出好东西吗？等等，为什么它是武器！ type=112 enchanting-sharp=5 enchanting-rapid=5
+
+#=========================================
+# 秘银装备
+#=========================================
+秘银头盔 attack=5 armor=16 speed=-10 cost=-1 sell=90 comments=戴上它，你就是最亮的仔 type=15 enchanting-rapid=5 enchanting-strong=5
+秘银甲 attack=5 armor=18 speed=-10 cost=-1 sell=90 comments=防御很不错，但是不是有点亮？ type=16 enchanting-rapid=5 enchanting-strong=5
+秘银护腿 attack=5 armor=18 speed=-10 cost=-1 sell=90 comments=发光有时候真的很有用 type=17 enchanting-rapid=5 enchanting-strong=5
+秘银靴 attack=5 armor=16 speed=-10 cost=-1 sell=90 comments=护甲终究是要凑成一套 type=18 enchanting-rapid=5 enchanting-strong=5
+
+秘银剑 attack=86 armor=10 cost=-1 sell=120 comments=看上去纤细，但是锋利十足 type=111 enchanting-sharp=5 enchanting-rapid=5
+秘银斧 attack=92 armor=0 cost=-1 sell=120 comments=拿起来很轻，但是威力不俗 type=112 enchanting-sharp=5 enchanting-rapid=5
+秘银枪 attack=100 armor=-12 cost=-1 sell=120 comments=尖锐无比，好像可以刺破黑暗？ type=113 enchanting-sharp=5 enchanting-rapid=5
+秘银火铳 attack=92 armor=0 speed=20 cost=-1 sell=120 comments=口径就是正义 type=115 enchanting-sharp=6 enchanting-rapid=6
+秘银弓 attack=88 armor=0 speed=50 cost=-1 sell=120 comments=十分纤细但威力十足，双连发！ type=116 enchanting-sharp=6 enchanting-rapid=6
+
+#=========================================
+# 太古合金装备
+#=========================================
+太古合金头盔 attack=7 armor=20 speed=-6 cost=-1 sell=110 comments=由古老的工艺制作而成，看上去十分震撼 type=15 enchanting-rapid=6 enchanting-strong=6
+太古合金甲 attack=7 armor=26 speed=-6 cost=-1 sell=110 comments=很难想象是如何制作而成的，感受到了满满的安全感 type=16 enchanting-rapid=6 enchanting-strong=6
+太古合金护腿 attack=7 armor=26 speed=-6 cost=-1 sell=110 comments=有了它，再也不会感觉凉飕飕的了 type=17 enchanting-rapid=6 enchanting-strong=6
+太古合金靴 attack=7 armor=20 speed=-6 cost=-1 sell=110 comments=虽然是由剩余的边角料制作而成，但是还是起到了很好的防护作用 type=18 enchanting-rapid=6 enchanting-strong=6
+
+太古合金剑 attack=102 armor=10 cost=-1 sell=150 comments=顶尖的合金工艺，似乎可以斩断一切 type=111 enchanting-sharp=6 enchanting-rapid=6
+太古合金斧 attack=114 armor=6 cost=-1 sell=150 comments=沉甸甸的重量带来了满满的实力 type=112 enchanting-sharp=6 enchanting-rapid=6
+太古合金枪 attack=128 armor=-2 cost=-1 sell=150 comments=很锋利，使用起来似乎可以做到无坚不摧 type=113 enchanting-sharp=6 enchanting-rapid=6
+太古合金火铳 attack=120 armor=2 speed=20 cost=-1 sell=150 comments=远古的金属再一次提高了火铳的实力 type=115 enchanting-sharp=6 enchanting-rapid=6
+太古合金弓 attack=110 armor=6 speed=50 cost=-1 sell=150 comments=这么坚韧的弓箭真的可以拉动吗？双连发！ type=116 enchanting-sharp=6 enchanting-rapid=6
+
 #=========================================
 # 背包
 #=========================================
 布背包 knapsack=5 cost=200 sell=10 comments=布制成的背包，可以稍微装一些物品 type=19
 皮革背包 knapsack=10 cost=500 sell=10 comments=皮革制成的背包，可以稍微装一些物品 type=19
-纳戒 knapsack=15 cost=1000 sell=10 comments=拥有空间之力的存物宝贝 type=19
+纳戒 knapsack=15 cost=-1 sell=10 comments=拥有空间之力的存物宝贝 type=19
 
 
 #=========================================
 # 饰品
 #=========================================
 魅舞面具 strength-recovery=20 strength-max=30 cost=-1 sell=200 comments=戴上它去舞池一定可以光芒四射 type=12
-魔女面纱 san-max=20 cost=-1 sell=50 comments=这是魔女佩戴的面纱 type=12
+魔女面纱 san-max=20 san-recovery=20 cost=-1 sell=50 comments=这是魔女佩戴的面纱 type=12
 
 轻盈指环 speed=10 cost=-1 sell=180 comments=戴上它，身体变得轻快了些 type=14
 勇者戒指 attack=1 armor=1 cost=-1 sell=50 comments=属于勇者的指环！ type=14
+法师戒指 san-max=40 cost=-1 sell=50 comments=或许它是魔法师必不可少的帮手 type=14
+魔女戒指 san-recovery=30 cost=-1 sell=50 comments=小心！这是魔女在使用的戒指！ type=14
 
 泰坦之心 hp-max=10 cost=-1 sell=50 comments=实际上并不是用泰坦的心脏制成的 type=13
 生命女神之叹息 cost=-1 comments=勇士，您现在没有足够的力量佩戴也无法窥探她 type=13
@@ -277,6 +398,19 @@
 
 锦鲤项链 cost=-1 sell=-1 comments=由传统节日纪念品合成，它会给你带来好运的 type=13
 锦鲤戒指 hp-max=10 cost=-1 sell=-1 comments=它会给你带来好运的 type=14
+#=========================================
+# 第二期饰品
+#=========================================
+元素面具 san-max=20 strength-recovery=20 cost=2500 sell=1300 comments=四大元素组成的花纹在这上面 type=12
+木纹护额 san-max=30 san-recovery=20 cost=3200 sell=1800 comments=曾经似乎被某个会木遁的忍者带过 type=12
+
+火灵指环 san-max=10 speed=10 cost=2000 sell=1000 comments=戴上它，身体变得暖和了些 type=14
+冰霜戒指 san-max=10 attack=2 cost=1800 sell=600 comments=属于深入冰川的勇者的指环！ type=14
+
+雷霆之心 hp-max=20 cost=1500 sell=500 comments=雷电在里面闪烁！ type=13
+生命女神之祝福 cost=-1 comments=勇士，您现在没有足够的力量佩戴也无法窥探她 type=13
+
+
 #=========================================
 # 卷轴
 #=========================================
@@ -298,6 +432,9 @@
 内测玩家纪念品 cost=-1 sell=30 comments=一个看起来没什么用的摆件 type=42
 公测玩家纪念品 cost=-1 sell=30 comments=一个看起来没什么用的摆件 type=42
 
+元素时代纪念品 cost=-1 sell=30 comments=这是经历了元素时代开始的玩家的证明 type=42
+元素球 cost=-1 sell=1 comments=可以兑换一些好东西 type=44
+
 元旦节纪念品 cost=-1 sell=50 comments=元旦节的摆件 type=41
 除夕纪念品 cost=-1 sell=50 comments=除夕的摆件 type=41
 春节纪念品 cost=-1 sell=50 comments=春节的摆件 type=41
@@ -315,11 +452,98 @@
 国庆节纪念品 cost=-1 sell=50 comments=国庆节的摆件 type=41
 重阳节纪念品 cost=-1 sell=50 comments=重阳节的摆件 type=41
 
+
+#=========================================
+爆竹 cost=-1 sell=1 comments=爆竹声中一岁除，春风送暖入屠苏。 type=44
+压岁钱 cost=-1 sell=1 comments=镇一年气运，守一岁平安。 type=44
+春联 cost=-1 sell=1 comments=千门万户除旧日，总把新桃换旧符。 type=44
+元宵 cost=-1 sell=1 comments=月色灯山满帝都，香车宝盖隘通衢。 type=44
+雄黄 cost=-1 sell=1 comments=天地诸邪皆退避！ type=44
+劳动节勋章 cost=-1 sell=1 comments=劳动创造价值 type=44
+玩具 cost=-1 sell=1 comments=或许小孩子会喜欢 type=44
+粽子 cost=-1 sell=1 comments=官衣亦有名，端午被恩荣。细葛含风软，香罗叠雪轻。 type=44
+红绳 cost=-1 sell=1 comments=纤云弄巧，飞星传恨，银汉迢迢暗度。 type=44
+鬼魂 cost=-1 sell=1 comments=绛节飘飖宫国来，中元朝拜上清回。 type=44
+月饼 cost=-1 sell=1 comments=明月几时有？把酒问青天。 type=44
+国旗 cost=-1 sell=1 comments=红日初升在东方，其大道满霞光。 type=44
+茱萸 cost=-1 sell=1 comments=遥知兄弟登高处，遍插茱萸少一人。 type=44
+
+
+#=========================================
+天灾之心 cost=-1 sell=100 comments=不知道有什么用，但是它是你打败传奇的证明 type=43
+
 #=========================================
 # 灵
 #=========================================
 劣质灵 cost=-1 sell=1 comments=劣质的灵，一碰就碎 type=331
 普通灵 cost=-1 sell=2 comments=普通的灵，稍有强度 type=332
 稀有灵 cost=-1 sell=3 comments=稀有的灵，韧性十足 type=333
-史诗灵 cost=-1 sell=4 comments=史诗的灵，澎湃宏大 type=334
+史诗灵 cost=-1 sell=-1 comments=史诗的灵，澎湃宏大 type=334
 传奇灵 cost=-1 sell=9999 comments=传奇的灵，每一个传奇灵的产生都意味着一个传奇的逝去 type=335
+
+#=========================================
+# 升级材料
+#=========================================
+四级矿工升级凭证 cost=-1 sell=-1 comments=这是升级四级矿工不可缺少的材料 type=34
+四级培育师升级凭证 cost=-1 sell=-1 comments=这是升级四级培育师不可缺少的材料 type=34
+四级锻造师升级凭证 cost=-1 sell=-1 comments=这是升级四级锻造师不可缺少的材料 type=34
+四级附魔师升级凭证 cost=-1 sell=-1 comments=这是升级四级附魔师不可缺少的材料 type=34
+
+五级矿工升级凭证 cost=-1 sell=-1 comments=这是升级五级矿工不可缺少的材料 type=34
+五级培育师升级凭证 cost=-1 sell=-1 comments=这是升级五级培育师不可缺少的材料 type=34
+五级锻造师升级凭证 cost=-1 sell=-1 comments=这是升级五级锻造师不可缺少的材料 type=34
+五级附魔师升级凭证 cost=-1 sell=-1 comments=这是升级五级附魔师不可缺少的材料 type=34
+
+六级矿工升级凭证 cost=-1 sell=-1 comments=这是升级六级矿工不可缺少的材料 type=34
+六级培育师升级凭证 cost=-1 sell=-1 comments=这是升级六级培育师不可缺少的材料 type=34
+六级锻造师升级凭证 cost=-1 sell=-1 comments=这是升级六级锻造师不可缺少的材料 type=34
+六级附魔师升级凭证 cost=-1 sell=-1 comments=这是升级六级附魔师不可缺少的材料 type=34
+
+七级矿工升级凭证 cost=-1 sell=-1 comments=这是升级七级矿工不可缺少的材料 type=34
+七级培育师升级凭证 cost=-1 sell=-1 comments=这是升级七级培育师不可缺少的材料 type=34
+七级锻造师升级凭证 cost=-1 sell=-1 comments=这是升级七级锻造师不可缺少的材料 type=34
+七级附魔师升级凭证 cost=-1 sell=-1 comments=这是升级七级附魔师不可缺少的材料 type=34
+
+八级矿工升级凭证 cost=-1 sell=-1 comments=这是升级八级矿工不可缺少的材料 type=34
+八级培育师升级凭证 cost=-1 sell=-1 comments=这是升级八级培育师不可缺少的材料 type=34
+八级锻造师升级凭证 cost=-1 sell=-1 comments=这是升级八级锻造师不可缺少的材料 type=34
+八级附魔师升级凭证 cost=-1 sell=-1 comments=这是升级八级附魔师不可缺少的材料 type=34
+
+九级矿工升级凭证 cost=-1 sell=-1 comments=这是升级九级矿工不可缺少的材料 type=34
+九级培育师升级凭证 cost=-1 sell=-1 comments=这是升级九级培育师不可缺少的材料 type=34
+九级锻造师升级凭证 cost=-1 sell=-1 comments=这是升级九级锻造师不可缺少的材料 type=34
+九级附魔师升级凭证 cost=-1 sell=-1 comments=这是升级九级附魔师不可缺少的材料 type=34
+
+#=========================================
+# 技能石
+#=========================================
+火元素祝福原石 cost=-1 sell=-1 limit=1 comments=其中有着澎湃的火元素 type=26
+火元素祝福技能石 cost=-1 sell=-1 comments=使用后可以获得技能《火元素祝福》 type=26
+
+木元素祝福原石 cost=-1 sell=-1 limit=1 comments=其中有着澎湃的木元素 type=26
+木元素祝福技能石 cost=-1 sell=-1 comments=使用后可以获得技能《木元素祝福》 type=26
+
+雷元素祝福原石 cost=-1 sell=-1 limit=1 comments=其中有着澎湃的雷元素 type=26
+雷元素祝福技能石 cost=-1 sell=-1 comments=使用后可以获得技能《雷元素祝福》 type=26
+
+水元素祝福原石 cost=-1 sell=-1 limit=1 comments=其中有着澎湃的水元素 type=26
+水元素祝福技能石 cost=-1 sell=-1 comments=使用后可以获得技能《水元素祝福》 type=26
+
+天使祝福原石 cost=-1 sell=-1 limit=1 comments=其中有着澎湃的光元素 type=26
+天使祝福技能石 cost=-1 sell=-1 comments=使用后可以获得技能《天使祝福》 type=26
+
+#=========================================
+# 特殊药剂
+#=========================================
+姜汤 cost=-1 sell=1 comments=可以暖暖身子 type=28
+冰粉 cost=-1 sell=1 comments=可以降降火气 type=28
+板蓝根 cost=-1 sell=1 comments=可以祛除毒气 type=28
+茶水 cost=-1 sell=1 comments=可以解麻 type=28
+
+生姜 cost=-1 sell=1 comments=可以种 type=27
+板蓝根种子 cost=-1 sell=1 comments=可以种 type=27
+茶树 cost=-1 sell=1 comments=可以种 type=27
+
+面粉 cost=-1 sell=1 comments=可以种 type=22
+茶叶 cost=-1 sell=2 comments=散发着缕缕茶香 type=22
+生姜粉 cost=-1 sell=2 comments=生姜磨成的粉末 type=22

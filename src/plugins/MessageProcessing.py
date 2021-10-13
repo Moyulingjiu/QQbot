@@ -211,6 +211,7 @@ class MessageProcessing:
         need_at = False
         at_qq = 0
         muteall_schedule = dataManage.load_obj('data/Function/muteall')  # 禁言计划
+        remind_schedule = dataManage.load_obj('data/Function/remind')  # 定时提醒
 
         if message_code == 'nudge on' or message == '开启戳一戳':
             if not self.groups[group_id]['config']['nudge']:
@@ -628,6 +629,70 @@ class MessageProcessing:
                 await bot.send(event, '现在没有定时全员禁言的计划')
             return
 
+        elif message == '添加定时提醒':
+            single = {
+                'name': '',
+                'is_consecutive': False,
+                'from': {  # 开始时间
+                    'year': 0,
+                    'month': 0,
+                    'day': 0,
+                    'hour': 0,
+                    'minute': 0,
+                    'second': 0
+                },
+                'to': {  # 结束时间
+                    'year': 0,
+                    'month': 0,
+                    'day': 0,
+                    'hour': 0,
+                    'minute': 0,
+                    'second': 0
+                },
+                'repeat': '每小时、每天、每星期、每月、每年、每季度',
+                'repeat-mode': ''
+            }
+        elif message == '查看定时提醒':
+            if not remind_schedule.__contains__(group_id) or len(remind_schedule[group_id]) == 0:
+                await bot.send(event, '本群没有任何定时提醒')
+                return
+            
+            index = 1
+            reply = '本群定时提醒如下：'
+            for single in remind_schedule[group_id]:
+                reply = '\n%d.' % (index)
+            await bot.send(event, reply)
+            return
+        elif message == '删除定时提醒':
+            pass
+
+        elif message_code == 'revoke on' or message == '开启防撤回':
+            if not self.groups[group_id]['config']['revoke']:
+                if group_right < 2 or right < 3:
+                    self.groups[group_id]['config']['revoke'] = True
+                    dataManage.save_group(group_id, self.groups[group_id])
+
+                    self.statistics['operate'] += 1
+                    dataManage.save_statistics(self.statistics)
+                    reply_text = '本群已开启防撤回功能~'
+                else:
+                    reply_text = '权限不足，需要群管理或群主'
+                await send_message(bot, event, mode, merge_reply, reply_text, reply_image, need_at, at_qq)
+            return
+        elif message_code == 'revoke off' or message == '关闭防撤回':
+            if self.groups[group_id]['config']['revoke']:
+                if group_right < 2 or right < 3:
+                    self.groups[group_id]['config']['revoke'] = False
+                    dataManage.save_group(group_id, self.groups[group_id])
+
+                    self.statistics['operate'] += 1
+                    dataManage.save_statistics(self.statistics)
+                    reply_text = '本群已关闭防撤回功能~'
+                else:
+                    reply_text = '权限不足，需要群管理或群主'
+                await send_message(bot, event, mode, merge_reply, reply_text, reply_image, need_at, at_qq)
+            return
+
         return 1
 
     # 0：朋友消息，1：群消息，2：临时消息
@@ -647,7 +712,7 @@ class MessageProcessing:
         at_list = message_chain[At]
         for i in at_list:
             if i != At(bot.qq):
-                message += '@' + str(i)[10:-1]
+                message += str(i)
         if len(message_chain[Image]) != 0:
             message += '[图片]'
         flash_image = message_chain[FlashImage]
@@ -1389,9 +1454,19 @@ class MessageProcessing:
                 need_reply = True
             elif message == '游戏帮助' or message == '游戏指令':
                 reply_image = command.help_game()
+                reply_text = '输入“游戏帮助2”查看下一页'
                 if mode == 1:
                     if not self.groups[group_id]['config']['RPG']:
-                        reply_text = '本群游戏模块为关闭状态，在群内输入“模块列表”查询各个模块开关状态'
+                        reply_text += '\n本群游戏模块为关闭状态，在群内输入“模块列表”查询各个模块开关状态'
+                need_reply = True
+            elif message == '游戏帮助2':
+                reply_image = command.help_game2()
+                need_reply = True
+            elif message == '附魔查询':
+                reply_image = command.enchanting()
+                need_reply = True
+            elif message == 'buff查询':
+                reply_image = command.buff()
                 need_reply = True
             elif message == '游戏新手指南' or message == '新手指南':
                 reply_image = command.help_game_novice()
@@ -1405,7 +1480,7 @@ class MessageProcessing:
                 need_reply = True
                 if mode == 1:
                     if not self.groups[group_id]['config']['clash']:
-                        reply_text = '本群游戏模块为关闭状态，在群内输入“模块列表”查询各个模块开关状态'
+                        reply_text = '本群部落冲突查询模块为关闭状态，在群内输入“模块列表”查询各个模块开关状态'
 
             if need_reply:
                 self.statistics['help'] += 1
@@ -2056,3 +2131,14 @@ class MessageProcessing:
             if event.current == '':
                 reply += event.member.member_name + '（QQ昵称）'
             await bot.send_group_message(event.group.id, reply)
+
+    async def group_recall_message(self, bot, event):
+        self.get_group(event.group.id)
+        if self.groups[event.group.id]['config']['revoke']:
+            if event.author_id == event.operator.id:
+                message = await bot.message_from_id(event.message_id)
+                message_chain = message.message_chain
+                message_chain.insert(0, Plain('成员<%d>试图撤回%s的消息：\n------------\n' % (event.author_id, event.time)))
+                await bot.send_group_message(event.group.id, message_chain)
+            else:
+                print('非自己撤回')

@@ -976,7 +976,7 @@ class Clash:
             tag = message[6:]
             reply_text = self.clan(tag)
             if reply_text == '完成':
-                reply_image = 'data/clash/temp/clan_' + user_config['config']['clash_tag'][user_config['config']['main_clash_tag']] + '.png'
+                reply_image = 'data/clash/temp/clan_' + tag + '.png'
                 reply_text = ''
         elif message[:6] == 'coc玩家#':
             need_reply = True
@@ -991,7 +991,7 @@ class Clash:
                 await bot.send(event, clan_wait_reply)
                 reply_text = self.clan(user_config['config']['clash_tag'][index])
                 if reply_text == '完成':
-                    reply_image = 'data/clash/temp/clan_' + user_config['config']['clash_tag'][user_config['config']['main_clash_tag']] + '.png'
+                    reply_image = 'data/clash/temp/clan_' + user_config['config']['clash_tag'][index] + '.png'
                     reply_text = ''
             else:
                 reply_text = '没有序号对应的标签'
@@ -1053,6 +1053,21 @@ class Clash:
             need_reply = True
         elif message == 'coc联赛' or message == 'coc联赛奖励':
             reply_image = 'data/Clash/联赛数据.jpg'
+            need_reply = True
+        elif message == 'coc部落战奖励':
+            reply_image = 'data/Clash/部落战奖励.png'
+            need_reply = True
+        elif message == 'coc闪电机制':
+            reply_image = 'data/Clash/闪电机制.jpg'
+            need_reply = True
+        elif message == 'coc闪震计算表':
+            reply_image = 'data/Clash/闪震计算表.png'
+            need_reply = True
+        elif message == 'coc夜世界奖励':
+            reply_image = 'data/Clash/夜世界奖励.png'
+            need_reply = True
+        elif message == 'coc援军等级限制':
+            reply_image = 'data/Clash/援军等级限制.png'
             need_reply = True
 
         return need_reply, reply_text, reply_image

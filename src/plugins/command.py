@@ -112,6 +112,15 @@ def help_tarot():
 
 def help_game():
     return 'data/Help/游戏帮助.png'
+    
+def help_game2():
+    return 'data/Help/游戏帮助2.png'
+    
+def enchanting():
+    return 'data/Help/附魔查询.jpg'
+    
+def buff():
+    return 'data/Help/buff查询.jpg'
 
 def help_game_novice():
     return 'data/Help/游戏新手指南.png'

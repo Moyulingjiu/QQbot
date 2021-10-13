@@ -15,15 +15,19 @@ user_path = 'data/RPG/user/information'
 
 rpg_config_path = 'data/RPG/system'
 system_path = 'data/RPG/system/system'
+special_monster_path = 'data/RPG/system/special_monster'
 rank_path = 'data/RPG/system/rank'
 
 goods_path = 'data/RPG/goods/goods'
 shop_path = 'data/RPG/goods/shop'
 soul_shop_path = 'data/RPG/goods/soul_shop'
+skill_shop_path = 'data/RPG/goods/skill_shop'
 conversion_path = 'data/RPG/goods/conversion/'
 
 monster_path = 'data/RPG/monster/monster'
 map_path = 'data/RPG/monster/map/'
+
+activity_path = 'data/RPG/activity'
 
 # ============================================
 # 明日方舟抽卡模拟器
@@ -423,11 +427,19 @@ def get_roman_numerals(number):
         return 'Ⅺ'
     elif number == 12:
         return 'Ⅻ'
+    elif number == 13:
+        return 'XIII'
+    elif number == 14:
+        return 'XIV'
+    elif number == 15:
+        return 'XV'
     return ''
+
 
 # ============================================
 # 核心
 
+# 显示核心
 class Result:
     def __init__(self):
         super().__init__()
@@ -703,6 +715,31 @@ class Result:
             'lost': []
         }
 
+        self.skill = {
+            'init': False,
+            'state': 'success',
+            'name': '',
+            'effect': ''
+        }
+        self.remove_skill = {
+            'init': False,
+            'state': 'success',
+            'name': ''
+        }
+        self.recharge_skill = {
+            'init': False,
+            'state': 'success',
+            'name': ''
+        }
+        self.exchange_activity_goods = {
+            'init': False,
+            'state': 'success',
+            'activity_goods': '',
+            'cost_number': 0,
+            'goods': '',
+            'get_number': 0
+        }
+
     # ======================================
     def show_goods(self, goods):
         reply = ''
@@ -712,11 +749,24 @@ class Result:
                 reply += '，'
             else:
                 init = True
-            if i['number'] > 1:
-                reply += i['name'] + 'x' + str(i['number'])
-            else:
-                reply += i['name']
+
+            reply += get_name_with_enchanting(i)
         return reply
+    
+    def show_monsters(self, monsters):
+        reply = ''
+        init = False
+        for i in monsters:
+            if init:
+                reply += '，'
+            else:
+                init = True
+
+            reply += i['name']
+            if i['number'] > 1:
+                reply += 'x' + str(i['number'])
+        return reply
+
 
     def show_type(self, number):
         if number == 0:
@@ -775,6 +825,8 @@ class Result:
             return '晶石'
         elif number == 27:
             return '树苗、种子、牲畜'
+        elif number == 28:
+            return '特殊药剂'
 
         # 材料
         elif number == 3:
@@ -807,6 +859,10 @@ class Result:
             return '节日纪念品'
         elif number == 42:
             return '活动纪念品'
+        elif number == 43:
+            return '传说之证'
+        elif number == 44:
+            return '活动道具纪念品'
 
         return '【未知错误】'
 
@@ -904,6 +960,11 @@ class Result:
                 reply += '\n你暂无积分哦~'
             elif self.PVP['state'] == 'passive fencers have no points':
                 reply += '\n对方暂无积分哦~'
+                
+            if self.PVP.__contains__('gets') and len(self.PVP['gets']) != 0:
+                reply += '\n额外获得物品'
+                for activity, value in self.PVP['gets'].items():
+                    reply += '\n因为' + activity + '获得：' + self.show_goods(value)
         elif self.introduction['init']:
             if self.introduction['state'] == 'success':
                 reply = '名字：' + self.introduction['name'] + '（id：' + str(self.introduction['id']) + '）'
@@ -1225,7 +1286,6 @@ class Result:
                             reply += '，'
                         reply += '复活'
 
-
             elif self.use['state'] == 'die':
                 reply += '\n使用失败！你目前处于死亡状态，不能直接回复生命值'
             elif self.use['state'] == 'too much':
@@ -1237,7 +1297,7 @@ class Result:
             elif self.use['state'] == 'material':
                 reply += '\n使用失败！材料不可以使用'
             elif self.use['state'] == 'keepsake':
-                reply += '\n使用失败！纪念品不可以使用，只可以出售'
+                reply += '\n使用失败！纪念品、纪念品活动道具、传说之证不可以使用，只可以出售。或许别的特殊用处。'
             elif self.use['state'] == 'cultivation':
                 reply += '\n使用失败！这个物品只可以在培育师手里培育不可以直接使用'
             elif self.use['state'] == 'unknown':
@@ -1252,6 +1312,10 @@ class Result:
                 reply += '\n使用失败！如果使用，体力值将超过最大体力值'
             elif self.use['state'] == 'the backpack is full':
                 reply += '\n装备失败！背包已满'
+            elif self.use['state'] == 'origin stone':
+                reply += '\n使用失败！技能原石必须合成技能石后才能使用'
+            elif self.use['state'] == 'skill full':
+                reply += '\n使用失败！技能已满'
         elif self.remove_equipment['init']:
             if self.remove_equipment['state'] == 'success':
                 reply += '\n成功卸下装备：' + self.remove_equipment['name']
@@ -1269,13 +1333,13 @@ class Result:
             reply += '\n介绍：' + str(self.monster_introduction['comments'])
         elif self.PVE['init']:
             if self.PVE['state'] == 'win':
-                reply += '\n成功击败「' + self.show_goods(self.PVE['monsters']) + '」，损失' + str(self.PVE['hp']) + '点生命值'
+                reply += '\n成功击败「' + self.show_monsters(self.PVE['monsters']) + '」，损失' + str(self.PVE['hp']) + '点生命值'
                 if len(self.PVE['gets']) != 0:
                     reply += '\n战利品：' + self.show_goods(self.PVE['gets'])
                 else:
                     reply += '\n战利品：无'
             elif self.PVE['state'] == 'die':
-                reply += '\n你在与「' +  self.show_goods(self.PVE['monsters']) + '」的战斗中死亡'
+                reply += '\n你在与「' +  self.show_monsters(self.PVE['monsters']) + '」的战斗中死亡'
                 if len(self.PVE['gets']) != 0:
                     reply += '\n战利品：' + self.show_goods(self.PVE['gets'])
                 else:
@@ -1286,6 +1350,13 @@ class Result:
                 reply += '\n你目前没有生命值呢'
             elif self.PVE['state'] == 'no strength':
                 reply += '\n体力不足~'
+                
+            if self.PVE.__contains__('activity_gets') and len(self.PVE['activity_gets']) != 0:
+                reply += '\n额外获得物品'
+                for activity, value in self.PVE['activity_gets'].items():
+                    reply += '\n因为' + activity + '获得：' + self.show_goods(value)
+            if self.PVE.__contains__('buff'):
+                reply += '\n受到debuff：' + self.PVE['buff']['name']
         elif self.mining['init']:
             if self.mining['times'] != 0:
                 reply += '\n你成功挖矿' + str(self.mining['times']) + '次，消耗' + str(self.mining['strength']) + '点体力值，得到：' + self.show_goods(self.mining['gets'])
@@ -1360,6 +1431,43 @@ class Result:
                 reply += '\n收获失败！你不是培育师~'
             elif self.harvest['state'] == 'nothing':
                 reply += '\n收获失败！没有可以收获的或者背包已满'
+        elif self.skill['init']:
+            if self.skill['state'] == 'success':
+                reply += '\n成功使用「' + self.skill['name'] + '」' + self.skill['effect']
+            elif self.skill['state'] == 'low san':
+                reply += '\n使用失败！你的精神值过低'
+            elif self.skill['state'] == 'limit':
+                reply += '\n使用失败！已经达到使用上限，请充能技能。'
+            elif self.skill['state'] == 'unable':
+                reply += '\n使用失败！该技能不可以使用'
+            elif self.skill['state'] == 'none':
+                reply += '\n使用失败！不存在该技能'
+        elif self.remove_skill['init']:
+            if self.remove_skill['state'] == 'success':
+                reply += '\n成功遗忘「' + self.remove_skill['name'] + '」'
+            elif self.remove_skill['state'] == 'none':
+                reply += '\n遗忘失败！不存在该技能'
+        elif self.recharge_skill['init']:
+            if self.recharge_skill['state'] == 'success':
+                reply += '\n成功充能「' + self.recharge_skill['name'] + '」'
+            elif self.recharge_skill['state'] == 'none':
+                reply += '\n充能失败！不存在该技能'
+            elif self.recharge_skill['state'] == 'not enough':
+                reply += '\n充能失败！没有魔法石'
+        elif self.exchange_activity_goods['init']:
+            if self.exchange_activity_goods['state'] == 'success':
+                reply += '\n兑换成功！失去「%sx%d」获得「%sx%d」' % (
+                    self.exchange_activity_goods['activity_goods'],
+                    self.exchange_activity_goods['cost_number'],
+                    self.exchange_activity_goods['goods'],
+                    self.exchange_activity_goods['get_number']
+                )
+            elif self.exchange_activity_goods['state'] == 'not enough':
+                reply += '\n兑换失败！物品不足'
+            elif self.exchange_activity_goods['state'] == 'none':
+                reply += '\n兑换失败！活动已结束或不存在对应的活动'
+            elif self.exchange_activity_goods['state'] == 'knapsack':
+                reply += '\n兑换失败！背包已满'
         else:
             reply += '\n【操作指令内出现未预期的错误】'
 
@@ -1541,6 +1649,22 @@ class Result:
         self.low_san = low_san
         self.init = True
 
+    def append_skill(self, skill):
+        self.skill = skill
+        self.init = True
+
+    def append_remove_skill(self, remove_skill):
+        self.remove_skill = remove_skill
+        self.init = True
+
+    def append_recharge_skill(self, recharge_skill):
+        self.recharge_skill = recharge_skill
+        self.init = True
+
+    def append_exchange_activity_goods(self, exchange_activity_goods):
+        self.exchange_activity_goods = exchange_activity_goods
+        self.init = True
+
     def set_name(self, name):
         self.name = name
         self.init = True
@@ -1548,12 +1672,14 @@ class Result:
     def get_init(self):
         return self.init
 
+# 运算核心
 class Core:
     def __init__(self):
         super().__init__()
         self.users = {}  # 用户
 
         self.system = {}  # 系统数据，主要为boss血量等
+        self.special_monster = {}  # 特殊怪物
         self.rank = {}  # 排名数据
 
         self.init = True  # 是否有初始化
@@ -1574,6 +1700,18 @@ class Core:
         self.forger_synthesis = {}  # 锻造师合成表
         self.nurturer_synthesis = {}  # 培育师合成表
         self.enchanter_synthesis = {}  # 附魔师合成表
+
+        self.activity = {}  # 活动列表
+
+        # 技能表
+        self.skills = [
+            '火元素祝福',
+            '水元素祝福',
+            '木元素祝福',
+            '雷元素祝福',
+            '天使祝福'
+        ]
+        self.skill_shop = {}
 
         self.luck = BaseFunction.luck()
 
@@ -1597,7 +1735,9 @@ class Core:
             'be_fenced': 0,
             'monster': 0,
             'die': 0,  # 死亡数
-            'travel': 0
+            'travel': 0,
+            'mining_max': 0,
+            'sign_max': 0
         }
         rank = dataManage.load_obj(rank_path)
         if rank.__contains__('gold'):
@@ -1624,7 +1764,11 @@ class Core:
             self.rank['die'] = rank['die']
         if rank.__contains__('travel'):
             self.rank['travel'] = rank['travel']
-
+        if rank.__contains__('mining_max'):
+            self.rank['mining_max'] = rank['mining_max']        
+        if rank.__contains__('sign_max'):
+            self.rank['sign_max'] = rank['sign_max']
+        
         # 获取物品
         index = 1
         with open(goods_path + '.txt', 'r+', encoding='utf-8') as f:
@@ -1712,6 +1856,34 @@ class Core:
                                 item['cost'].append(single)
                         if not self.soul_shop.__contains__(data[0]) and len(item['cost']) != 0:
                             self.soul_shop[data[0]] = item
+                        
+        with open(skill_shop_path + '.txt', 'r+', encoding='utf-8') as f:
+            text = f.readlines()
+            for line in text:
+                line = line.strip()
+                if len(line) > 0 and line[0] != '#':
+                    data = line.split(' ')
+                    if len(data) == 2 and data[0] in self.skills:
+                        item = {
+                            'cost': []
+                        }
+                        information = data[1].split('=')
+                        cost_list = information[1].split('，')
+                        for section in cost_list:
+                            piece = section.split('x')
+                            if len(piece) == 2 and piece[1].isdigit():
+                                single = {
+                                    'name': piece[0],
+                                    'number': int(piece[1]),
+                                    'enchanting': {
+                                        'sharp': 0,
+                                        'rapid': 0,
+                                        'strong': 0
+                                    }
+                                }
+                                item['cost'].append(single)
+                        if not self.skill_shop.__contains__(data[0]) and len(item['cost']) != 0:
+                            self.skill_shop[data[0]] = item
         
         # 分解表&合成表的获取
         # （分解表）
@@ -1859,9 +2031,13 @@ class Core:
                                             }
                                         }
                                         if len(information) == 1:
-                                            item['name'] = information[0]
+                                            item_name, enchanting = analysis_name(information[0])
+                                            item['name'] = item_name
+                                            item['enchanting'] = enchanting
                                         elif len(information) == 2:
-                                            item['name'] = information[0]
+                                            item_name, enchanting = analysis_name(information[0])
+                                            item['name'] = item_name
+                                            item['enchanting'] = enchanting
                                             if information[1].isdigit():
                                                 item['number'] = int(information[1])
 
@@ -1985,6 +2161,7 @@ class Core:
                             self.nurturer_synthesis[name] = synthesis_route
 
         # 获取怪物表
+        self.special_monster = dataManage.load_obj(special_monster_path)
         with open(monster_path + '.txt', 'r+', encoding='utf-8') as f:
             text = f.readlines()
             for line in text:
@@ -1994,7 +2171,7 @@ class Core:
                     if len(data) >= 6:
                         if not self.monster.__contains__(data[0]):
                             monster = {
-                                'level': 0,
+                                'level': -1,
                                 'attack': 0,
                                 'armor': 0,
                                 'speed': 0,
@@ -2032,7 +2209,7 @@ class Core:
                                                         'enchanting': enchanting
                                                     }
                                                     monster['spoils'].append(item)
-                            if monster['level'] != 0 and monster['hp'] != 0 and monster['comments'] != '':
+                            if (monster['level'] != -1 and monster['hp'] != 0 and monster['comments'] != ''):
                                 if 1 <= monster['level'] <= 3:
                                     name = '劣质灵'
                                     number = monster['level']
@@ -2063,6 +2240,20 @@ class Core:
                                         }
                                     }
                                     monster['spoils'].append(item)
+                                if data[0] == '天灾军团':
+                                    if self.special_monster.__contains__(data[0]):
+                                        monster['attack'] = self.special_monster[data[0]]['attack']
+                                        monster['armor'] = self.special_monster[data[0]]['armor']
+                                        monster['speed'] = self.special_monster[data[0]]['speed']
+                                        monster['hp'] = self.special_monster[data[0]]['hp']
+                                    else:
+                                        self.special_monster[data[0]] = {
+                                            'attack': monster['attack'],
+                                            'armor': monster['armor'],
+                                            'speed': monster['speed'],
+                                            'hp': monster['hp']
+                                        }
+                                        dataManage.save_obj(self.special_monster, special_monster_path)
                                 self.monster[data[0]] = copy.deepcopy(monster)
         # 加载群系表
         with open(map_path + 'map.txt', 'r+', encoding='utf-8') as f:
@@ -2124,6 +2315,40 @@ class Core:
             temp_value = self.recalculate_equipment_attribute(value)
             self.users[key] = self.recharge_occupation_attribute(temp_value)
 
+        # 加载活动
+        filenames=os.listdir(activity_path)
+        for filename in filenames:
+            if filename[-4:] == '.txt':
+                with open(activity_path + '/' + filename, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+                    activity = {
+                        'start': '',
+                        'end': '',
+                        'sign': '0',
+                        'pvp': '0',
+                        'pve': '0',
+                        'activity_goods': '',
+                        'exchange': {}
+                    }
+                    activity_name = ''
+                    for line in lines:
+                        line = line.strip()
+                        if len(line) == 0 or line[0] == '#':
+                            continue
+                        if activity_name == '':
+                            activity_name = line
+                            continue
+
+                        section = line.split('=')
+                        if activity.__contains__(section[0]):
+                            activity[section[0]] = section[1]
+                            continue
+                        if self.goods.__contains__(section[0]) and section[1].isdigit():
+                            activity['exchange'][section[0]] = int(section[1])
+                    # 判断是否有该活动了，而且判断活动道具是不是存在的
+                    if not self.activity.__contains__(activity_name) and self.goods.__contains__(activity['activity_goods']):
+                        self.activity[activity_name] = activity
+
     def save_user_information(self):
         dataManage.save_obj(self.users, user_path)
         dataManage.save_obj(self.rank, rank_path)
@@ -2166,7 +2391,7 @@ class Core:
             # 群系判断
             if not self.map.__contains__(self.users[qq]['config']['place']):
                 init_map = []
-                for key, value in self.map:
+                for key, value in self.map.items():
                     if self.map[key]['level'] == 0:
                         init_map.append(key)
                 self.users[qq]['config']['place'] = random.choice(init_map)
@@ -2194,7 +2419,7 @@ class Core:
                 'sign': {
                     'last_date': '2021-8-1',  # 上一次签到的日期
                     'consecutive': 0,  # 连续签到的天数
-                    'sum': 0  # 累计签到的天星术
+                    'sum': 0  # 累计签到的天总数
                 },
                 'die_check': False,  # 死亡检验
                 'place': '内测新手村',  # 当前所在的位置
@@ -2620,6 +2845,10 @@ class Core:
     def get_soul_shop(self):
         return copy.deepcopy(self.soul_shop)
 
+    # 获取技能表
+    def get_skill_shop(self) -> dict:
+        return self.skill_shop
+
     def get_synthesis(self):
         return copy.deepcopy(self.synthesis)
         
@@ -2638,14 +2867,22 @@ class Core:
     # ==========================================
     # 数据获取
     def get_attack(self, user):
-        return user['attribute']['strengthen']['attack'] + user['attribute']['own']['attack'] + \
+        reply, level, user = self.remove_buff('冰冻', user)
+        if level > 9:
+            return 0
+        attack = user['attribute']['strengthen']['attack'] + user['attribute']['own']['attack'] + \
                user['attribute']['equipment']['attack'] + user['attribute']['skill']['attack'] + \
                user['attribute']['occupation']['attack'] + user['attribute']['buff']['attack']
+        return int(attack * (1 - 0.04 * level))
 
     def get_armor(self, user):
-        return user['attribute']['strengthen']['armor'] + user['attribute']['own']['armor'] + \
+        reply, level, user = self.remove_buff('灼烧', user)
+        if level > 9:
+            return 0
+        armor = user['attribute']['strengthen']['armor'] + user['attribute']['own']['armor'] + \
                user['attribute']['equipment']['armor'] + user['attribute']['skill']['armor'] + \
                user['attribute']['occupation']['armor'] + user['attribute']['buff']['armor']
+        return int(armor * (1 - 0.06 * level))
 
     def get_speed(self, user):
         return user['attribute']['strengthen']['speed'] + user['attribute']['own']['speed'] + \
@@ -2917,6 +3154,18 @@ class Core:
             temp_user = self.get_user(self.rank['die'])
             if new_user['combat_data']['die'] > temp_user['combat_data']['die']:
                 self.rank['die'] = qq
+        
+        # 挖矿量判断
+        if qq != self.rank['mining_max']:
+            temp_user = self.get_user(self.rank['mining_max'])
+            if new_user['survival_data']['mining'] > temp_user['survival_data']['mining']:
+                self.rank['mining_max'] = qq
+                
+        # 签到判断
+        if qq != self.rank['sign_max']:
+            temp_user = self.get_user(self.rank['sign_max'])
+            if new_user['config']['sign']['sum'] > temp_user['config']['sign']['sum']:
+                self.rank['sign_max'] = qq
         
         if self.get_PVP_times(new_user) > 100:
             # 胜率判断
@@ -3308,7 +3557,8 @@ class Core:
 
     # 获得buff
     def get_buff(self, user, buff):
-        valid_name = ['无敌', '进攻', '防御', '双倍积分收益', '减半积分收益', '中毒', '麻痹', '冰冻', '灼烧']
+        valid_name = ['无敌', '进攻', '防御', '双倍积分收益', '减半积分收益', '中毒', '麻痹', '冰冻', '灼烧',
+        '火元素祝福', '水元素祝福', '木元素祝福', '雷元素祝福', '天使祝福']
         reply = False
 
         if buff['name'] in valid_name:
@@ -3381,20 +3631,6 @@ class Core:
 
         if user['equipment']['mask'] != {} and self.goods.__contains__(user['equipment']['mask']['name']):
             name = user['equipment']['mask']['name']
-            equipment['attack'] += self.goods[name]['attack']
-            equipment['armor'] += self.goods[name]['armor']
-            equipment['speed'] += self.goods[name]['speed']
-            equipment['knapsack'] += self.goods[name]['knapsack']
-
-            equipment['hp']['recovery'] += self.goods[name]['hp-recovery']
-            equipment['hp']['max'] += self.goods[name]['hp-max']
-
-            equipment['san']['recovery'] += self.goods[name]['san-recovery']
-            equipment['san']['max'] += self.goods[name]['san-max']
-
-            equipment['strength']['recovery'] += self.goods[name]['strength-recovery']
-            equipment['strength']['max'] += self.goods[name]['strength-max']
-            name = user['equipment']['arms']['name']
             equipment['attack'] += self.goods[name]['attack']
             equipment['armor'] += self.goods[name]['armor']
             equipment['speed'] += self.goods[name]['speed']
@@ -3610,6 +3846,24 @@ class Core:
                 
         return reply, level, user
 
+    def remove_force_buff(self, name, user):
+        reply = False
+        level = 0
+        apply_index = -1
+
+        for index in range(len(user['buff'])):
+            if user['buff'][index]['name'] == name:
+                if (user['buff'][index]['level'] > level and user['buff'][apply_index]['type'] == user['buff'][index]['type']) or (user['buff'][apply_index]['type'] == 0 and user['buff'][index]['type'] != 0):
+                    reply = True
+                    level = user['buff'][index]['level']
+                    apply_index = index
+
+        if reply:
+            del user['buff'][apply_index]
+                
+        return reply, level, user
+
+
     # ==========================================
     # 转职
     def recharge_occupation_attribute(self, user):
@@ -3642,48 +3896,32 @@ class Core:
             user['attribute']['occupation']['strength']['max'] += 100
 
         if user['occupation']['fight'] == '战士':
-            if user['occupation']['fight_level'] == 1:
-                user['attribute']['occupation']['attack'] += 2
-                user['attribute']['occupation']['armor'] += 2
-            elif user['occupation']['fight_level'] == 2:
-                user['attribute']['occupation']['attack'] += 4
-                user['attribute']['occupation']['armor'] += 4
-            elif user['occupation']['fight_level'] == 3:
-                user['attribute']['occupation']['attack'] += 6
-                user['attribute']['occupation']['armor'] += 6
+            user['attribute']['occupation']['attack'] += 2 * user['occupation']['fight_level']
+            user['attribute']['occupation']['armor'] += 2 * user['occupation']['fight_level']
+
             user['attribute']['occupation']['speed'] += 10
         elif user['occupation']['fight'] == '盾战士':
-            if user['occupation']['fight_level'] == 1:
-                user['attribute']['occupation']['armor'] += 4
-            elif user['occupation']['fight_level'] == 2:
-                user['attribute']['occupation']['armor'] += 8
-            elif user['occupation']['fight_level'] == 3:
-                user['attribute']['occupation']['armor'] += 12
+            user['attribute']['occupation']['armor'] += 4 * user['occupation']['fight_level']
+
             user['attribute']['occupation']['speed'] -= 10
             user['attribute']['occupation']['hp']['max'] += 10
             user['attribute']['occupation']['strength']['max'] += 50
         elif user['occupation']['fight'] == '弓箭手':
-            if user['occupation']['fight_level'] == 1:
-                user['attribute']['occupation']['attack'] += 3
-                user['attribute']['occupation']['speed'] += 20
-            elif user['occupation']['fight_level'] == 2:
-                user['attribute']['occupation']['attack'] += 6
-                user['attribute']['occupation']['speed'] += 25
-            elif user['occupation']['fight_level'] == 3:
-                user['attribute']['occupation']['attack'] += 9
-                user['attribute']['occupation']['speed'] += 30
+            user['attribute']['occupation']['attack'] += 3 * user['occupation']['fight_level']
+            user['attribute']['occupation']['speed'] += 15 + 5 * user['occupation']['fight_level']
 
             user['attribute']['occupation']['hp']['max'] -= 10
         elif user['occupation']['fight'] == '魔法师':
-            if user['occupation']['fight_level'] == 1:
-                user['attribute']['occupation']['attack'] += 3
-            elif user['occupation']['fight_level'] == 2:
-                user['attribute']['occupation']['attack'] += 6
-            elif user['occupation']['fight_level'] == 3:
-                user['attribute']['occupation']['attack'] += 9
+            user['attribute']['occupation']['attack'] += 3 * user['occupation']['fight_level']
+            user['attribute']['occupation']['san']['max'] += 25 * user['occupation']['fight_level']
                 
             user['attribute']['occupation']['strength']['max'] -= 50
             user['attribute']['occupation']['hp']['max'] -= 20
+
+        user['skill']['max'] = 2
+        if user['occupation']['fight'] == '魔法师':
+            if user['occupation']['fight_level'] >= 2:
+                user['skill']['max'] = 4
 
         return user
 
@@ -3988,6 +4226,26 @@ class Core:
                             'strong': 2
                         }
                     }
+                elif user['occupation']['work_level'] == 3:
+                    item = {
+                        'name': '四级矿工升级凭证',
+                        'number': 1,
+                        'enchanting': {
+                            'sharp': 0,
+                            'rapid': 0,
+                            'strong': 0
+                        }
+                    }
+                elif user['occupation']['work_level'] == 4:
+                    item = {
+                        'name': '五级矿工升级凭证',
+                        'number': 1,
+                        'enchanting': {
+                            'sharp': 0,
+                            'rapid': 0,
+                            'strong': 0
+                        }
+                    }
             elif user['occupation']['work'] == '锻造师':
                 if user['occupation']['work_level'] == 1:
                     item = {
@@ -4003,6 +4261,26 @@ class Core:
                     item = {
                         'name': '下界石英',
                         'number': 5,
+                        'enchanting': {
+                            'sharp': 0,
+                            'rapid': 0,
+                            'strong': 0
+                        }
+                    }
+                elif user['occupation']['work_level'] == 3:
+                    item = {
+                        'name': '四级锻造师升级凭证',
+                        'number': 1,
+                        'enchanting': {
+                            'sharp': 0,
+                            'rapid': 0,
+                            'strong': 0
+                        }
+                    }
+                elif user['occupation']['work_level'] == 4:
+                    item = {
+                        'name': '五级锻造师升级凭证',
+                        'number': 1,
                         'enchanting': {
                             'sharp': 0,
                             'rapid': 0,
@@ -4030,6 +4308,26 @@ class Core:
                             'strong': 0
                         }
                     }
+                elif user['occupation']['work_level'] == 3:
+                    item = {
+                        'name': '四级附魔师升级凭证',
+                        'number': 1,
+                        'enchanting': {
+                            'sharp': 0,
+                            'rapid': 0,
+                            'strong': 0
+                        }
+                    }
+                elif user['occupation']['work_level'] == 4:
+                    item = {
+                        'name': '五级附魔师升级凭证',
+                        'number': 1,
+                        'enchanting': {
+                            'sharp': 0,
+                            'rapid': 0,
+                            'strong': 0
+                        }
+                    }
             elif user['occupation']['work'] == '培育师':
                 if user['occupation']['work_level'] == 1:
                     item = {
@@ -4051,18 +4349,38 @@ class Core:
                             'strong': 0
                         }
                     }
+                elif user['occupation']['work_level'] == 3:
+                    item = {
+                        'name': '四级培育师升级凭证',
+                        'number': 1,
+                        'enchanting': {
+                            'sharp': 0,
+                            'rapid': 0,
+                            'strong': 0
+                        }
+                    }
+                elif user['occupation']['work_level'] == 4:
+                    item = {
+                        'name': '五级培育师升级凭证',
+                        'number': 1,
+                        'enchanting': {
+                            'sharp': 0,
+                            'rapid': 0,
+                            'strong': 0
+                        }
+                    }
             level_up_occupation['need'] = item
 
-            reply, user = self.remove_items(user, item)
-            if reply == 0:
-                if user['occupation']['work_level'] < 3:
+            if user['occupation']['work_level'] >= 5:
+                level_up_occupation['state'] = 'max'
+            else:
+                reply, user = self.remove_items(user, item)
+                if reply == 0:
                     user['occupation']['work_level'] += 1
-                else:
-                    level_up_occupation['state'] = 'max'
-            elif reply == 1:
-                level_up_occupation['state'] = 'not enough'
-            elif reply == 2:
-                level_up_occupation['state'] = 'non-existent'
+                elif reply == 1:
+                    level_up_occupation['state'] = 'not enough'
+                elif reply == 2:
+                    level_up_occupation['state'] = 'non-existent'
         user = self.recharge_occupation_attribute(user)
         result.append_level_up_occupation(level_up_occupation)
         result = self.update(qq, user, result)
@@ -4339,8 +4657,8 @@ class Core:
             level_up_occupation['state'] = 'null'
         else:
             item = {
-                'name': '稀有灵',
-                'number': 2,
+                'name': '普通灵',
+                'number': 5,
                 'enchanting': {
                     'sharp': 0,
                     'rapid': 0,
@@ -4348,6 +4666,46 @@ class Core:
                 }
             }
             if user['occupation']['fight_level'] == 2:
+                item = {
+                    'name': '稀有灵',
+                    'number': 1,
+                    'enchanting': {
+                        'sharp': 0,
+                        'rapid': 0,
+                        'strong': 0
+                    }
+                }
+            elif user['occupation']['fight_level'] == 3:
+                item = {
+                    'name': '稀有灵',
+                    'number': 10,
+                    'enchanting': {
+                        'sharp': 0,
+                        'rapid': 0,
+                        'strong': 0
+                    }
+                }
+            elif user['occupation']['fight_level'] == 4:
+                item = {
+                    'name': '稀有灵',
+                    'number': 50,
+                    'enchanting': {
+                        'sharp': 0,
+                        'rapid': 0,
+                        'strong': 0
+                    }
+                }
+            elif user['occupation']['fight_level'] == 5:
+                item = {
+                    'name': '史诗灵',
+                    'number': 3,
+                    'enchanting': {
+                        'sharp': 0,
+                        'rapid': 0,
+                        'strong': 0
+                    }
+                }
+            elif user['occupation']['fight_level'] == 6:
                 item = {
                     'name': '史诗灵',
                     'number': 10,
@@ -4359,16 +4717,16 @@ class Core:
                 }
             level_up_occupation['need'] = item
 
-            reply, user = self.remove_items(user, item)
-            if reply == 0:
-                if user['occupation']['fight_level'] < 3:
+            if user['occupation']['fight_level'] >= 6:
+                level_up_occupation['state'] = 'max'
+            else:
+                reply, user = self.remove_items(user, item)
+                if reply == 0:
                     user['occupation']['fight_level'] += 1
-                else:
-                    level_up_occupation['state'] = 'max'
-            elif reply == 1:
-                level_up_occupation['state'] = 'not enough'
-            elif reply == 2:
-                level_up_occupation['state'] = 'non-existent'
+                elif reply == 1:
+                    level_up_occupation['state'] = 'not enough'
+                elif reply == 2:
+                    level_up_occupation['state'] = 'non-existent'
         user = self.recharge_occupation_attribute(user)
         result.append_level_up_occupation(level_up_occupation)
         result = self.update(qq, user, result)
@@ -4407,6 +4765,35 @@ class Core:
             message_sign['gold_sign'] = gold
             message_sign['consecutive'] = user['config']['sign']['consecutive']
             message_sign['sum'] = user['config']['sign']['sum']
+
+            # 道具获取
+            for name, value in self.activity.items():
+                if is_beyond_deadline(value['end']) or not is_beyond_deadline(value['start']):
+                    continue
+                if value['sign'] != '0':
+                    number = 0
+                    if '-' in value['sign']:
+                        section = value['sign'].split('-')
+                        if len(section) == 2 and section[0].isdigit() and section[1].isdigit():
+                            min = int(section[0])
+                            max = int(section[1])
+                            number = random.randint(min, max)
+                    elif value['sign'].isdigit():
+                        number = int(value['sign'])
+                    
+                    if number > 0:
+                        items = {
+                            'name': value['activity_goods'],
+                            'number': number,
+                            'enchanting': {
+                                'sharp': 0,
+                                'rapid': 0,
+                                'strong': 0
+                            }
+                        }
+                        reply, user = self.get_items(user, items)
+                        if reply:
+                            message_sign['gets'][name] = [items]
         else:
             message_sign['state'] = 'fail'
         result.set_name(user['config']['name'])
@@ -4439,6 +4826,37 @@ class Core:
         elif user_passive['attribute']['own']['gold'] <= 1:  # 被动击剑的人没有积分
             PVP['state'] = 'passive fencers have no points'
         else:
+            # 道具获取
+            for name, value in self.activity.items():
+                if is_beyond_deadline(value['end']) or not is_beyond_deadline(value['start']):
+                    continue
+                if value['pvp'] != '0':
+                    number = 0
+                    if '-' in value['pvp']:
+                        section = value['pvp'].split('-')
+                        if len(section) == 2 and section[0].isdigit() and section[1].isdigit():
+                            min = int(section[0])
+                            max = int(section[1])
+                            number = random.randint(min, max)
+                    elif value['pvp'].isdigit():
+                        number = int(value['pvp'])
+                    
+                    if number > 0:
+                        items = {
+                            'name': value['activity_goods'],
+                            'number': number,
+                            'enchanting': {
+                                'sharp': 0,
+                                'rapid': 0,
+                                'strong': 0
+                            }
+                        }
+                        reply, user_active = self.get_items(user_active, items)
+                        if reply:
+                            if not PVP.__contains__('gets'):
+                                PVP['gets'] = {}
+                            PVP['gets'][name] = [items]
+
             user_active['attribute']['own']['strength']['number'] -= 1
             user_active['combat_data']['PVP_active'] += 1
             user_passive['combat_data']['PVP_passive'] += 1
@@ -4508,6 +4926,36 @@ class Core:
         return result
 
     def PVE(self, qq, user, monsters, result_PVE):
+        for name, value in self.activity.items():
+            if is_beyond_deadline(value['end']) or not is_beyond_deadline(value['start']):
+                continue
+            if value['pve'] != '0':
+                number = 0
+                if '-' in value['pve']:
+                    section = value['pve'].split('-')
+                    if len(section) == 2 and section[0].isdigit() and section[1].isdigit():
+                        min = int(section[0])
+                        max = int(section[1])
+                        number = random.randint(min, max)
+                elif value['pve'].isdigit():
+                    number = int(value['pve'])
+                
+                if number > 0:
+                    items = {
+                        'name': value['activity_goods'],
+                        'number': number,
+                        'enchanting': {
+                            'sharp': 0,
+                            'rapid': 0,
+                            'strong': 0
+                        }
+                    }
+                    reply, user = self.get_items(user, items)
+                    if reply:
+                        if not result_PVE.__contains__('activity_gets'):
+                            result_PVE['activity_gets'] = {}
+                        result_PVE['activity_gets'][name] = [items]
+
         for monster in monsters:
             target = self.get_monster(monster['name'])
             if target is not None:
@@ -4533,15 +4981,79 @@ class Core:
                     part_rand = random.randint(0, 10)
                     hurt += part_rand
 
+                    reply_fire, level_fire, user = self.remove_buff('火元素祝福', user)
+                    reply_wood, level_wood, user = self.remove_buff('木元素祝福', user)
+                    reply_thunder, level_thunder, user = self.remove_buff('雷元素祝福', user)
+                    reply_water, level_water, user = self.remove_buff('水元素祝福', user)
+                    element = target['element']
+                    if element != '':
+                        relationship = 0
+                        same_element = 0
+                        debuff_name = ''
+                        if element == '火':
+                            relationship = level_water - level_wood
+                            same_element = level_fire
+                            debuff_name = '灼烧'
+                        elif element == '木':
+                            relationship = level_fire - level_thunder
+                            same_element = level_wood
+                            debuff_name = '中毒'
+                        elif element == '雷':
+                            relationship = level_wood - level_water
+                            same_element = level_thunder
+                            debuff_name = '麻痹'
+                        elif element == '水':
+                            relationship = level_thunder - level_fire
+                            same_element = level_water
+                            debuff_name = '冰冻'
+                        
+                        buff_level = same_element + relationship  # 同属性和克制属性都可以减少受到debuff的影响
+                        if debuff_name != '' and random.uniform(0, 1) < 0.15 * (1 + target['level'] * 0.1) * (1 - buff_level * 0.1):
+                            buff = {
+                                'name': debuff_name,  # buff名字
+                                'type': 1,  # 0表示次数，1表示时间
+                                'level': int(target['level'] / 2),  # 级别
+                                'date': '',  # 时间
+                                'times': 0  # 次数
+                            }
+                            if buff['level'] <= 0:
+                                buff['level'] = 1
+                            minute = (300 - user['attribute']['own']['san']['number']) / 20
+                            if minute < 5:
+                                minute = 5
+                            buff['date'] = addition_minute(getNow.toString(), int(minute))
+                            reply, user = self.get_buff(user, buff)
+                            if reply:
+                                result_PVE['buff'] = buff
+                        if relationship > 0:
+                            hurt = hurt * (1 - 0.05 * relationship)
+                        if relationship < 0:
+                            hurt = hurt * (1.5 - 0.05 * relationship)                    
+
                     hurt = int(hurt)
                     if hurt <= 0:
                         hurt = 1
+                    reply, level, user = self.remove_buff('无敌', user)
+                    if reply:
+                        hurt = 0
                     result_PVE['hp'] += hurt
 
                     if user['attribute']['own']['hp']['number'] < hurt:
                         result_PVE['state'] = 'die'
                         user['config']['die_check'] = True
                         user['attribute']['own']['hp']['number'] = 0
+
+                        # 如果玩家死亡，天灾军团将被加强
+                        if monster['name'] == '天灾军团':
+                            self.monster[monster['name']]['attack'] += 2
+                            self.monster[monster['name']]['armor'] += 1
+                            self.special_monster[monster['name']] = {
+                                'attack': self.monster[monster['name']]['attack'],
+                                'armor': self.monster[monster['name']]['armor'],
+                                'speed': self.monster[monster['name']]['speed'],
+                                'hp': self.monster[monster['name']]['hp']
+                            }
+                            dataManage.save_obj(self.special_monster, special_monster_path)
                         break
                     else:
                         user['combat_data']['monster_kill'] += 1
@@ -4561,17 +5073,32 @@ class Core:
                                 if not is_stack:
                                     result_PVE['gets'].append(copy.deepcopy(goods))
 
+                        # 如果天灾军团死亡，天灾军团将被减弱
+                        if monster['name'] == '天灾军团':
+                            self.monster[monster['name']]['attack'] += 1
+                            self.monster[monster['name']]['armor'] += 0
+                            self.special_monster[monster['name']] = {
+                                'attack': self.monster[monster['name']]['attack'],
+                                'armor': self.monster[monster['name']]['armor'],
+                                'speed': self.monster[monster['name']]['speed'],
+                                'hp': self.monster[monster['name']]['hp']
+                            }
+                            dataManage.save_obj(self.special_monster, special_monster_path)
+
             if result_PVE['state'] == 'die':
                 break
         return user, result_PVE
 
     def PVB(self, qq, boss):
         pass
-
+    
+    # 购买
     def purchase(self, qq, name, number):
         user = self.get_user(qq)
         result = Result()
         result.set_name(user['config']['name'])
+        if number <= 0:
+            number = 1
         purchase = {
             'init': True,
             'state': 'success',
@@ -4582,7 +5109,7 @@ class Core:
             'number': number
         }
 
-        if not self.goods.__contains__(name):
+        if not self.goods.__contains__(name) and not self.goods.__contains__(name + '原石'):
             purchase['state'] = 'non-existent'  # 不存在
         elif name not in self.shop:
             if self.soul_shop.__contains__(name):
@@ -4602,6 +5129,58 @@ class Core:
                 purchase['cost_soul'] = operated
                     
                 # 限购
+                if purchase['state'] == 'success':
+                    if self.goods[name]['limit'] != 0:
+                        if user['config']['limit'].__contains__(name):
+                            if user['config']['limit'][name] + number > self.goods[name]['limit']:
+                                purchase['state'] = 'limit'
+                            else:
+                                user['config']['limit'][name] += number
+                        else:
+                            if number > self.goods[name]['limit']:
+                                purchase['state'] = 'limit'
+                            else:
+                                user['config']['limit'][name] = number
+                
+                # 获取物品
+                if purchase['state'] == 'success':
+                    item = {
+                        'name': name,
+                        'number': number,
+                        'enchanting': {
+                            'sharp': 0,
+                            'rapid': 0,
+                            'strong': 0
+                        }
+                    }
+                    reply, user = self.get_items(user, item)
+                    if not reply:
+                        purchase['state'] = 'the backpack is full'
+
+
+                # 判断是否成功
+                if purchase['state'] != 'success':
+                    for i in operated:
+                        reply, user = self.get_items(user, i)
+            elif self.skill_shop.__contains__(name):
+                purchase['type'] = 1
+                cost = copy.deepcopy(self.skill_shop[name]['cost'])
+                
+                operated = []
+
+                for i in cost:
+                    i['number'] *= number
+                    reply, user = self.remove_items(user, i)
+                    if reply == 0:
+                        operated.append(i)
+                    else:
+                        purchase['state'] = 'no gold'
+                        break
+                purchase['cost_soul'] = operated
+                    
+                # 限购
+                name = name + '原石'
+                purchase['name'] = name
                 if purchase['state'] == 'success':
                     if self.goods[name]['limit'] != 0:
                         if user['config']['limit'].__contains__(name):
@@ -4806,6 +5385,7 @@ class Core:
         self.update(qq2, user_received, Result())
         return result
 
+    # 使用
     def use(self, qq, name, number):
         result = Result()
         user = self.get_user(qq)
@@ -4944,7 +5524,7 @@ class Core:
                                 user['equipment']['knapsack'] = item
                     else:
                         use['state'] = 'too much'
-                elif goods['type'] == 2 or (21 <= goods['type'] <= 27 and goods['type'] != 23):
+                elif goods['type'] == 2 or (21 <= goods['type'] <= 28 and goods['type'] != 23):
                     if goods['type'] == 27:  # 树苗、种子、牲畜
                         use['state'] = 'cultivation'
                     elif goods['type'] == 26:  # 晶石
@@ -4969,13 +5549,26 @@ class Core:
                         elif name == '高级传送石':
                             init_map = []
                             for key, value in self.map.items():
-                                if self.map[key]['level'] == 2:
+                                if self.map[key]['level'] == 2 or self.map[key]['level'] == 3:
                                     init_map.append(key)
                             if len(init_map) != 0:
                                 user['config']['place'] = random.choice(init_map)
                             use['comments'] = '再一次天转地旋之后你被传送到了' + user['config']['place']
                             user['survival_data']['travel'] += 1
 
+                        elif name[-2:] == '原石':
+                            use['state'] = 'origin stone'
+                        elif name[-3:] == '技能石':
+                            if len(user['skill']['skills']) < user['skill']['max']:
+                                user['skill']['skills'].append({
+                                    'name': name[:-3],
+                                    'cost': 40,
+                                    'limit': 5,
+                                    'use_times': 0
+                                })
+                                use['comments'] = '狂暴的魔法力量涌入你的体力，获得了技能' + name[:-3]
+                            else:
+                                use['state'] = 'skill full'
                     elif goods['type'] == 25:  # 卷轴
                         buff = {
                             'name': '',  # buff名字
@@ -5055,7 +5648,31 @@ class Core:
                             buff['times'] = addition_minute(getNow.toString(), 5)
                             use['comments'] = '你获得了5分钟的1级防御buff'
                             reply, user = self.get_buff(user, buff)
-
+                    elif goods['type'] == 28:  # 特殊药剂
+                        if name == '姜汤':
+                            reply, level, user = self.remove_force_buff('冰冻', user)
+                            if reply:
+                                use['comments'] = '喝下姜汤你感觉好多了，移除「%s%s」' % ('冰冻', get_roman_numerals(level))
+                            else:
+                                use['comments'] = '喝下姜汤你感觉到了一阵暖意'
+                        elif name == '冰粉':
+                            reply, level, user = self.remove_force_buff('灼烧', user)
+                            if reply:
+                                use['comments'] = '吃下冰粉你感觉好多了，移除「%s%s」' % ('灼烧', get_roman_numerals(level))
+                            else:
+                                use['comments'] = '吃下冰粉你感觉到了一阵冰凉'
+                        elif name == '板蓝根':
+                            reply, level, user = self.remove_force_buff('中毒', user)
+                            if reply:
+                                use['comments'] = '喝下板蓝根你感觉好多了，移除「%s%s」' % ('中毒', get_roman_numerals(level))
+                            else:
+                                use['comments'] = '喝下板蓝根你感觉好多了'
+                        elif name == '茶水':
+                            reply, level, user = self.remove_force_buff('麻痹', user)
+                            if reply:
+                                use['comments'] = '喝下茶水你感觉好多了，移除「%s%s」' % ('麻痹', get_roman_numerals(level))
+                            else:
+                                use['comments'] = '喝下茶水你感觉好多了'
                     else:
                         check = True
                         hp = goods['hp'] * number
@@ -5132,6 +5749,125 @@ class Core:
             use['state'] = 'non-existent'
 
         result.append_use(use)
+        result = self.update(qq, user, result)
+        return result
+
+    # 使用技能
+    def use_skill(self, qq, target_qq, index, number):
+        result = Result()
+        user = self.get_user(qq)
+        if qq != target_qq:
+            target_user = self.get_user(target_qq)
+        result.set_name(user['config']['name'])
+        skill = {
+            'init': True,
+            'state': 'success',
+            'name': '',
+            'effect': ''
+        }
+        if number > 10:
+            number = 10
+
+        index -= 1
+        if index < 0 or index >= len(user['skill']['skills']):
+            skill['state'] = 'none'
+        else:
+            user_skill = user['skill']['skills'][index]
+            if user_skill['cost'] < 0:
+                skill['state'] = 'unable'
+            if user['attribute']['own']['san']['number'] < user_skill['cost'] * number:
+                skill['state'] = 'low san'
+            else:
+                if user_skill['use_times'] + number > user_skill['limit']:
+                    skill['state'] = 'limit'
+                else:
+                    skill['name'] = user_skill['name']
+                    minute = user['attribute']['own']['san']['number'] / 10
+                    if user['occupation']['fight'] == '魔法师':
+                        minute *= 1 + 0.3 * user['occupation']['fight_level']
+                    minute = int(minute)
+
+                    user['attribute']['own']['san']['number'] -= user_skill['cost'] * number
+                    user_skill['use_times'] += number
+                    buff = {
+                        'name': '',  # buff名字
+                        'type': 1,  # 0表示次数，1表示时间
+                        'level': number,  # 级别
+                        'date': '',  # 时间
+                        'times': 0  # 次数
+                    }
+                    buff['date'] = addition_minute(getNow.toString(), minute)
+
+                    if user_skill['name'][-2:] == '祝福':
+                        buff['name'] = user_skill['name']
+                        skill['effect'] = '获得buff-' + user_skill['name']
+                    if qq == target_qq:
+                        reply, user = self.get_buff(user, buff)
+                    else:
+                        reply, target_user = self.get_buff(target_user, buff)
+                        self.update(target_qq, target_user, Result())
+                    if not reply:  # 如果不能使用buff
+                        user['attribute']['own']['san']['number'] += user_skill['cost']
+                        user_skill['use_times'] -= 1
+                        skill['state'] = 'unable'
+        result.append_skill(skill)
+        result = self.update(qq, user, result)
+        return result
+
+    # 遗忘技能
+    def remove_skill(self, qq, index):
+        result = Result()
+        user = self.get_user(qq)
+        result.set_name(user['config']['name'])
+        remove_skill = {
+            'init': True,
+            'state': 'success',
+            'name': ''
+        }
+        
+        index -= 1
+        if index < 0 or index >= len(user['skill']['skills']):
+            remove_skill['state'] = 'none'
+        else:
+            remove_skill['name'] = user['skill']['skills'][index]['name']
+            del user['skill']['skills'][index]
+        
+        result.append_remove_skill(remove_skill)
+        result = self.update(qq, user, result)
+        return result
+
+    # 充能技能
+    def recharge_skill(self, qq, index):
+        result = Result()
+        user = self.get_user(qq)
+        result.set_name(user['config']['name'])
+        recharge_skill = {
+            'init': True,
+            'state': 'success',
+            'name': ''
+        }
+        
+        index -= 1
+        if index < 0 or index >= len(user['skill']['skills']):
+            recharge_skill['state'] = 'none'
+        else:
+            recharge_skill['name'] = user['skill']['skills'][index]['name']
+            item = {
+                'name': '魔法石',
+                'number': 1,
+                'enchanting': {
+                    'sharp': 0,
+                    'rapid': 0,
+                    'strong': 0
+                }
+            }
+            reply, user = self.remove_items(user, item)
+            if reply == 0:
+                user['skill']['skills'][index]['use_times'] = 0
+            else:
+                recharge_skill['state'] = 'not enough'
+        
+        result.append_recharge_skill(recharge_skill)
         result = self.update(qq, user, result)
         return result
 
@@ -5227,6 +5963,7 @@ class Core:
         result = self.update(qq, user, result)
         return result
 
+    # 打怪
     def hunt(self, qq):
         result = Result()
         user = self.get_user(qq)
@@ -5273,6 +6010,7 @@ class Core:
         result = self.update(qq, user, result)
         return result
 
+    # 挖矿
     def mining(self, qq, times):
         result = Result()
         user = self.get_user(qq)
@@ -5289,8 +6027,8 @@ class Core:
         if user['occupation']['work'] == '矿工':
             level = user['occupation']['work_level']
         
-        if times > 10:  # 最高挖二十次
-            times = 10
+        if times > 20:  # 最高挖二十次
+            times = 20
         for index in range(times):
             if user['attribute']['own']['strength']['number'] < 2:
                 break
@@ -5300,7 +6038,155 @@ class Core:
             mining['strength'] += 2
             mining['times'] += 1
 
-            if level >= 3:
+            if level >= 5:  # 五级矿工
+                ran = random.randint(0, 100000)
+                items = {
+                    'name': '',
+                    'number': 1,
+                    'enchanting': {
+                        'sharp': 0,
+                        'rapid': 0,
+                        'strong': 0
+                    }
+                }
+                if ran < 66000:
+                    items['name'] = '碎石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 80250:
+                    items['name'] = '石头'
+                    reply, user = self.get_items(user, items)
+                elif ran < 85250:
+                    items['name'] = '铁锭'
+                    reply, user = self.get_items(user, items)
+                elif ran < 87250:
+                    items['name'] = '铝锭'
+                    reply, user = self.get_items(user, items)
+                elif ran < 89000:
+                    items['name'] = '钛矿石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 89500:
+                    items['name'] = '下界石英'
+                    reply, user = self.get_items(user, items)
+                elif ran < 89800:
+                    items['name'] = '灵石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 90550:
+                    items['name'] = '寒铁'
+                    reply, user = self.get_items(user, items)
+                elif ran < 90950:
+                    items['name'] = '星钢岩'
+                    reply, user = self.get_items(user, items)
+                elif ran < 91000:
+                    items['name'] = '秘银'
+                    reply, user = self.get_items(user, items)
+                elif ran < 91010:
+                    items['name'] = '太古岩石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 91410:
+                    items['name'] = '钨矿石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 92160:
+                    items['name'] = '铬矿石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 92170:
+                    items['name'] = '火元素晶石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 92180:
+                    items['name'] = '水元素晶石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 92190:
+                    items['name'] = '雷元素晶石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 92200:
+                    items['name'] = '木元素晶石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 93200:
+                    items['name'] = '钻石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 96200:
+                    items['name'] = '金锭'
+                    reply, user = self.get_items(user, items)
+                elif ran < 96700:
+                    items['name'] = '魔法石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 97000:
+                    items['name'] = '末地水晶'
+                    reply, user = self.get_items(user, items)
+                elif ran < 98000:
+                    items['name'] = '燧石'
+                    reply, user = self.get_items(user, items)
+                else:
+                    items['name'] = '皮革'
+                    reply, user = self.get_items(user, items)
+
+                if reply:
+                    mining['gets'].append(items)
+            elif level >= 4:  # 四级矿工
+                ran = random.randint(0, 100000)
+                items = {
+                    'name': '',
+                    'number': 1,
+                    'enchanting': {
+                        'sharp': 0,
+                        'rapid': 0,
+                        'strong': 0
+                    }
+                }
+                if ran < 69000:
+                    items['name'] = '碎石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 82000:
+                    items['name'] = '石头'
+                    reply, user = self.get_items(user, items)
+                elif ran < 88000:
+                    items['name'] = '铁锭'
+                    reply, user = self.get_items(user, items)
+                elif ran < 90000:
+                    items['name'] = '铝锭'
+                    reply, user = self.get_items(user, items)
+                elif ran < 91500:
+                    items['name'] = '钛矿石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 92000:
+                    items['name'] = '下界石英'
+                    reply, user = self.get_items(user, items)
+                elif ran < 92300:
+                    items['name'] = '灵石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 92800:
+                    items['name'] = '寒铁'
+                    reply, user = self.get_items(user, items)
+                elif ran < 93000:
+                    items['name'] = '星钢岩'
+                    reply, user = self.get_items(user, items)
+                elif ran < 93200:
+                    items['name'] = '钨矿石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 93700:
+                    items['name'] = '铬矿石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 94450:
+                    items['name'] = '钻石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 95950:
+                    items['name'] = '金锭'
+                    reply, user = self.get_items(user, items)
+                elif ran < 96150:
+                    items['name'] = '魔法石'
+                    reply, user = self.get_items(user, items)
+                elif ran < 96250:
+                    items['name'] = '末地水晶'
+                    reply, user = self.get_items(user, items)
+                elif ran < 97000:
+                    items['name'] = '燧石'
+                    reply, user = self.get_items(user, items)
+                else:
+                    items['name'] = '皮革'
+                    reply, user = self.get_items(user, items)
+
+                if reply:
+                    mining['gets'].append(items)
+            elif level >= 3:
                 ran = random.randint(0, 100000)
                 items = {
                     'name': '',
@@ -5714,6 +6600,10 @@ class Core:
                         cost_item['name'] = '天蓝石'
                     elif level == 3:
                         cost_item['name'] = '青金石'
+                    elif level == 4:
+                        cost_item['name'] = '锆石'
+                    elif level == 5:
+                        cost_item['name'] = '绿松石'
                 elif enchanting_name == '迅捷':
                     if level == 1:
                         cost_item['name'] = '猫眼'
@@ -5721,6 +6611,10 @@ class Core:
                         cost_item['name'] = '碧玺'
                     elif level == 3:
                         cost_item['name'] = '翡翠'
+                    elif level == 4:
+                        cost_item['name'] = '珊瑚'
+                    elif level == 5:
+                        cost_item['name'] = '欧珀'
                 elif enchanting_name == '坚固':
                     if level == 1:
                         cost_item['name'] = '红水晶'
@@ -5728,6 +6622,10 @@ class Core:
                         cost_item['name'] = '蓝水晶'
                     elif level == 3:
                         cost_item['name'] = '紫水晶'
+                    elif level == 4:
+                        cost_item['name'] = '红宝石'
+                    elif level == 5:
+                        cost_item['name'] = '蓝宝石'
                 
                 if cost_item['name'] == '':
                     enchanting['state'] = 'max'
@@ -5806,6 +6704,9 @@ class Core:
                         cultivation['state'] = 'null'
                 else:
                     cultivation['state'] = 'max'
+                # 返还物品
+                if cultivation['state'] != 'success':
+                    reply, user  = self.get_items(user, items)
             else:
                 cultivation['state'] = 'non-existent'
         else:
@@ -5848,8 +6749,6 @@ class Core:
                     else:
                         is_back = True
                         break
-                # print(harvest['gets'])
-                # print(self.nurturer_synthesis[name]['additional'])
 
                 if is_back:
                     for i in operated:
@@ -5890,6 +6789,62 @@ class Core:
         user['warehouse'] = sorted(user['warehouse'], key=functools.cmp_to_key(self.compare_items))
         self.update(qq, user, Result())
 
+    # 活动礼品兑换
+    def exchange_activity(self, qq, activity_goods, goods, number):
+        result = Result()
+        user = self.get_user(qq)
+        result.set_name(user['config']['name'])
+        exchange_activity_goods = {
+            'init': True,
+            'state': 'success',
+            'activity_goods': activity_goods,
+            'cost_number': 0,
+            'goods': goods,
+            'get_number': number
+        }
+
+        is_get = False
+        for name, value in self.activity.items():
+            if activity_goods == value['activity_goods']:
+                for goods_name, value2 in value['exchange'].items():
+                    if goods_name == goods:
+                        items = {
+                            'name': activity_goods,
+                            'number': value2 * number,
+                            'enchanting': {
+                                'sharp': 0,
+                                'rapid': 0,
+                                'strong': 0
+                            }
+                        }
+                        exchange_activity_goods['cost_number'] = items['number']
+                        reply_discard, user = self.remove_items(user, items)
+                        if reply_discard == 0:
+                            get_items = {
+                                'name': goods,
+                                'number': number,
+                                'enchanting': {
+                                    'sharp': 0,
+                                    'rapid': 0,
+                                    'strong': 0
+                                }
+                            }
+                            reply_get, user = self.get_items(user, get_items)
+                            if not reply_get:
+                                exchange_activity_goods['state'] = 'knapsack'
+                                reply, user = self.get_items(user, items)
+                        else:
+                            exchange_activity_goods['state'] = 'not enough'
+                        is_get = True
+                        break
+            if is_get:
+                break
+        if not is_get:
+            exchange_activity_goods['state'] = 'none'
+        result.append_exchange_activity_goods(exchange_activity_goods)
+        result = self.update(qq, user, result)
+        return result
+
 class RPG:
     def __init__(self):
         super().__init__()
@@ -5919,6 +6874,13 @@ class RPG:
             reply += user['occupation']['work'] + get_roman_numerals(user['occupation']['work_level']) + '（生活职业）'
         else:
             reply += user['occupation']['work'] + get_roman_numerals(user['occupation']['work_level']) + '（生活职业）、' + user['occupation']['fight'] + get_roman_numerals(user['occupation']['fight_level']) + '（战斗职业）'
+        
+        reply += '\n技能：'
+        if len(user['skill']['skills']) == 0:
+            reply += '暂无'
+        else:
+            reply += str(len(user['skill']['skills'])) + '/' + str(user['skill']['max'])
+        
         reply += '\n当前所在群系：' + str(user['config']['place'])
         reply += '\n出生地：' + str(user['config']['born_place'])
 
@@ -6055,6 +7017,8 @@ class RPG:
         if rank['gold']['3'] != 0:
             temp_user = self.core.get_user(rank['gold']['3'])
             reply += '\n积分第三：' + temp_user['config']['name'] + '（' + str(temp_user['attribute']['own']['gold']) + '）'
+            
+        reply += '\n----------------'
         if rank['rate']['all'] != 0:
             temp_user = self.core.get_user(rank['rate']['all'])
             reply += '\n胜率第一：' + temp_user['config']['name'] + '（' + str(self.core.get_PVP_rate(temp_user)) + '%）'
@@ -6070,6 +7034,8 @@ class RPG:
         if rank['be_fenced'] != 0:
             temp_user = self.core.get_user(rank['be_fenced'])
             reply += '\n被击剑次数最多：' + temp_user['config']['name'] + '（' + str(temp_user['combat_data']['PVP_passive']) + '次）'
+            
+        reply += '\n----------------'
         if rank['monster'] != 0:
             temp_user = self.core.get_user(rank['monster'])
             reply += '\n怪物猎人：' + temp_user['config']['name'] + '（' + str(temp_user['combat_data']['monster_kill']) + '只）'
@@ -6079,6 +7045,12 @@ class RPG:
         if rank['travel'] != 0:
             temp_user = self.core.get_user(rank['travel'])
             reply += '\n流浪者：' + temp_user['config']['name'] + '（转换群系' + str(temp_user['survival_data']['travel']) + '次）'
+        if rank['mining_max'] != 0:
+            temp_user = self.core.get_user(rank['mining_max'])
+            reply += '\n黄金矿工：' + temp_user['config']['name'] + '（挖矿' + str(temp_user['survival_data']['mining']) + '次）'
+        if rank['sign_max'] != 0:
+            temp_user = self.core.get_user(rank['sign_max'])
+            reply += '\n签到达人：' + temp_user['config']['name'] + '（签到' + str(temp_user['config']['sign']['sum']) + '次）'
         return reply
 
     def get_farm(self, user):
@@ -6200,8 +7172,66 @@ class RPG:
         
         return reply
     
+    def get_skills(self, user):
+        reply = user['config']['name'] + '你的技能如下：' + str(len(user['skill']['skills']) ) + '/' + str(user['skill']['max'])
+        if len(user['skill']['skills']) == 0:
+            reply += '（暂无）'
+        else:
+            index = 0
+            for items in user['skill']['skills']:
+                index += 1
+                reply += '\n技能%d：%s（san值花费：%d，次数：%d/%d）' % (index, items['name'], items['cost'], items['limit'] - items['use_times'], items['limit'])
+        return reply
+
+    def get_activity(self):
+        reply = '当前活动如下：'
+        activity = self.core.activity
+        index = 0
+        for name, value in activity.items():
+            if index != 0:
+                reply += '\n'
+            index += 1
+            reply += '\n活动%d、%s' % (index, name)
+            if is_beyond_deadline(value['end']):
+                reply += '（已过期）'
+            elif is_beyond_deadline(value['start']):
+                reply += '（正在进行，将在“%s”结束）' % (value['end'])
+            else:
+                reply += '（活动将在“%s”到来）' % (value['start'])
+            if value['activity_goods'] != '积分':
+                reply += '\n——活动道具：%s' % (value['activity_goods'])
+            
+            get_path = ''
+            if value['sign'] != '0':
+                get_path += '签到'
+            if value['pvp'] != '0':
+                if get_path != '':
+                    get_path += '、'
+                get_path += 'PVP'
+            if value['pve'] != '0':
+                if get_path != '':
+                    get_path += '、'
+                get_path += 'PVE'
+            if get_path != '':
+                reply += '\n——获取途径：' + get_path
+        if index == 0:
+            reply += '\n（暂无）'
+        return reply
+    
+    def get_activity_shop(self):
+        reply = '活动商店如下：'
+        activity = self.core.activity
+        index = 0
+        for name, value in activity.items():
+            for goods_name, value2 in value['exchange'].items():
+                index += 1
+                reply += '\n%s：%sx%d' % (goods_name, value['activity_goods'], value2)
+        if index == 0:
+            reply += '\n（暂无）'
+        return reply
+
     # 入口函数
-    def handle(self, message, qq, name, config, bot_config, be_at, limit):
+    def handle(self, message, qq, member_name, config, bot_config, be_at, limit):
         bot_qq = bot_config['qq']
         bot_name = bot_config['name']
         message = message.replace('(', '（').replace(')', '）').replace(',', '，').replace(':', '：')
@@ -6256,6 +7286,10 @@ class RPG:
                 user = self.core.get_user(qq)
                 reply_text = self.get_achievement(user)
                 need_reply = True
+            elif (message == '技能' or message == '我的技能') and not limit:
+                user = self.core.get_user(qq)
+                reply_text = self.get_skills(user)
+                need_reply = True
             elif message == '排行榜' and not limit:
                 reply_text = self.get_rank()
                 need_reply = True
@@ -6293,8 +7327,30 @@ class RPG:
                             reply_text += '（限购：' + str(goods['limit']) + '）'
                 need_reply = True
             elif message == '技能商店':
-                reply_text = '技能商店暂未开放'
+                skill_shop = self.core.skill_shop
+                reply_text = '技能商店如下：'
+                for name, value in skill_shop.items():
+                    goods = self.core.get_goods(name + '原石')
+                    if goods is not None:
+                        reply_text += '\n' + name + '：'
+                        init = False
+                        for item in value['cost']:
+                            if not init:
+                                init = True
+                            else:
+                                reply_text += '，'
+                            reply_text += get_name_with_enchanting(item)
+                        if goods['limit'] != 0:
+                            reply_text += '（限购：' + str(goods['limit']) + '）'
                 need_reply = True
+
+                need_reply = True
+            elif message == '活动':
+                need_reply = True
+                reply_text = self.get_activity()
+            elif message == '活动商店':
+                need_reply = True
+                reply_text = self.get_activity_shop()
 
             elif (message[:4] == '查询合成' or message[:4] == '介绍合成') and not limit:
                 temp = message[4:].strip()
@@ -6374,7 +7430,10 @@ class RPG:
                             break
                     if left < right <= len(temp_message):
                         qq_received = int(temp_message[left:right])
-                        if qq_received > 0:
+                        if qq_received == qq:
+                            reply_text = '不可以赠送自己哦~'
+                            need_reply = True
+                        elif qq_received > 0:
                             temp_message = temp_message[:left - 1] + temp_message[right:]
                             temp_message = temp_message.strip()
                             if 'x' in temp_message:
@@ -6549,7 +7608,7 @@ class RPG:
                 user = self.core.get_user(qq)
                 if user['config']['init_name']:
                     user = self.core.get_user(qq)
-                    user['config']['name'] = name
+                    user['config']['name'] = member_name
                     user['config']['init_name'] = False
                     self.core.update(qq, user, Result())
                     reply_text = '清除成功~'
@@ -6560,7 +7619,7 @@ class RPG:
                 user = self.core.get_user(qq)
                 nickname = message[4:].strip()
                 flag = True
-                screens = ['小柒', '操', '傻逼', '母dog', '母狗', 'mugou', '鸡鸡', '群主', '群管理', '窝嫩叠', '尼玛']
+                screens = ['小柒', '操', '傻逼', '母dog', '母狗', 'mugou', '鸡鸡', '群主', '群管理', '窝嫩叠', '尼玛', '爸爸', '爷爷', '妈妈', '奶奶', '婆婆', '外公', '外婆', '祖宗', '是我儿', '儿子', '墨羽翎玖']
                 for screen in screens:
                     if screen in nickname:
                         flag = False
@@ -6577,6 +7636,64 @@ class RPG:
                 else:
                     reply_text = '改名字包含敏感词汇，不可使用'
                 need_reply = True
+
+            elif message[:4] == '使用技能' and not limit:
+                information = message[4:].split('@')
+                index = 0
+                number = 1
+                if len(information) > 0:
+                    information[0] = information[0].strip()
+                    if information[0].isdigit():
+                        index = int(information[0])
+                    if ' ' in information[0]:
+                        data = information[0].split(' ')
+                        if len(data) == 2 and data[0].isdigit() and data[1].isdigit():
+                            index = int(data[0])
+                            number = int(data[1])
+                    if 'x' in information[0]:
+                        data = information[0].split('x')
+                        if len(data) == 2 and data[0].isdigit() and data[1].isdigit():
+                            index = int(data[0])
+                            number = int(data[1])
+                if len(information) == 1 and index > 0 and number > 0:
+                    result = self.core.use_skill(qq, qq, index, number)
+                    reply_text = result.show()
+                    need_reply = True
+                elif len(information) == 2 and index > 0 and number > 0 and information[1].isdigit():
+                    result = self.core.use_skill(qq, int(information[1]), index, number)
+                    reply_text = result.show()
+                    need_reply = True
+            elif message[:4] == '遗忘技能' and message[4:].isdigit() and not limit:
+                index = int(message[4:])
+                result = self.core.remove_skill(qq, index)
+                reply_text = result.show()
+                need_reply = True
+            elif message[:4] == '充能技能' and message[4:].isdigit() and not limit:
+                index = int(message[4:])
+                result = self.core.recharge_skill(qq, index)
+                reply_text = result.show()
+                need_reply = True
+
+            elif message[:2] == '使用' and '兑换' in message and message != '使用兑换' and message[-2:] != '兑换':
+                section = message[2:].strip().split('兑换')
+                if len(section) == 2:
+                    activity_goods = section[0]
+                    get_goods = section[1]
+                    goods = get_goods
+                    number = 1
+                    if 'x' in get_goods:
+                        data = get_goods.split('x')
+                        if len(data) == 2 and data[1].isdigit():
+                            goods = data[0]
+                            number = int(data[1])
+                    elif ' ' in get_goods:
+                        data = get_goods.split(' ')
+                        if len(data) == 2 and data[1].isdigit():
+                            goods = data[0]
+                            number = int(data[1])
+                    result = self.core.exchange_activity(qq, activity_goods, goods, number)
+                    reply_text = result.show()
+                    need_reply = True
 
             elif (message[:2] == '装备' or message[:2] == '使用') and not limit:
                 temp = message[2:].strip()
@@ -6658,30 +7775,13 @@ class RPG:
         if need_reply:
             user = self.core.get_user(qq)
             if not user['config']['init_name']:
-                user['config']['name'] = name
+                user['config']['name'] = member_name
                 self.core.update(qq, user, Result())
-            if user['attribute']['strengthen']['times'] != 0:  # 删除强化
-                user['attribute']['strengthen']['times'] = 0
-                user['attribute']['strengthen']['attack'] = 0
-                user['attribute']['strengthen']['armor'] = 0
-                self.core.update(qq, user, Result())
-            if user['config']['version'] == 0:  # 从0版本的数据更新到1版本
-                user = self.core.get_user(qq)  # 重新更新数据
-                user['config']['version'] = 1
-                user['skill'] = {
-                    'max': 3,
-                    'skills': []
-                }
-                user['config']['other_limit'] = {
-                    'skill': {},
-                    'skill_shop': []
-                }
-                self.core.update(qq, user, Result())
-
-        if self.core.users.__contains__(qq):
-            user = self.core.get_user(qq)
-            if user['config']['version'] == -1:  # 如果仍然没有初始化游戏的，那么删除存档
-                self.core.remove_user(qq)
+                reply_text = reply_text.replace('【未初始化】', member_name)
+            
+            if user['config']['report'] != '':
+                reply_text += '\n-----------\n' + user['config']['report']
+                user['config']['report'] = ''
 
         return need_reply, reply_text, reply_image
 
@@ -6934,6 +8034,49 @@ class RPG:
                 reply_text = self.get_achievement(user)
                 need_reply = True
         
+        elif message[:4] == '清空背包':
+            number = message[4:].strip()
+            if len(message) == 4:
+                user = self.core.get_user(qq)
+                user['warehouse'] = []
+                self.core.update(qq, user, Result())
+                reply_text = '修改成功~'
+            elif len(number) > 0 and number.isdigit():
+                user = self.core.get_user(int(number))
+                user['warehouse'] = []
+                self.core.update(int(number), user, Result())
+                reply_text = '修改成功~'
+            else:
+                reply_text = '格式错误~'
+            need_reply = True
+        elif message[:6] == '清空buff':
+            number = message[6:].strip()
+            if len(message) == 6:
+                user = self.core.get_user(qq)
+                user['buff'] = []
+                self.core.update(qq, user, Result())
+                reply_text = '修改成功~'
+            elif len(number) > 0 and number.isdigit():
+                user = self.core.get_user(int(number))
+                user['buff'] = []
+                self.core.update(int(number), user, Result())
+                reply_text = '修改成功~'
+            else:
+                reply_text = '格式错误~'
+            need_reply = True
+        elif message[:6] == '移除buff':
+            print(message)
+            name = message[6:].strip()
+            if name != '':
+                user = self.core.get_user(qq)
+                reply, level, user = self.core.remove_force_buff(name, user)
+                self.core.update(qq, user, Result())
+                if reply:
+                    reply_text = '移除成功~移除' + name + get_roman_numerals(level)
+                else:
+                    reply_text = '移除失败~目标没有该buff'
+                need_reply = True
+
         elif message == '备份游戏存档' or message == '备份游戏数据':
             need_reply = True
             reply_text = '备份成功，备份时间：' + getNow.toString()

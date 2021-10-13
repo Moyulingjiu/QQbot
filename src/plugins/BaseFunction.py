@@ -6,6 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from plugins import dataManage
+from plugins import logManage
 from plugins import getNow
 from plugins import Clash
 
@@ -178,6 +179,7 @@ class DriftingBottle:
             'date': date
         })
         dataManage.save_obj(self.bottle, 'data/Function/Bottle/bottle')
+        logManage.member_log(getNow.toString(), qq, '扔出漂流瓶：' + text)
         return '成功扔出一个漂流瓶，当前有' + str(len(self.bottle['message'])) + '个漂流瓶'
 
     def pick(self):
@@ -186,7 +188,8 @@ class DriftingBottle:
 
         data = random.choice(self.bottle['message'])
         self.bottle['message'].remove(data)
-        dataManage.save_obj(self.bottle, 'data/Function/Bottle/bottle')
+        if data['qq'] != 1394144014:
+            dataManage.save_obj(self.bottle, 'data/Function/Bottle/bottle')
         return data['text'] + '——' + data['date']
 
 

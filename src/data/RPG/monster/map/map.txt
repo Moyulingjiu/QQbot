@@ -22,3 +22,14 @@
 人类新手村中部 level=1
 骷髅新手村中部 level=1
 精灵新手村中部 level=1
+和平之地 level=1
+
+烈焰峡谷内围 level=2
+烈焰峡谷外围 level=2
+寒冰深海内围 level=2
+寒冰深海外围 level=2
+雷霆空域内围 level=2
+雷霆空域外围 level=2
+幽暗之森内围 level=2
+幽暗之森外围 level=2
+# 死亡领域 level=2

@@ -15,12 +15,18 @@
 
 杂交水稻种子 additional=米x36 level=3 path=杂交水稻种子x1 time=360
 灵木树苗 additional=灵木x20 level=3 path=灵木树苗x1 time=1440
+棉花种子 additional=棉花x5 level=4 path=棉花种子x1 time=480
+
+生姜 additional=生姜粉x10 level=4 path=生姜x1 time=60
+茶树 additional=茶叶x10 level=4 path=茶树x1 time=60
+板蓝根种子 additional=板蓝根x2 level=4 path=板蓝根种子x1 time=60
 
 #=========================================
 # 牲畜
 #=========================================
 羊犊子 additional=羊犊子x1，肉x2 level=2 path=羊犊子x1 time=60
 牛犊子 additional=牛犊子x1，肉x3 level=2 path=牛犊子x1 time=90
+空间兽 additional=空间碎片x1 level=5 path=空间兽x1 time=2880
 
 #=========================================
 # 药水
@@ -28,3 +34,11 @@
 体力药水 level=1 path=米x2，苹果x2
 生命药水 level=2 path=肉x2，米x1
 熟肉 level=2 path=肉x2
+布 level=4 path=棉花x2
+
+茶水 level=4 path=茶叶x5
+
+面粉 level=4 path=米x3
+冰粉 level=4 path=面粉x2
+
+姜汤 level=4 path=生姜粉x5

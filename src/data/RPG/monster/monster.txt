@@ -10,41 +10,88 @@
 # comments 介绍
 # spoils 掉落物
 # 掉落物的特殊说明：
-#        多个掉落物以 掉落物x数量，掉落物x数量分割
-#        
+#    多个掉落物以 掉落物x数量，掉落物x数量分割
+#    
 
-哥布林 level=1 armor=0 attack=5 speed=60  hp=18  comments=长着尖尖的耳朵的绿皮小矮子 spoils=木板x1，石头x1
-哥布林弓箭手 level=2 armor=0 attack=19 speed=100  hp=20  comments=哈哈！没想到哥布林也能学会远程攻击吧！ spoils=皮革x1
-哥布林战士 level=2 armor=1 attack=20 speed=75  hp=23  comments=强壮的肌肉！让你还小瞧哥布林 spoils=石头x3
-哥布林狼骑士 level=3 armor=3 attack=19 speed=140  hp=50  comments=与狼达成契约，当哥布林战士骑上野狼会发生什么？ spoils=铁锭x1
-哥布林法师 level=3 armor=0 attack=30 speed=100  hp=80  comments=哥布林也是可以学会魔法的！ spoils=精神药水x1
-哥布林祭祀 level=3 armor=1 attack=20 speed=80  hp=100  comments=鼓舞与治疗是任何一个军队都必不可少的 spoils=铝合金x1
-哥布林领主 level=4 armor=2 attack=41 speed=120  hp=300  comments=肥胖的哥布林领主看起来可真奇怪 spoils=金锭x1
-巨型哥布林 level=5 armor=8 attack=45 speed=50  hp=200  comments=这，这是什么？哥布林的秘密武器么？! spoils=铁锭x3，木板x5，铝合金x1
+南挽 level=0 armor=1 attack=1 speed=1 hp=1 comments=欸嘿嘿 spoils=无x1 element=传说
+六芒 level=0 armor=10000 attack=10000 speed=10000 hp=10000 comments=你真幸运，能遇到六芒。 spoils=无x1 element=传说
 
-民兵 level=1 armor=0 attack=5 speed=45  hp=24  comments=征召而来的民兵 spoils=木板x1，石头x1
-士兵 level=2 armor=2 attack=19 speed=40  hp=35  comments=受到严格训练的士兵 spoils=皮革x1
-弓箭手 level=2 armor=2 attack=20 speed=75  hp=18  comments=经过训练的弓箭手 spoils=石头x3
-剑士 level=3 armor=4 attack=20 speed=60  hp=80  comments=精湛的剑术，擅长双手剑 spoils=铁锭x1
-骑士 level=3 armor=4 attack=35 speed=60  hp=100  comments=当他们冲锋的时候应该没有什么能够阻挡 spoils=精神药水x1
-火枪手 level=3 armor=3 attack=38 speed=70  hp=70  comments=大人，时代变了！ spoils=铝合金x1
-法师 level=4 armor=5 attack=42 speed=50  hp=100  comments=人类也是一种亲近自然元素的种族，这是人族法师 spoils=金锭x1
-军队统领 level=5 armor=2 attack=45 speed=50  hp=300  comments=一将功成万骨枯！ spoils=铁锭x3，木板x5，铝合金x1
+哥布林 level=1 armor=0 attack=5 speed=60 hp=18 comments=长着尖尖的耳朵的绿皮小矮子 spoils=木板x1，石头x1
+哥布林弓箭手 level=2 armor=0 attack=19 speed=100 hp=20 comments=哈哈！没想到哥布林也能学会远程攻击吧！ spoils=皮革x1
+哥布林战士 level=2 armor=1 attack=20 speed=75 hp=23 comments=强壮的肌肉！让你还小瞧哥布林 spoils=石头x3
+哥布林狼骑士 level=3 armor=3 attack=19 speed=140 hp=50 comments=与狼达成契约，当哥布林战士骑上野狼会发生什么？ spoils=铁锭x1
+哥布林法师 level=3 armor=0 attack=30 speed=100 hp=80 comments=哥布林也是可以学会魔法的！ spoils=精神药水x1
+哥布林祭祀 level=3 armor=1 attack=20 speed=80 hp=100 comments=鼓舞与治疗是任何一个军队都必不可少的 spoils=铝合金x1
+哥布林领主 level=4 armor=2 attack=41 speed=120 hp=300 comments=肥胖的哥布林领主看起来可真奇怪 spoils=金锭x1
+巨型哥布林 level=5 armor=8 attack=45 speed=50 hp=200 comments=这，这是什么？哥布林的秘密武器么？! spoils=铁锭x3，木板x5，铝合金x1
 
-骷髅 level=1 armor=0 attack=6 speed=50  hp=17  comments=骨头也可以站起来！ spoils=木板x1，石头x1
-骷髅战士 level=2 armor=0 attack=19 speed=80  hp=25  comments=当骷髅拿起剑与盾 spoils=皮革x1
-骷髅弓箭手 level=2 armor=0 attack=21 speed=120  hp=15  comments=这是小白吗？ spoils=石头x3
-骷髅法师 level=3 armor=2 attack=22 speed=70  hp=70  comments=灵魂如此强大，生前一定是个大法师 spoils=铁锭x1
-腐化骷髅 level=3 armor=4 attack=40 speed=50  hp=70  comments=他们虽然腐朽但是行动极其迅速，他们力求给予你最强一击 spoils=精神药水x1
-骷髅炸弹人 level=3 armor=0 attack=80 speed=60  hp=20  comments=他们只会与你同归于尽！ spoils=铝合金x1
-骷髅骑士 level=4 armor=5 attack=45 speed=80  hp=50  comments=骷髅+骷髅马，这是什么东西？ spoils=金锭x1
-骨龙 level=5 armor=5 attack=46 speed=90  hp=120  comments=龙族？！不，这是骷髅族从龙墓中挖出的骷髅！ spoils=铁锭x3，木板x5，铝合金x1
+民兵 level=1 armor=0 attack=5 speed=45 hp=24 comments=征召而来的民兵 spoils=木板x1，石头x1
+士兵 level=2 armor=2 attack=19 speed=40 hp=35 comments=受到严格训练的士兵 spoils=皮革x1
+弓箭手 level=2 armor=2 attack=20 speed=75 hp=18 comments=经过训练的弓箭手 spoils=石头x3
+剑士 level=3 armor=4 attack=20 speed=60 hp=80 comments=精湛的剑术，擅长双手剑 spoils=铁锭x1
+骑士 level=3 armor=4 attack=35 speed=60 hp=100 comments=当他们冲锋的时候应该没有什么能够阻挡 spoils=精神药水x1
+火枪手 level=3 armor=3 attack=38 speed=70 hp=70 comments=大人，时代变了！ spoils=铝合金x1
+法师 level=4 armor=5 attack=42 speed=50 hp=100 comments=人类也是一种亲近自然元素的种族，这是人族法师 spoils=金锭x1
+军队统领 level=5 armor=2 attack=45 speed=50 hp=300 comments=一将功成万骨枯！ spoils=铁锭x3，木板x5，铝合金x1
 
-精灵 level=1 armor=0 attack=4 speed=80  hp=20  comments=精灵的颜值与箭术让人望尘莫及 spoils=木板x1，石头x1
-精灵战士 level=2 armor=1 attack=19 speed=120  hp=15  comments=银色铠甲如此耀眼 spoils=皮革x1
-黑暗精灵 level=2 armor=0 attack=19 speed=130  hp=18  comments=献祭自己堕入黑暗的精灵 spoils=石头x3
-精灵剑士 level=3 armor=3 attack=20 speed=150  hp=35  comments=他们的剑相比于人类可美多了，纤细而又迅速 spoils=铁锭x1
-精灵法师 level=3 armor=2 attack=38 speed=100  hp=50  comments=与自然的亲和让他们的魔法更加强大 spoils=精神药水x1
-精灵弓箭手 level=4 armor=2 attack=41 speed=140  hp=50  comments=这可是她们极其擅长的领域 spoils=铝合金x1
-精灵灵剑士 level=4 armor=5 attack=40 speed=100  hp=70  comments=将魔法与剑术融合，这是其他种族难以想象的 spoils=金锭x1
-精灵精锐弓箭手 level=5 armor=4 attack=46 speed=160  hp=80  comments=这是精灵弓箭手中的精锐，她们速度更快，百发百中 spoils=铁锭x3，木板x5，铝合金x1
+骷髅 level=1 armor=0 attack=6 speed=50 hp=17 comments=骨头也可以站起来！ spoils=木板x1，石头x1
+骷髅战士 level=2 armor=0 attack=19 speed=80 hp=25 comments=当骷髅拿起剑与盾 spoils=皮革x1
+骷髅弓箭手 level=2 armor=0 attack=21 speed=120 hp=15 comments=这是小白吗？ spoils=石头x3
+骷髅法师 level=3 armor=2 attack=22 speed=70 hp=70 comments=灵魂如此强大，生前一定是个大法师 spoils=铁锭x1
+腐化骷髅 level=3 armor=4 attack=40 speed=50 hp=70 comments=他们虽然腐朽但是行动极其迅速，他们力求给予你最强一击 spoils=精神药水x1
+骷髅炸弹人 level=3 armor=0 attack=80 speed=60 hp=20 comments=他们只会与你同归于尽！ spoils=铝合金x1
+骷髅骑士 level=4 armor=5 attack=45 speed=80 hp=50 comments=骷髅+骷髅马，这是什么东西？ spoils=金锭x1
+骨龙 level=5 armor=5 attack=46 speed=90 hp=120 comments=龙族？！不，这是骷髅族从龙墓中挖出的骷髅！ spoils=铁锭x3，木板x5，铝合金x1
+
+精灵 level=1 armor=0 attack=4 speed=80 hp=20 comments=精灵的颜值与箭术让人望尘莫及 spoils=木板x1，石头x1
+精灵战士 level=2 armor=1 attack=19 speed=120 hp=15 comments=银色铠甲如此耀眼 spoils=皮革x1
+黑暗精灵 level=2 armor=0 attack=19 speed=130 hp=18 comments=献祭自己堕入黑暗的精灵 spoils=石头x3
+精灵剑士 level=3 armor=3 attack=20 speed=150 hp=35 comments=他们的剑相比于人类可美多了，纤细而又迅速 spoils=铁锭x1
+精灵法师 level=3 armor=2 attack=38 speed=100 hp=50 comments=与自然的亲和让他们的魔法更加强大 spoils=精神药水x1
+精灵弓箭手 level=4 armor=2 attack=41 speed=140 hp=50 comments=这可是她们极其擅长的领域 spoils=铝合金x1
+精灵灵剑士 level=4 armor=5 attack=40 speed=100 hp=70 comments=将魔法与剑术融合，这是其他种族难以想象的 spoils=金锭x1
+精灵精锐弓箭手 level=5 armor=4 attack=46 speed=160 hp=80 comments=这是精灵弓箭手中的精锐，她们速度更快，百发百中 spoils=铁锭x3，木板x5，铝合金x1
+
+
+# ========================================
+# 第二次更新
+# ========================================
+
+天灾军团 level=0 armor=60 attack=80 speed=60 hp=200 comments=什么东西在席卷而来？这是天灾？ spoils=天灾之心x1 element=暗
+
+
+小火苗 level=5 armor=10 attack=65 speed=80 hp=80 comments=星星之火 spoils=钨矿石x1 element=火
+火焰精灵 level=6 armor=12 attack=70 speed=80 hp=120 comments=自然形成的一点意识 spoils=寒铁x1 element=火
+火焰守卫 level=6 armor=25 attack=82 speed=60 hp=80 comments=这些意识自发的守卫家园 spoils=星钢岩x1 element=火
+烈焰 level=7 armor=25 attack=80 speed=100 hp=80 comments=快跑，烈焰就在身后翻滚 spoils=棉花x3 element=火
+焚尽法师 level=8 armor=29 attack=100 speed=100 hp=60 comments=在这里修炼的法师，却被环境同化了 spoils=钨矿石x2，寒铁x1 element=火
+烈焰之焚 level=8 armor=10 attack=120 speed=120 hp=40 comments=这是什么？？为什么会有这么庞大的火焰力量！ spoils=板蓝根x2，棉花x1 element=火
+炎尽 level=9 armor=30 attack=500 speed=40 hp=22 comments=灾难平息了么？不！还没结束！！ spoils=魔法石x1 element=火
+烈焰之焚天炎龙 level=10 armor=60 attack=160 speed=150 hp=100 comments=它曾是龙族最为骄傲的幼龙，是炎龙一族无比闪耀的天才，却在龙族对抗天灾的时候为保护族人而陨落至一处峡谷 spoils=太古岩石x1，秘银x3，布x8 element=火
+
+小水滩 level=5 armor=24 attack=74 speed=60 hp=50 comments=一洼水滩 spoils=铬矿石x1 element=水
+水之精灵 level=6 armor=28 attack=82 speed=80 hp=50 comments=水的意志么？ spoils=寒铁x1 element=水
+大海守卫 level=6 armor=32 attack=80 speed=80 hp=50 comments=大海不容侵犯，与之相比我们更像侵略者 spoils=星钢岩x1 element=水
+水波 level=7 armor=38 attack=86 speed=80 hp=40 comments=波浪来袭！快闪开 spoils=棉花x3 element=水
+浪涛战士 level=8 armor=42 attack=97 speed=80 hp=40 comments=在这里修炼的战士，却被环境同化了 spoils=钨矿石x2，寒铁x1 element=水
+深海之浪 level=8 armor=50 attack=98 speed=70 hp=40 comments=我们潜入深海，却被莫名的力量袭击了！ spoils=冰粉x2，棉花x1 element=水
+冰叹 level=9 armor=66 attack=100 speed=70 hp=30 comments=这就是源头了么？好冷~ spoils=魔法石x1 element=水
+寒冰之永霜冰鲨 level=10 armor=80 attack=130 speed=100 hp=200 comments=它恶名昭彰，曾是海洋上为祸一方的大鲨鱼，天灾到来之时助纣为虐，在天灾被抑制后，吸收了部分天灾的力量潜入深海 spoils=太古岩石x1，秘银x3，布x6 element=水
+
+小闪电 level=5 armor=6 attack=75 speed=180 hp=30 comments=一道闪电 spoils=铬矿石x1 element=雷
+闪电精灵 level=6 armor=7 attack=79 speed=180 hp=50 comments=发着亮光，向你冲来 spoils=寒铁x1 element=雷
+雷霆守卫 level=6 armor=10 attack=74 speed=200 hp=48 comments=守卫着无尽雷霆的天空 spoils=星钢岩x1 element=雷
+雷暴 level=7 armor=4 attack=80 speed=300 hp=40 comments=准备防御，这是雷暴！ spoils=棉花x3 element=雷
+闪电刺客 level=7 armor=20 attack=81 speed=240 hp=40 comments=在这里修炼的刺客，却被环境同化了 spoils=空间碎片x1 element=雷
+雷霆之威 level=8 armor=28 attack=96 speed=160 hp=36 comments=雷从九天临！ spoils=姜汤x2，棉花x1 element=雷
+雷隐 level=9 armor=0 attack=110 speed=500 hp=30 comments=这点电光就是雷霆的力量么？ spoils=空间兽x1 element=雷
+闪电之怒雷闪凤 level=10 armor=45 attack=140 speed=480 hp=55 comments=凤凰一族在抑制天灾的时候，曾经几度溃败，后来在各方力量下稳住阵脚，但是发现它们中有些人已经在天灾的力量下动摇了 spoils=太古岩石x1，秘银x2，布x8 element=雷
+
+小树苗 level=5 armor=20 attack=80 speed=50 hp=80 comments=这树苗真的是敌人么？ spoils=灵木x2，棉花x1 element=木
+木之精灵 level=6 armor=22 attack=87 speed=60 hp=100 comments=我们才是侵略者对吧？ spoils=棉花x2 element=木
+森林守卫 level=6 armor=32 attack=86 speed=32 hp=100 comments=森林之息，我们真的要打败它么？ spoils=钨矿石x2，寒铁x1 element=木
+食人花 level=7 armor=30 attack=110 speed=40 hp=100 comments=好险，差点被咬到 spoils=茶水x2 element=木
+不知名的木遁忍者 level=8 armor=40 attack=108 speed=70 hp=60 comments=在这里修炼的忍者，把环境同化了 spoils=木元素祝福原石x1 element=木
+森林之怒 level=8 armor=46 attack=98 speed=50 hp=80 comments=我们似乎做错了 spoils=魔法石x2 element=木
+木息 level=9 armor=40 attack=108 speed=40 hp=500 comments=或许我们真的不该入侵森林 spoils=秘银x3，灵木x2，棉花x5 element=木
+幽森之地脉古树 level=10 armor=60 attack=160 speed=60 hp=300 comments=古树在等着你的净化呢，原本的天灾最强大的力量是大地动摇，这位最年长的古树亲自镇压的这股力量。虽然没有失去意志，但是也阻止不了这股力量逐渐散发了。 spoils=太古岩石x2，秘银x3，布x10 element=木
