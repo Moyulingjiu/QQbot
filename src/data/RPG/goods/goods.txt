@@ -1,4 +1,4 @@
-# 分类表
+﻿# 分类表
 
 #=========================================
 # 维度
@@ -145,24 +145,24 @@
 灵魂结晶 cost=-1 sell=80 comments=一个强韧的灵魂中和了下界石英，再用灵石固定，就成了灵魂结晶 type=34
 
 
-玛瑙 cost=-1 sell=60 comments=附魔师所需要的石头，我也不知道这些材料怎么合成的玛瑙 type=34
-天蓝石 cost=-1 sell=70 comments=附魔师所需要的石头，蕴含了锋利 type=34
-青金石 cost=-1 sell=80 comments=附魔师所需要的石头 ，蕴含了锋利 type=34
-猫眼 cost=-1 sell=60 comments=附魔师所需要的宝石，一定是魔法合成的 type=34
-碧玺 cost=-1 sell=70 comments=附魔师所需要的宝石，蕴含了速度 type=34
-翡翠 cost=-1 sell=80 comments=附魔师所需要的宝石，蕴含了速度 type=34
-红水晶 cost=-1 sell=60 comments=附魔师所需要的水晶，虽然水晶并不坚固 type=34
-蓝水晶 cost=-1 sell=70 comments=附魔师所需要的水晶，蕴含了坚固 type=34
-紫水晶 cost=-1 sell=80 comments=附魔师所需要的水晶，蕴含了坚固 type=34
+玛瑙 cost=-1 sell=30 comments=附魔师所需要的石头，我也不知道这些材料怎么合成的玛瑙 type=34
+天蓝石 cost=-1 sell=30 comments=附魔师所需要的石头，蕴含了锋利 type=34
+青金石 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了锋利 type=34
+猫眼 cost=-1 sell=30 comments=附魔师所需要的宝石，一定是魔法合成的 type=34
+碧玺 cost=-1 sell=30 comments=附魔师所需要的宝石，蕴含了速度 type=34
+翡翠 cost=-1 sell=30 comments=附魔师所需要的宝石，蕴含了速度 type=34
+红水晶 cost=-1 sell=30 comments=附魔师所需要的水晶，虽然水晶并不坚固 type=34
+蓝水晶 cost=-1 sell=30 comments=附魔师所需要的水晶，蕴含了坚固 type=34
+紫水晶 cost=-1 sell=30 comments=附魔师所需要的水晶，蕴含了坚固 type=34
 
-锆石 cost=-1 sell=80 comments=附魔师所需要的石头 ，蕴含了锋利 type=34
-绿松石 cost=-1 sell=80 comments=附魔师所需要的石头 ，蕴含了锋利 type=34
+锆石 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了锋利 type=34
+绿松石 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了锋利 type=34
 
-珊瑚 cost=-1 sell=80 comments=附魔师所需要的石头 ，蕴含了迅捷 type=34
-欧珀 cost=-1 sell=80 comments=附魔师所需要的石头 ，蕴含了迅捷 type=34
+珊瑚 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了迅捷 type=34
+欧珀 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了迅捷 type=34
 
-红宝石 cost=-1 sell=80 comments=附魔师所需要的石头 ，蕴含了坚固 type=34
-蓝宝石 cost=-1 sell=80 comments=附魔师所需要的石头 ，蕴含了坚固 type=34
+红宝石 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了坚固 type=34
+蓝宝石 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了坚固 type=34
 
 
 钻石 cost=1000 sell=50 comments=璀璨闪亮，可以用来合成很多东西以及附魔 type=32
@@ -187,15 +187,15 @@
 #=========================================
 # 药水
 #=========================================
-体力药水 cost=10 sell=1 strength=5 limit=20 comments=一瓶普通的体力药水，可以帮助恢复体力 type=21
+体力药水 cost=5 sell=1 strength=5 limit=20 comments=一瓶普通的体力药水，可以帮助恢复体力 type=21
 晨露 cost=20 sell=1 strength=-1 limit=1 comments=活力满满！直接回满体力 type=21
 
-生命药水 cost=10 sell=1 hp=10 limit=20 comments=一瓶普通的生命药水，可以帮助恢复生命 type=21
-甘霖 cost=30 sell=1 hp=-1 limit=1 comments=活力满满！直接回满生命 type=21
+生命药水 cost=5 sell=1 hp=10 limit=20 comments=一瓶普通的生命药水，可以帮助恢复生命 type=21
+甘霖 cost=20 sell=1 hp=-1 limit=1 comments=活力满满！直接回满生命 type=21
 
 精神药水 cost=5 sell=1 san=10 limit=20 comments=回复一部分精神力，强大的精神才可以释放出强大的技能 type=21
 
-复活药水 resurrection=1 cost=20 sell=5 limit=10 comments=复活吧勇士！继续战斗！ type=21
+复活药水 resurrection=1 cost=30 sell=5 limit=10 comments=复活吧勇士！继续战斗！ type=21
 #=========================================
 # 木头装备
 #=========================================
@@ -206,17 +206,17 @@
 #=========================================
 # 石制装备
 #=========================================
-石剑 attack=3 armor=1 cost=-1 sell=2 comments=剑乃百兵之君，可攻可防 type=111 enchanting-sharp=1 enchanting-rapid=1
-石斧 attack=4 armor=0 cost=-1 sell=2 comments=斧势大力沉，有开山之能 type=112 enchanting-sharp=1 enchanting-rapid=1
-石枪 attack=5 armor=-1 cost=-1 sell=2 comments=枪乃百兵之王，诸器遇枪立败也 type=113 enchanting-sharp=1 enchanting-rapid=1
+石剑 attack=3 armor=1 cost=-1 sell=2 comments=剑乃百兵之君，可攻可防 type=111
+石斧 attack=4 armor=0 cost=-1 sell=2 comments=斧势大力沉，有开山之能 type=112
+石枪 attack=5 armor=-1 cost=-1 sell=2 comments=枪乃百兵之王，诸器遇枪立败也 type=113
 
 #=========================================
 # 铁制装备
 #=========================================
-铁剑 attack=6 armor=2 cost=-1 sell=5 comments=其实在铁之前人们先发现的是铜 type=111 enchanting-sharp=1 enchanting-rapid=1
-铁斧 attack=8 armor=0 cost=-1 sell=5 comments=用来砍树似乎不错哟 type=112 enchanting-sharp=1 enchanting-rapid=1
-铁枪 attack=10 armor=-2 cost=-1 sell=5 comments=一把常见的制式兵器 type=113 enchanting-sharp=1 enchanting-rapid=1
-铁弓 attack=6 armor=0 speed=10 cost=-1 sell=5 comments=拉开这种弓需要不少力气呢 type=114 enchanting-sharp=1 enchanting-rapid=1
+铁剑 attack=3 armor=2 cost=-1 sell=5 comments=其实在铁之前人们先发现的是铜 type=111 enchanting-sharp=1 enchanting-rapid=1
+铁斧 attack=5 armor=0 cost=-1 sell=5 comments=用来砍树似乎不错哟 type=112 enchanting-sharp=1 enchanting-rapid=1
+铁枪 attack=7 armor=-2 cost=-1 sell=5 comments=一把常见的制式兵器 type=113 enchanting-sharp=1 enchanting-rapid=1
+铁弓 attack=3 armor=0 speed=10 cost=-1 sell=5 comments=拉开这种弓需要不少力气呢 type=114 enchanting-sharp=1 enchanting-rapid=1
 
 铁头盔 armor=2 cost=-1 speed=-10 sell=4 comments=重，但是好用 type=15 enchanting-rapid=1 enchanting-strong=1
 铁甲 armor=3 cost=-1 speed=-10 sell=4 comments=满满的安全感 type=16 enchanting-rapid=1 enchanting-strong=1
@@ -226,32 +226,32 @@
 #=========================================
 # 钻石装备
 #=========================================
-钻石剑 attack=10 armor=3 cost=-1 sell=200 comments=人们挖到了钻石，掌握了钻石工艺 type=111 enchanting-sharp=1 enchanting-rapid=1
-钻石斧 attack=12 armor=0 cost=-1 sell=200 comments=科技树似乎有点点歪了 type=112 enchanting-sharp=1 enchanting-rapid=1
-钻石枪 attack=14 armor=-3 cost=-1 sell=200 comments=别问我为什么要用这么多钻石 type=113 enchanting-sharp=1 enchanting-rapid=1
-钻石弓 attack=10 armor=0 speed=10 cost=-1 sell=200 comments=我也不想解释钻石弓怎么拉开 type=114 enchanting-sharp=1 enchanting-rapid=1
+钻石剑 attack=7 armor=3 cost=-1 sell=200 comments=人们挖到了钻石，掌握了钻石工艺 type=111 enchanting-sharp=1 enchanting-rapid=1
+钻石斧 attack=9 armor=0 cost=-1 sell=200 comments=科技树似乎有点点歪了 type=112 enchanting-sharp=1 enchanting-rapid=1
+钻石枪 attack=11 armor=-3 cost=-1 sell=200 comments=别问我为什么要用这么多钻石 type=113 enchanting-sharp=1 enchanting-rapid=1
+钻石弓 attack=7 armor=0 speed=10 cost=-1 sell=200 comments=我也不想解释钻石弓怎么拉开 type=114 enchanting-sharp=1 enchanting-rapid=1
 
 钻石头盔 armor=3 cost=-1 speed=-10 sell=150 comments=看，那个人好闪 type=15 enchanting-rapid=1 enchanting-strong=1
 钻石甲 armor=4 cost=-1 speed=-10 sell=150 comments=好奢侈呀 type=16 enchanting-rapid=1 enchanting-strong=1
 钻石护腿 armor=4 cost=-1 speed=-10 sell=150 comments=穿着一定不舒服吧 type=17 enchanting-rapid=1 enchanting-strong=1
 钻石靴 armor=3 cost=-1 speed=-10 sell=150 comments=有一点光就会闪亮的靴子 type=18 enchanting-rapid=1 enchanting-strong=1
 
-钻石覆膜剑 attack=10 armor=3 cost=-1 sell=150 comments=在那天，人们发现了只需要覆一层膜就够了 type=111 enchanting-sharp=2 enchanting-rapid=2
-钻石覆膜斧 attack=12 armor=0 cost=-1 sell=150 comments=冷知识钻石很脆，不适合做斧子type=112 enchanting-sharp=2 enchanting-rapid=2
-钻石覆膜枪 attack=14 armor=-3 cost=-1 sell=150 comments=钻石枪头还是很好用的 type=113 enchanting-sharp=2 enchanting-rapid=2
-钻石箭头弓 attack=10 armor=0 speed=20 cost=-1 sell=150 comments=这次是箭头用的钻石，不是弓身 type=114 enchanting-sharp=2 enchanting-rapid=2
+钻石覆膜剑 attack=7 armor=3 cost=-1 sell=150 comments=在那天，人们发现了只需要覆一层膜就够了 type=111 enchanting-sharp=2 enchanting-rapid=2
+钻石覆膜斧 attack=9 armor=0 cost=-1 sell=150 comments=冷知识钻石很脆，不适合做斧子type=112 enchanting-sharp=2 enchanting-rapid=2
+钻石覆膜枪 attack=11 armor=-3 cost=-1 sell=150 comments=钻石枪头还是很好用的 type=113 enchanting-sharp=2 enchanting-rapid=2
+钻石箭头弓 attack=7 armor=0 speed=20 cost=-1 sell=150 comments=这次是箭头用的钻石，不是弓身 type=114 enchanting-sharp=2 enchanting-rapid=2
 
 #=========================================
 # 合金装备
 #=========================================
-铝制火铳 attack=14 armor=0 speed=20 cost=-1 sell=40 comments=大人！时代变了！ type=115 enchanting-sharp=2 enchanting-rapid=2
+铝制火铳 attack=8 armor=0 speed=20 cost=-1 sell=40 comments=大人！时代变了！ type=115 enchanting-sharp=2 enchanting-rapid=2
 铝制弩 attack=8 armor=0 speed=50 cost=-1 sell=40 comments=两连发！ type=116 enchanting-sharp=2 enchanting-rapid=2
 
-铝合金剑 attack=12 armor=6 cost=-1 sell=40 comments=这种合金不是一般人能制作的 type=111 enchanting-sharp=2 enchanting-rapid=2
-铝合金斧 attack=16 armor=2 cost=-1 sell=40 comments=斧子太轻了不好用 type=112 enchanting-sharp=2 enchanting-rapid=2
-铝合金枪 attack=20 armor=-2 cost=-1 sell=40 comments=这种枪杆还是很舒服的 type=113 enchanting-sharp=2 enchanting-rapid=2
-铝合金火铳 attack=14 armor=0 speed=20 cost=-1 sell=40 comments=大人！时代变了！ type=115 enchanting-sharp=2 enchanting-rapid=2
-铝合金弩 attack=8 armor=0 speed=50 cost=-1 sell=40 comments=两连发！ type=116 enchanting-sharp=2 enchanting-rapid=2
+铝合金剑 attack=6 armor=6 cost=-1 sell=40 comments=这种合金不是一般人能制作的 type=111 enchanting-sharp=2 enchanting-rapid=2
+铝合金斧 attack=10 armor=2 cost=-1 sell=40 comments=斧子太轻了不好用 type=112 enchanting-sharp=2 enchanting-rapid=2
+铝合金枪 attack=14 armor=-2 cost=-1 sell=40 comments=这种枪杆还是很舒服的 type=113 enchanting-sharp=2 enchanting-rapid=2
+铝合金火铳 attack=8 armor=0 speed=20 cost=-1 sell=40 comments=大人！时代变了！ type=115 enchanting-sharp=2 enchanting-rapid=2
+铝合金弩 attack=2 armor=0 speed=50 cost=-1 sell=40 comments=两连发！ type=116 enchanting-sharp=2 enchanting-rapid=2
 
 铝合金头盔 attack=1 armor=4 speed=-5 cost=-1 sell=30 comments=好轻啊，没有安全感 type=15 enchanting-rapid=2 enchanting-strong=2
 铝合金甲 attack=1 armor=5 speed=-5 cost=-1 sell=30 comments=轻，坚固，稳定，减震 type=16 enchanting-rapid=2 enchanting-strong=2
@@ -263,20 +263,20 @@
 钛合金护腿 attack=2 armor=6 speed=-6 cost=-1 sell=40 comments=总有些怪物喜欢攻击下盘 type=17 enchanting-rapid=2 enchanting-strong=2
 钛合金靴 attack=2 armor=5 speed=-6 cost=-1 sell=40 comments=还是好硬啊，穿着不舒服 type=18 enchanting-rapid=2 enchanting-strong=2
 
-钛合金剑 attack=16 armor=4 cost=-1 sell=50 comments=顶尖的合金工艺 type=111 enchanting-sharp=2 enchanting-rapid=2
-钛合金斧 attack=20 armor=0 cost=-1 sell=50 comments=重量刚刚好！ type=112 enchanting-sharp=2 enchanting-rapid=2
-钛合金枪 attack=24 armor=-2 cost=-1 sell=50 comments=有些沉，但很好用 type=113 enchanting-sharp=2 enchanting-rapid=2
-钛合金火统 attack=18 armor=0 speed=20 cost=-1 sell=50 comments=口径就是正义 type=115 enchanting-sharp=2 enchanting-rapid=2
-钛合金弩 attack=10 armor=0 speed=50 cost=-1 sell=50 comments=十字弩，双连发！ type=116 enchanting-sharp=2 enchanting-rapid=2
+钛合金剑 attack=10 armor=4 cost=-1 sell=50 comments=顶尖的合金工艺 type=111 enchanting-sharp=2 enchanting-rapid=2
+钛合金斧 attack=14 armor=0 cost=-1 sell=50 comments=重量刚刚好！ type=112 enchanting-sharp=2 enchanting-rapid=2
+钛合金枪 attack=18 armor=-2 cost=-1 sell=50 comments=有些沉，但很好用 type=113 enchanting-sharp=2 enchanting-rapid=2
+钛合金火统 attack=12 armor=0 speed=20 cost=-1 sell=50 comments=口径就是正义 type=115 enchanting-sharp=2 enchanting-rapid=2
+钛合金弩 attack=4 armor=0 speed=50 cost=-1 sell=50 comments=十字弩，双连发！ type=116 enchanting-sharp=2 enchanting-rapid=2
 
 #=========================================
 # 下界装备
 #=========================================
-下界合金剑 attack=20 armor=0 cost=-1 sell=100 comments=这种原料似乎并不是来自我们的世界 type=111 enchanting-sharp=2 enchanting-rapid=2
-下界合金斧 attack=26 armor=-4 cost=-1 sell=100 comments=攻击力为什么这么高？ type=112 enchanting-sharp=2 enchanting-rapid=2
-下界合金枪 attack=32 armor=-8 cost=-1 sell=100 comments=似乎在我挥枪的时候有什么东西握着我的手 type=113 enchanting-sharp=2 enchanting-rapid=2
-下界合金火铳 attack=30 armor=0 speed=30 cost=-1 sell=100 comments=如果只是用来制作子弹，似乎清醒了些 type=115 enchanting-sharp=2 enchanting-rapid=2
-下界合金弩 attack=16 armor=0 speed=50 cost=-1 sell=100 comments=这种箭头似乎会吸收光线 type=116 enchanting-sharp=2 enchanting-rapid=2
+下界合金剑 attack=14 armor=0 cost=-1 sell=100 comments=这种原料似乎并不是来自我们的世界 type=111 enchanting-sharp=2 enchanting-rapid=2
+下界合金斧 attack=20 armor=-4 cost=-1 sell=100 comments=攻击力为什么这么高？ type=112 enchanting-sharp=2 enchanting-rapid=2
+下界合金枪 attack=26 armor=-8 cost=-1 sell=100 comments=似乎在我挥枪的时候有什么东西握着我的手 type=113 enchanting-sharp=2 enchanting-rapid=2
+下界合金火铳 attack=24 armor=0 speed=30 cost=-1 sell=100 comments=如果只是用来制作子弹，似乎清醒了些 type=115 enchanting-sharp=2 enchanting-rapid=2
+下界合金弩 attack=10 armor=0 speed=50 cost=-1 sell=100 comments=这种箭头似乎会吸收光线 type=116 enchanting-sharp=2 enchanting-rapid=2
 
 下界合金头盔 attack=3 armor=6 speed=-8 cost=-1 sell=80 comments=这种东西真的能带头上么 type=15 enchanting-rapid=2 enchanting-strong=2
 下界合金甲 attack=3 armor=7 speed=-8 cost=-1 sell=80 comments=感觉有什么在吞噬我的精神 type=16 enchanting-rapid=2 enchanting-strong=2
@@ -288,20 +288,20 @@
 下界核心护腿 attack=3 armor=8 speed=-8 cost=-1 sell=100 comments=在护腿上做镂空雕刻真的不会影响强度么 type=17 enchanting-rapid=2 enchanting-strong=2
 下界核心靴 attack=3 armor=7 speed=-8 cost=-1 sell=100 comments=好吧，还是这么硬 type=18 enchanting-rapid=2 enchanting-strong=2
 
-下界核心剑 attack=24 armor=8 cost=-1 sell=120 comments=取其精华，弃其糟粕！ type=111 enchanting-sharp=2 enchanting-rapid=2
-下界核心斧 attack=30 armor=2 cost=-1 sell=120 comments=感觉好多了 type=112 enchanting-sharp=2 enchanting-rapid=2
-下界核心枪 attack=36 armor=-4 cost=-1 sell=120 comments=精湛的雕刻工艺 type=113 enchanting-sharp=2 enchanting-rapid=2
-下界核心火铳 attack=32 armor=2 speed=30 cost=-1 sell=120 comments=有一股神奇的力量 type=115 enchanting-sharp=2 enchanting-rapid=2
-下界核心弩 attack=18 armor=2 speed=50 cost=-1 sell=120 comments=十字反曲弩，悄无声息 type=116 enchanting-sharp=2 enchanting-rapid=2
+下界核心剑 attack=18 armor=8 cost=-1 sell=120 comments=取其精华，弃其糟粕！ type=111 enchanting-sharp=2 enchanting-rapid=2
+下界核心斧 attack=24 armor=2 cost=-1 sell=120 comments=感觉好多了 type=112 enchanting-sharp=2 enchanting-rapid=2
+下界核心枪 attack=30 armor=-4 cost=-1 sell=120 comments=精湛的雕刻工艺 type=113 enchanting-sharp=2 enchanting-rapid=2
+下界核心火铳 attack=26 armor=2 speed=30 cost=-1 sell=120 comments=有一股神奇的力量 type=115 enchanting-sharp=2 enchanting-rapid=2
+下界核心弩 attack=12 armor=2 speed=50 cost=-1 sell=120 comments=十字反曲弩，悄无声息 type=116 enchanting-sharp=2 enchanting-rapid=2
 
 #=========================================
 # 灵界装备
 #=========================================
-灵剑 attack=24 armor=10 cost=-1 sell=-1 comments=一股温润之力，宛若翩翩君子 type=111 enchanting-sharp=3 enchanting-rapid=3
-灵斧 attack=30 armor=6 cost=-1 sell=-1 comments=它似乎被一个叫沉香的人用过 type=112 enchanting-sharp=3 enchanting-rapid=3
-灵枪 attack=36 armor=2 cost=-1 sell=-1 comments=六尺长枪，百兵之王 type=113 enchanting-sharp=3 enchanting-rapid=3
-飞剑 attack=32 armor=2 speed=40 cost=-1 sell=-1 comments=脚下三尺飞剑，掌中三寸人间！ type=114 enchanting-sharp=3 enchanting-rapid=3
-灵弩 attack=18 armor=2 speed=60 cost=-1 sell=-1 comments=弩箭会自动索敌哟 type=115 enchanting-sharp=3 enchanting-rapid=3
+灵剑 attack=14 armor=10 cost=-1 sell=-1 comments=一股温润之力，宛若翩翩君子 type=111 enchanting-sharp=3 enchanting-rapid=3
+灵斧 attack=20 armor=6 cost=-1 sell=-1 comments=它似乎被一个叫沉香的人用过 type=112 enchanting-sharp=3 enchanting-rapid=3
+灵枪 attack=26 armor=2 cost=-1 sell=-1 comments=六尺长枪，百兵之王 type=113 enchanting-sharp=3 enchanting-rapid=3
+飞剑 attack=22 armor=2 speed=40 cost=-1 sell=-1 comments=脚下三尺飞剑，掌中三寸人间！ type=114 enchanting-sharp=3 enchanting-rapid=3
+灵弩 attack=8 armor=2 speed=60 cost=-1 sell=-1 comments=弩箭会自动索敌哟 type=115 enchanting-sharp=3 enchanting-rapid=3
 
 
 #=========================================
@@ -312,11 +312,11 @@
 铬合金护腿 attack=3 armor=9 speed=-10 cost=-1 sell=50 comments=总有些怪物喜欢攻击下盘 type=17 enchanting-rapid=3 enchanting-strong=3
 铬合金靴 attack=3 armor=8 speed=-10 cost=-1 sell=50 comments=还是好硬啊，穿着不舒服 type=18 enchanting-rapid=3 enchanting-strong=3
 
-铬合金剑 attack=36 armor=6 cost=-1 sell=60 comments=很不错的合金工艺 type=111 enchanting-sharp=3 enchanting-rapid=3
-铬合金斧 attack=40 armor=0 cost=-1 sell=60 comments=重量刚刚好！ type=112 enchanting-sharp=3 enchanting-rapid=3
-铬合金枪 attack=42 armor=-6 cost=-1 sell=60 comments=有些沉，但很好用 type=113 enchanting-sharp=3 enchanting-rapid=3
-铬合金火铳 attack=42 armor=0 speed=20 cost=-1 sell=60 comments=口径就是正义 type=115 enchanting-sharp=3 enchanting-rapid=3
-铬合金弩 attack=40 armor=0 speed=50 cost=-1 sell=60 comments=十字弩，双连发！ type=116 enchanting-sharp=3 enchanting-rapid=3
+铬合金剑 attack=26 armor=8 cost=-1 sell=60 comments=很不错的合金工艺 type=111 enchanting-sharp=3 enchanting-rapid=3
+铬合金斧 attack=30 armor=4 cost=-1 sell=60 comments=重量刚刚好！ type=112 enchanting-sharp=3 enchanting-rapid=3
+铬合金枪 attack=32 armor=0 cost=-1 sell=60 comments=有些沉，但很好用 type=113 enchanting-sharp=3 enchanting-rapid=3
+铬合金火铳 attack=32 armor=0 speed=20 cost=-1 sell=60 comments=口径就是正义 type=115 enchanting-sharp=3 enchanting-rapid=3
+铬合金弩 attack=30 armor=0 speed=50 cost=-1 sell=60 comments=十字弩，双连发！ type=116 enchanting-sharp=3 enchanting-rapid=3
 
 #=========================================
 # 钨合金装备
@@ -326,23 +326,23 @@
 钨合金护腿 attack=4 armor=12 speed=-8 cost=-1 sell=60 comments=很完美的外观，但是缺乏了颜色 type=17 enchanting-rapid=4 enchanting-strong=4
 钨合金靴 attack=3 armor=10 speed=-8 cost=-1 sell=60 comments=没有推进器，不然就可以飞行了 type=18 enchanting-rapid=4 enchanting-strong=4
 
-钨合金剑 attack=42 armor=10 cost=-1 sell=70 comments=顶尖的合金工艺，锋利十足 type=111 enchanting-sharp=4 enchanting-rapid=4
-钨合金斧 attack=46 armor=0 cost=-1 sell=70 comments=有了套装提升了力量，从而解决了武器重量的问题！ type=112 enchanting-sharp=4 enchanting-rapid=4
-钨合金枪 attack=52 armor=-12 cost=-1 sell=70 comments=有些沉，但很坚韧 type=113 enchanting-sharp=4 enchanting-rapid=4
-钨合金火铳 attack=44 armor=0 speed=20 cost=-1 sell=70 comments=耐热性很好，火力十足 type=115 enchanting-sharp=4 enchanting-rapid=4
-钨合金弩 attack=42 armor=0 speed=50 cost=-1 sell=70 comments=看上去十分坚韧，双连发！ type=116 enchanting-sharp=4 enchanting-rapid=4
+钨合金剑 attack=29 armor=10 cost=-1 sell=70 comments=顶尖的合金工艺，锋利十足 type=111 enchanting-sharp=4 enchanting-rapid=4
+钨合金斧 attack=33 armor=4 cost=-1 sell=70 comments=有了套装提升了力量，从而解决了武器重量的问题！ type=112 enchanting-sharp=4 enchanting-rapid=4
+钨合金枪 attack=39 armor=-2 cost=-1 sell=70 comments=有些沉，但很坚韧 type=113 enchanting-sharp=4 enchanting-rapid=4
+钨合金火铳 attack=35 armor=0 speed=20 cost=-1 sell=70 comments=耐热性很好，火力十足 type=115 enchanting-sharp=4 enchanting-rapid=4
+钨合金弩 attack=31 armor=0 speed=50 cost=-1 sell=70 comments=看上去十分坚韧，双连发！ type=116 enchanting-sharp=4 enchanting-rapid=4
 
 #=========================================
 # 九天玄铁装备
 #=========================================
-九天玄铁头盔 attack=4 armor=13 speed=-6 cost=-1 sell=80 comments=散发着寒气，会不会把人冻傻？ type=15 enchanting-rapid=4 enchanting-strong=4
-九天玄铁甲 attack=4 armor=15 speed=-6 cost=-1 sell=80 comments=咄咄逼人的寒气，给人一种难以逼近的感觉 type=16 enchanting-rapid=4 enchanting-strong=4
-九天玄铁护腿 attack=4 armor=15 speed=-6 cost=-1 sell=80 comments=外表寒冷，但是里面却十分保暖，是怎么做到的？ type=17 enchanting-rapid=4 enchanting-strong=4
-九天玄铁靴 attack=4 armor=13 speed=-6 cost=-1 sell=80 comments=还是好硬啊，穿着有些凉 type=18 enchanting-rapid=4 enchanting-strong=4
+九天玄铁头盔 attack=4 armor=13 speed=-6 cost=-1 sell=80 comments=散发着寒气，会不会把人冻傻？ type=15 enchanting-rapid=5 enchanting-strong=5
+九天玄铁甲 attack=4 armor=15 speed=-6 cost=-1 sell=80 comments=咄咄逼人的寒气，给人一种难以逼近的感觉 type=16 enchanting-rapid=5 enchanting-strong=5
+九天玄铁护腿 attack=4 armor=15 speed=-6 cost=-1 sell=80 comments=外表寒冷，但是里面却十分保暖，是怎么做到的？ type=17 enchanting-rapid=5 enchanting-strong=5
+九天玄铁靴 attack=4 armor=13 speed=-6 cost=-1 sell=80 comments=还是好硬啊，穿着有些凉 type=18 enchanting-rapid=5 enchanting-strong=5
 
-九天玄铁剑 attack=62 armor=4 cost=-1 sell=90 comments=寒气逼人，锋利无比 type=111 enchanting-sharp=4 enchanting-rapid=4
-九天玄铁斧 attack=66 armor=0 cost=-1 sell=90 comments=散发着寒气，重量刚刚好！有着很好的手感 type=112 enchanting-sharp=4 enchanting-rapid=4
-九天玄铁镐 attack=70 armor=-6 cost=-1 sell=100 comments=有了它真的可以挖出好东西吗？等等，为什么它是武器！ type=112 enchanting-sharp=5 enchanting-rapid=5
+九天玄铁剑 attack=44 armor=4 cost=-1 sell=90 comments=寒气逼人，锋利无比 type=111 enchanting-sharp=5 enchanting-rapid=5
+九天玄铁斧 attack=48 armor=0 cost=-1 sell=90 comments=散发着寒气，重量刚刚好！有着很好的手感 type=112 enchanting-sharp=5 enchanting-rapid=5
+九天玄铁镐 attack=52 armor=-6 cost=-1 sell=100 comments=有了它真的可以挖出好东西吗？等等，为什么它是武器！ type=112 enchanting-sharp=5 enchanting-rapid=5
 
 #=========================================
 # 秘银装备
@@ -352,11 +352,11 @@
 秘银护腿 attack=5 armor=18 speed=-10 cost=-1 sell=90 comments=发光有时候真的很有用 type=17 enchanting-rapid=5 enchanting-strong=5
 秘银靴 attack=5 armor=16 speed=-10 cost=-1 sell=90 comments=护甲终究是要凑成一套 type=18 enchanting-rapid=5 enchanting-strong=5
 
-秘银剑 attack=86 armor=10 cost=-1 sell=120 comments=看上去纤细，但是锋利十足 type=111 enchanting-sharp=5 enchanting-rapid=5
-秘银斧 attack=92 armor=0 cost=-1 sell=120 comments=拿起来很轻，但是威力不俗 type=112 enchanting-sharp=5 enchanting-rapid=5
-秘银枪 attack=100 armor=-12 cost=-1 sell=120 comments=尖锐无比，好像可以刺破黑暗？ type=113 enchanting-sharp=5 enchanting-rapid=5
-秘银火铳 attack=92 armor=0 speed=20 cost=-1 sell=120 comments=口径就是正义 type=115 enchanting-sharp=6 enchanting-rapid=6
-秘银弓 attack=88 armor=0 speed=50 cost=-1 sell=120 comments=十分纤细但威力十足，双连发！ type=116 enchanting-sharp=6 enchanting-rapid=6
+秘银剑 attack=68 armor=10 cost=-1 sell=120 comments=看上去纤细，但是锋利十足 type=111 enchanting-sharp=5 enchanting-rapid=5
+秘银斧 attack=74 armor=0 cost=-1 sell=120 comments=拿起来很轻，但是威力不俗 type=112 enchanting-sharp=5 enchanting-rapid=5
+秘银枪 attack=82 armor=-12 cost=-1 sell=120 comments=尖锐无比，好像可以刺破黑暗？ type=113 enchanting-sharp=5 enchanting-rapid=5
+秘银火铳 attack=74 armor=0 speed=20 cost=-1 sell=120 comments=口径就是正义 type=115 enchanting-sharp=5 enchanting-rapid=5
+秘银弓 attack=70 armor=0 speed=50 cost=-1 sell=120 comments=十分纤细但威力十足，双连发！ type=116 enchanting-sharp=5 enchanting-rapid=5
 
 #=========================================
 # 太古合金装备
@@ -366,11 +366,11 @@
 太古合金护腿 attack=7 armor=26 speed=-6 cost=-1 sell=110 comments=有了它，再也不会感觉凉飕飕的了 type=17 enchanting-rapid=6 enchanting-strong=6
 太古合金靴 attack=7 armor=20 speed=-6 cost=-1 sell=110 comments=虽然是由剩余的边角料制作而成，但是还是起到了很好的防护作用 type=18 enchanting-rapid=6 enchanting-strong=6
 
-太古合金剑 attack=102 armor=10 cost=-1 sell=150 comments=顶尖的合金工艺，似乎可以斩断一切 type=111 enchanting-sharp=6 enchanting-rapid=6
-太古合金斧 attack=114 armor=6 cost=-1 sell=150 comments=沉甸甸的重量带来了满满的实力 type=112 enchanting-sharp=6 enchanting-rapid=6
-太古合金枪 attack=128 armor=-2 cost=-1 sell=150 comments=很锋利，使用起来似乎可以做到无坚不摧 type=113 enchanting-sharp=6 enchanting-rapid=6
-太古合金火铳 attack=120 armor=2 speed=20 cost=-1 sell=150 comments=远古的金属再一次提高了火铳的实力 type=115 enchanting-sharp=6 enchanting-rapid=6
-太古合金弓 attack=110 armor=6 speed=50 cost=-1 sell=150 comments=这么坚韧的弓箭真的可以拉动吗？双连发！ type=116 enchanting-sharp=6 enchanting-rapid=6
+太古合金剑 attack=81 armor=10 cost=-1 sell=150 comments=顶尖的合金工艺，似乎可以斩断一切 type=111 enchanting-sharp=6 enchanting-rapid=6
+太古合金斧 attack=93 armor=6 cost=-1 sell=150 comments=沉甸甸的重量带来了满满的实力 type=112 enchanting-sharp=6 enchanting-rapid=6
+太古合金枪 attack=107 armor=-2 cost=-1 sell=150 comments=很锋利，使用起来似乎可以做到无坚不摧 type=113 enchanting-sharp=6 enchanting-rapid=6
+太古合金火铳 attack=99 armor=2 speed=20 cost=-1 sell=150 comments=远古的金属再一次提高了火铳的实力 type=115 enchanting-sharp=6 enchanting-rapid=6
+太古合金弓 attack=89 armor=6 speed=50 cost=-1 sell=150 comments=这么坚韧的弓箭真的可以拉动吗？双连发！ type=116 enchanting-sharp=6 enchanting-rapid=6
 
 #=========================================
 # 背包
@@ -468,6 +468,7 @@
 国旗 cost=-1 sell=1 comments=红日初升在东方，其大道满霞光。 type=44
 茱萸 cost=-1 sell=1 comments=遥知兄弟登高处，遍插茱萸少一人。 type=44
 
+糖果 cost=-1 sell=1 comments=不给糖果就捣蛋！ type=44
 
 #=========================================
 天灾之心 cost=-1 sell=100 comments=不知道有什么用，但是它是你打败传奇的证明 type=43
@@ -475,11 +476,11 @@
 #=========================================
 # 灵
 #=========================================
-劣质灵 cost=-1 sell=1 comments=劣质的灵，一碰就碎 type=331
-普通灵 cost=-1 sell=2 comments=普通的灵，稍有强度 type=332
-稀有灵 cost=-1 sell=3 comments=稀有的灵，韧性十足 type=333
+劣质灵 cost=-1 sell=0 comments=劣质的灵，一碰就碎 type=331
+普通灵 cost=-1 sell=1 comments=普通的灵，稍有强度 type=332
+稀有灵 cost=-1 sell=5 comments=稀有的灵，韧性十足 type=333
 史诗灵 cost=-1 sell=-1 comments=史诗的灵，澎湃宏大 type=334
-传奇灵 cost=-1 sell=9999 comments=传奇的灵，每一个传奇灵的产生都意味着一个传奇的逝去 type=335
+传奇灵 cost=-1 sell=-1 comments=传奇的灵，每一个传奇灵的产生都意味着一个传奇的逝去 type=335
 
 #=========================================
 # 升级材料
@@ -535,15 +536,18 @@
 #=========================================
 # 特殊药剂
 #=========================================
-姜汤 cost=-1 sell=1 comments=可以暖暖身子 type=28
-冰粉 cost=-1 sell=1 comments=可以降降火气 type=28
-板蓝根 cost=-1 sell=1 comments=可以祛除毒气 type=28
-茶水 cost=-1 sell=1 comments=可以解麻 type=28
+姜汤 cost=-1 sell=-1 comments=可以暖暖身子 type=28
+冰粉 cost=-1 sell=-1 comments=可以降降火气 type=28
+板蓝根 cost=-1 sell=-1 comments=可以祛除毒气 type=28
+茶水 cost=-1 sell=-1 comments=可以解麻 type=28
 
-生姜 cost=-1 sell=1 comments=可以种 type=27
+生姜 cost=-1 sell=-1 comments=可以种 type=27
 板蓝根种子 cost=-1 sell=1 comments=可以种 type=27
-茶树 cost=-1 sell=1 comments=可以种 type=27
+茶树 cost=-1 sell=-1 comments=可以种 type=27
 
-面粉 cost=-1 sell=1 comments=可以种 type=22
-茶叶 cost=-1 sell=2 comments=散发着缕缕茶香 type=22
-生姜粉 cost=-1 sell=2 comments=生姜磨成的粉末 type=22
+面粉 cost=-1 sell=-1 comments=可以种 type=22
+茶叶 cost=-1 sell=-1 comments=散发着缕缕茶香 type=22
+生姜粉 cost=-1 sell=-1 comments=生姜磨成的粉末 type=22
+
+命运骰子 cost=-1 sell=-1 use-limit=3 comments=拨动命运的脉络 type=28
+驱魔石 cost=-1 sell=-1 comments=可以祛除魔法 type=26

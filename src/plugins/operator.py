@@ -474,12 +474,15 @@ async def administrator_operation(bot, event, message, qq, name, group_id, mode,
             reply_text = '请在小柒的指引下完成复杂回复的添加~请问你的触发该回复的触发词是什么呢？（只能包含文本和艾特消息，你可以随时输入“*取消创建*”来取消，星号不可以省略哦~）'
             need_reply = True
         elif message == '查看复杂回复' and mode == 1:
-            if len(config['key_reply']['complex']) != 0:
-                reply_text = '开放的复杂回复触发词如下：'
-                for key, value in config['key_reply']['complex'].items():
-                    reply_text += '\n' + key
-            else:
+            if not config['key_reply'].__contains__('complex'):
                 reply_text = '没有开放的复杂回复触发词'
+            else:
+                if len(config['key_reply']['complex']) != 0:
+                    reply_text = '开放的复杂回复触发词如下：'
+                    for key, value in config['key_reply']['complex'].items():
+                        reply_text += '\n' + key
+                else:
+                    reply_text = '没有开放的复杂回复触发词'
             need_reply = True
         elif message7 == '删除复杂回复 ' and mode == 1:
             key = message[7:]

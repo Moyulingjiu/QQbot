@@ -85,6 +85,13 @@ class luck:
     def write_file(self):
         dataManage.save_obj(self.luck, self.luck_file)
 
+    def refresh_luck(self, qq):
+        self.load_file()
+        if self.luck["luck"].__contains__(qq):
+            del self.luck["luck"][qq]
+            self.write_file()
+
+
     def get_luck_number(self, qq):
         self.load_file()
         if self.luck["luck"].__contains__(qq):

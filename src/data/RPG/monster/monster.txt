@@ -60,38 +60,38 @@
 天灾军团 level=0 armor=60 attack=80 speed=60 hp=200 comments=什么东西在席卷而来？这是天灾？ spoils=天灾之心x1 element=暗
 
 
-小火苗 level=5 armor=10 attack=65 speed=80 hp=80 comments=星星之火 spoils=钨矿石x1 element=火
+小火苗 level=5 armor=10 attack=65 speed=80 hp=80 comments=星星之火 spoils=灵木x1 element=火
 火焰精灵 level=6 armor=12 attack=70 speed=80 hp=120 comments=自然形成的一点意识 spoils=寒铁x1 element=火
-火焰守卫 level=6 armor=25 attack=82 speed=60 hp=80 comments=这些意识自发的守卫家园 spoils=星钢岩x1 element=火
-烈焰 level=7 armor=25 attack=80 speed=100 hp=80 comments=快跑，烈焰就在身后翻滚 spoils=棉花x3 element=火
-焚尽法师 level=8 armor=29 attack=100 speed=100 hp=60 comments=在这里修炼的法师，却被环境同化了 spoils=钨矿石x2，寒铁x1 element=火
-烈焰之焚 level=8 armor=10 attack=120 speed=120 hp=40 comments=这是什么？？为什么会有这么庞大的火焰力量！ spoils=板蓝根x2，棉花x1 element=火
-炎尽 level=9 armor=30 attack=500 speed=40 hp=22 comments=灾难平息了么？不！还没结束！！ spoils=魔法石x1 element=火
+火焰守卫 level=6 armor=25 attack=82 speed=60 hp=80 comments=这些意识自发的守卫家园 spoils=寒铁x1 element=火
+烈焰 level=7 armor=25 attack=80 speed=100 hp=80 comments=快跑，烈焰就在身后翻滚 spoils=棉花x2 element=火
+焚尽法师 level=8 armor=29 attack=120 speed=100 hp=60 comments=在这里修炼的法师，却被环境同化了 spoils=寒铁x2 element=火
+烈焰之焚 level=8 armor=10 attack=123 speed=120 hp=40 comments=这是什么？？为什么会有这么庞大的火焰力量！ spoils=板蓝根x2，棉花x2 element=火
+炎尽 level=9 armor=30 attack=500 speed=40 hp=22 comments=灾难平息了么？不！还没结束！！ spoils=钨矿石x1 element=火
 烈焰之焚天炎龙 level=10 armor=60 attack=160 speed=150 hp=100 comments=它曾是龙族最为骄傲的幼龙，是炎龙一族无比闪耀的天才，却在龙族对抗天灾的时候为保护族人而陨落至一处峡谷 spoils=太古岩石x1，秘银x3，布x8 element=火
 
-小水滩 level=5 armor=24 attack=74 speed=60 hp=50 comments=一洼水滩 spoils=铬矿石x1 element=水
+小水滩 level=5 armor=24 attack=74 speed=60 hp=50 comments=一洼水滩 spoils=灵木x1 element=水
 水之精灵 level=6 armor=28 attack=82 speed=80 hp=50 comments=水的意志么？ spoils=寒铁x1 element=水
-大海守卫 level=6 armor=32 attack=80 speed=80 hp=50 comments=大海不容侵犯，与之相比我们更像侵略者 spoils=星钢岩x1 element=水
-水波 level=7 armor=38 attack=86 speed=80 hp=40 comments=波浪来袭！快闪开 spoils=棉花x3 element=水
-浪涛战士 level=8 armor=42 attack=97 speed=80 hp=40 comments=在这里修炼的战士，却被环境同化了 spoils=钨矿石x2，寒铁x1 element=水
-深海之浪 level=8 armor=50 attack=98 speed=70 hp=40 comments=我们潜入深海，却被莫名的力量袭击了！ spoils=冰粉x2，棉花x1 element=水
-冰叹 level=9 armor=66 attack=100 speed=70 hp=30 comments=这就是源头了么？好冷~ spoils=魔法石x1 element=水
-寒冰之永霜冰鲨 level=10 armor=80 attack=130 speed=100 hp=200 comments=它恶名昭彰，曾是海洋上为祸一方的大鲨鱼，天灾到来之时助纣为虐，在天灾被抑制后，吸收了部分天灾的力量潜入深海 spoils=太古岩石x1，秘银x3，布x6 element=水
+大海守卫 level=6 armor=32 attack=80 speed=80 hp=50 comments=大海不容侵犯，与之相比我们更像侵略者 spoils=寒铁x1 element=水
+水波 level=7 armor=38 attack=86 speed=80 hp=40 comments=波浪来袭！快闪开 spoils=棉花x2 element=水
+浪涛战士 level=8 armor=42 attack=120 speed=80 hp=40 comments=在这里修炼的战士，却被环境同化了 spoils=寒铁x3 element=水
+深海之浪 level=8 armor=50 attack=119 speed=70 hp=40 comments=我们潜入深海，却被莫名的力量袭击了！ spoils=冰粉x2，棉花x2 element=水
+冰叹 level=9 armor=70 attack=130 speed=70 hp=30 comments=这就是源头了么？好冷~ spoils=铬矿石x2 element=水
+寒冰之永霜冰鲨 level=10 armor=80 attack=150 speed=100 hp=200 comments=它恶名昭彰，曾是海洋上为祸一方的大鲨鱼，天灾到来之时助纣为虐，在天灾被抑制后，吸收了部分天灾的力量潜入深海 spoils=太古岩石x1，九天玄铁x4，布x6 element=水
 
-小闪电 level=5 armor=6 attack=75 speed=180 hp=30 comments=一道闪电 spoils=铬矿石x1 element=雷
+小闪电 level=5 armor=6 attack=75 speed=180 hp=30 comments=一道闪电 spoils=灵木x1 element=雷
 闪电精灵 level=6 armor=7 attack=79 speed=180 hp=50 comments=发着亮光，向你冲来 spoils=寒铁x1 element=雷
-雷霆守卫 level=6 armor=10 attack=74 speed=200 hp=48 comments=守卫着无尽雷霆的天空 spoils=星钢岩x1 element=雷
+雷霆守卫 level=6 armor=10 attack=74 speed=200 hp=48 comments=守卫着无尽雷霆的天空 spoils=寒铁x1 element=雷
 雷暴 level=7 armor=4 attack=80 speed=300 hp=40 comments=准备防御，这是雷暴！ spoils=棉花x3 element=雷
-闪电刺客 level=7 armor=20 attack=81 speed=240 hp=40 comments=在这里修炼的刺客，却被环境同化了 spoils=空间碎片x1 element=雷
-雷霆之威 level=8 armor=28 attack=96 speed=160 hp=36 comments=雷从九天临！ spoils=姜汤x2，棉花x1 element=雷
-雷隐 level=9 armor=0 attack=110 speed=500 hp=30 comments=这点电光就是雷霆的力量么？ spoils=空间兽x1 element=雷
-闪电之怒雷闪凤 level=10 armor=45 attack=140 speed=480 hp=55 comments=凤凰一族在抑制天灾的时候，曾经几度溃败，后来在各方力量下稳住阵脚，但是发现它们中有些人已经在天灾的力量下动摇了 spoils=太古岩石x1，秘银x2，布x8 element=雷
+闪电刺客 level=7 armor=20 attack=81 speed=240 hp=40 comments=在这里修炼的刺客，却被环境同化了 spoils=布x2 element=雷
+雷霆之威 level=8 armor=28 attack=126 speed=160 hp=36 comments=雷从九天临！ spoils=姜汤x2，棉花x2 element=雷
+雷隐 level=9 armor=30 attack=135 speed=500 hp=30 comments=这点电光就是雷霆的力量么？ spoils=灵石x1 element=雷
+闪电之怒雷闪凤 level=10 armor=45 attack=140 speed=480 hp=55 comments=凤凰一族在抑制天灾的时候，曾经几度溃败，后来在各方力量下稳住阵脚，但是发现它们中有些人已经在天灾的力量下动摇了 spoils=太古岩石x1，九天玄铁x2，布x8，空间兽x1 element=雷
 
 小树苗 level=5 armor=20 attack=80 speed=50 hp=80 comments=这树苗真的是敌人么？ spoils=灵木x2，棉花x1 element=木
 木之精灵 level=6 armor=22 attack=87 speed=60 hp=100 comments=我们才是侵略者对吧？ spoils=棉花x2 element=木
-森林守卫 level=6 armor=32 attack=86 speed=32 hp=100 comments=森林之息，我们真的要打败它么？ spoils=钨矿石x2，寒铁x1 element=木
+森林守卫 level=6 armor=32 attack=86 speed=32 hp=100 comments=森林之息，我们真的要打败它么？ spoils=铬矿石x1，寒铁x1 element=木
 食人花 level=7 armor=30 attack=110 speed=40 hp=100 comments=好险，差点被咬到 spoils=茶水x2 element=木
-不知名的木遁忍者 level=8 armor=40 attack=108 speed=70 hp=60 comments=在这里修炼的忍者，把环境同化了 spoils=木元素祝福原石x1 element=木
-森林之怒 level=8 armor=46 attack=98 speed=50 hp=80 comments=我们似乎做错了 spoils=魔法石x2 element=木
-木息 level=9 armor=40 attack=108 speed=40 hp=500 comments=或许我们真的不该入侵森林 spoils=秘银x3，灵木x2，棉花x5 element=木
-幽森之地脉古树 level=10 armor=60 attack=160 speed=60 hp=300 comments=古树在等着你的净化呢，原本的天灾最强大的力量是大地动摇，这位最年长的古树亲自镇压的这股力量。虽然没有失去意志，但是也阻止不了这股力量逐渐散发了。 spoils=太古岩石x2，秘银x3，布x10 element=木
+不知名的木遁忍者 level=8 armor=40 attack=133 speed=70 hp=60 comments=在这里修炼的忍者，把环境同化了 spoils=木元素祝福原石x1 element=木
+森林之怒 level=8 armor=46 attack=98 speed=50 hp=80 comments=我们似乎做错了 spoils=星钢岩x1 element=木
+木息 level=9 armor=40 attack=133 speed=40 hp=500 comments=或许我们真的不该入侵森林 spoils=灵木x2，棉花x6，铬矿石x3 element=木
+幽森之地脉古树 level=10 armor=60 attack=160 speed=60 hp=300 comments=古树在等着你的净化呢，原本的天灾最强大的力量是大地动摇，这位最年长的古树亲自镇压的这股力量。虽然没有失去意志，但是也阻止不了这股力量逐渐散发了。 spoils=太古岩石x1，秘银x5，布x10 element=木

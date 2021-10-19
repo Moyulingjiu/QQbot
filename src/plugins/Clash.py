@@ -19,6 +19,7 @@ from plugins import dataManage
 # 服务器api
 api_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjdjMzEyYTE1LTcyN2EtNGQ3NC04Mzg5LTRhN2VhY2QwNDU5OSIsImlhdCI6MTYzMDY3Nzg4MCwic3ViIjoiZGV2ZWxvcGVyLzUzNTVmZDI5LTc4NDEtYTVjNC0wN2M2LTE2MGNiYTBiN2MwNSIsInNjb3BlcyI6WyJjbGFzaCJdLCJsaW1pdHMiOlt7InRpZXIiOiJkZXZlbG9wZXIvc2lsdmVyIiwidHlwZSI6InRocm90dGxpbmcifSx7ImNpZHJzIjpbIjE1MC4xNTguMTgwLjcxIl0sInR5cGUiOiJjbGllbnQifV19.8lcRUoWtpFQJaxzFFubCDlKul58eKK59F5Y7KP9xQ43p89BVhISYWqV2P8XZDAyTaWwjYPq2iPmGOa1zuBSBhA'
 
+
 # 写数字
 def get_text_place_color(d, fnt, left, top, value):
     space = 10
@@ -33,12 +34,13 @@ def get_text_place_color(d, fnt, left, top, value):
         if value['level'] > 9:
             left -= space
     if text == 'N':
-       d.text((left, top), text, font=fnt, fill=gray_color)
+        d.text((left, top), text, font=fnt, fill=gray_color)
     elif is_max:
-       d.text((left, top), text, font=fnt, fill=gold_color)
+        d.text((left, top), text, font=fnt, fill=gold_color)
     else:
-       d.text((left, top), text, font=fnt, fill=fill_black)
-       
+        d.text((left, top), text, font=fnt, fill=fill_black)
+
+
 def get_text_place_color2(d, fnt, left, top, value, value2):
     space = 10
     fill_black = '#000000'
@@ -57,6 +59,7 @@ def get_text_place_color2(d, fnt, left, top, value, value2):
             d.text((left, top), text, font=fnt, fill=gold_color)
         else:
             d.text((left, top), text, font=fnt, fill=fill_black)
+
 
 # 解码base64格式的资源
 def decode_image(src):
@@ -92,6 +95,7 @@ def decode_image(src):
 
     return filename
 
+
 # 编码base64格式的资源
 def encode_image(filename):
     """
@@ -119,6 +123,7 @@ def encode_image(filename):
     # 3、图片编码字符串拼接
     src = "data:image/{ext};base64,{data}".format(ext=ext, data=data)
     return src
+
 
 # 爬取html
 def get_html(url, data=None):
@@ -150,29 +155,32 @@ def get_html(url, data=None):
 
     return rep.text
 
+
 # 解析罗马数字
 def get_roman_number(text: str) -> str:
-  if text.endswith('III'):
-    return '3'
-  elif text.endswith('II'):
-    return '2'
-  elif text.endswith('I'):
-    return '1'
-  return ''
+    if text.endswith('III'):
+        return '3'
+    elif text.endswith('II'):
+        return '2'
+    elif text.endswith('I'):
+        return '1'
+    return ''
+
 
 # 将透明图片转变为白色底
 def transparence2white(img: Image) -> Image:
-    sp=img.size
-    width=sp[0]
-    height=sp[1]
+    sp = img.size
+    width = sp[0]
+    height = sp[1]
     for yh in range(height):
         for xw in range(width):
-            dot=(xw,yh)
-            color_d=img.getpixel(dot)  # 与cv2不同的是，这里需要用getpixel方法来获取维度数据
-            if(color_d[3]==0):
-                color_d=(255,255,255,255)
-                img.putpixel(dot,color_d)  # 赋值的方法是通过putpixel
+            dot = (xw, yh)
+            color_d = img.getpixel(dot)  # 与cv2不同的是，这里需要用getpixel方法来获取维度数据
+            if (color_d[3] == 0):
+                color_d = (255, 255, 255, 255)
+                img.putpixel(dot, color_d)  # 赋值的方法是通过putpixel
     return img
+
 
 class Clash:
     def __init__(self):
@@ -188,7 +196,7 @@ class Clash:
 
     def set_refresh(self) -> None:
         self.refresh = True
-    
+
     def refresh_chache(self) -> None:
         today = str(datetime.date.today())
         if self.refresh:
@@ -196,7 +204,7 @@ class Clash:
             self.user_cache: dict = dataManage.load_obj('data/Clash/cache/user')
             self.today = today
             self.refresh = False
-    
+
     def is_lock(self) -> bool:
         today = str(datetime.date.today())
         now = datetime.datetime.now()
@@ -211,14 +219,14 @@ class Clash:
         url = "https://www.cocservice.top/search/"
 
         response = get_html(url)
-        soup = BeautifulSoup(response,'html.parser')
+        soup = BeautifulSoup(response, 'html.parser')
 
         data = soup.select('#loot-index-score')
         image = soup.select('#loot-trend > img')
 
         if len(data) > 0 and len(image) > 0:
             decode_image(image[0]['src'])
-            
+
             reply = '目前鱼情：' + data[0].text
             reply += '\n-------------'
             reply += '\n数据由ClashOfClansForecaster提供'
@@ -241,7 +249,7 @@ class Clash:
             # 获取空白卡
             base = Image.open('data/Clash/玩家空白卡.jpg').convert('RGBA')
             # make a blank image for the text, initialized to transparent text color
-            txt = Image.new('RGBA', base.size, (255,255,255,0))
+            txt = Image.new('RGBA', base.size, (255, 255, 255, 0))
             # 设置字体
             margin = 40
             font_size = 32
@@ -260,7 +268,7 @@ class Clash:
             text = '玩家昵称：' + user_dict['name']
             d.text((margin, 20), text, font=fnt, fill=fill_black)
             text = '等级：' + str(user_dict['expLevel'])
-            d.text((450,20), text, font=fnt, fill=fill_black)
+            d.text((450, 20), text, font=fnt, fill=fill_black)
             text = '职位：'
             if user_dict.__contains__('role'):
                 if user_dict['role'] == 'leader':
@@ -273,35 +281,36 @@ class Clash:
                     text += '成员'
             else:
                 text += '无部落'
-            d.text((base.size[0]- (font_size * len(text)) - margin, 20), text, font=fnt, fill=fill_black)
+            d.text((base.size[0] - (font_size * len(text)) - margin, 20), text, font=fnt, fill=fill_black)
 
             text = '玩家部落：暂无'
             if user_dict.__contains__('clan'):
-                text = '玩家部落：' + user_dict['clan']['name'] + '（LV.' + str(user_dict['clan']['clanLevel']) + '） - ' + user_dict['clan']['tag']
-            d.text((40,70), text, font=fnt, fill=fill_black)
+                text = '玩家部落：' + user_dict['clan']['name'] + '（LV.' + str(user_dict['clan']['clanLevel']) + '） - ' + \
+                       user_dict['clan']['tag']
+            d.text((40, 70), text, font=fnt, fill=fill_black)
 
             # ======================
             # 大本营数据
             text = '奖杯：' + str(user_dict['trophies']) + ' / ' + str(user_dict['bestTrophies'])
-            d.text((200,135), text, font=fnt2, fill=fill_black)
+            d.text((200, 135), text, font=fnt2, fill=fill_black)
             text = '胜利之星：' + str(user_dict['warStars'])
-            d.text((200,175), text, font=fnt2, fill=fill_black)
+            d.text((200, 175), text, font=fnt2, fill=fill_black)
             text = '捐收：' + str(user_dict['donations']) + ' / ' + str(user_dict['donationsReceived'])
-            d.text((200,215), text, font=fnt2, fill=fill_black)
+            d.text((200, 215), text, font=fnt2, fill=fill_black)
             text = '攻防：' + str(user_dict['attackWins']) + ' / ' + str(user_dict['defenseWins'])
-            d.text((200,255), text, font=fnt2, fill=fill_black)
+            d.text((200, 255), text, font=fnt2, fill=fill_black)
 
             text = '奖杯：' + str(user_dict['versusTrophies']) + ' / ' + str(user_dict['bestVersusTrophies'])
-            d.text((650,135), text, font=fnt2, fill=fill_black)
+            d.text((650, 135), text, font=fnt2, fill=fill_black)
             text = '胜利次数：' + str(user_dict['versusBattleWins'])
-            d.text((650,175), text, font=fnt2, fill=fill_black)
+            d.text((650, 175), text, font=fnt2, fill=fill_black)
 
             image_path = 'data/Clash/大本营/TownHall' + str(user_dict['townHallLevel'])
             if user_dict.__contains__('townHallWeaponLevel'):
                 image_path += '_' + str(user_dict['townHallWeaponLevel'])
             image_path += '.jpg'
             image1 = Image.open(image_path)
-            image1 = image1.resize((145, 145),Image.ANTIALIAS)
+            image1 = image1.resize((145, 145), Image.ANTIALIAS)
             base.paste(image1, (40, 135))
 
             if user_dict.__contains__('builderHallLevel'):
@@ -309,7 +318,7 @@ class Clash:
             else:
                 image_path = 'data/Clash/大本营/空白大本营.jpg'
             image1 = Image.open(image_path)
-            image1 = image1.resize((145, 145),Image.ANTIALIAS)
+            image1 = image1.resize((145, 145), Image.ANTIALIAS)
             base.paste(image1, (485, 135))
 
             # ======================
@@ -380,7 +389,7 @@ class Clash:
             Stone_Slammer = 0  # 攻城气球
             Siege_Barracks = 0  # 攻城器
             Log_Launcher = 0  # 滚木攻城车
-            
+
             LASSI = 0  # 莱希
             Electro_Owl = 0  # 闪枭
             Mighty_Yak = 0  # 大牦
@@ -436,7 +445,7 @@ class Clash:
                     Ice_Golem = i
                 elif i['name'] == 'Headhunter' and i['village'] == 'home':
                     Headhunter = i
-                    
+
                 elif i['name'] == 'Super Barbarian' and i['village'] == 'home':
                     Super_Barbarian = i
                 elif i['name'] == 'Super Archer' and i['village'] == 'home':
@@ -461,7 +470,7 @@ class Clash:
                     Super_Witch = i
                 elif i['name'] == 'Ice Hound' and i['village'] == 'home':
                     Ice_Hound = i
-                
+
                 elif i['name'] == 'Raged Barbarian' and i['village'] == 'builderBase':
                     Raged_Barbarian = i
                 elif i['name'] == 'Sneaky Archer' and i['village'] == 'builderBase':
@@ -495,7 +504,7 @@ class Clash:
                     Siege_Barracks = i
                 elif i['name'] == 'Log Launcher' and i['village'] == 'home':
                     Log_Launcher = i
-            
+
                 elif i['name'] == 'L.A.S.S.I' and i['village'] == 'home':
                     LASSI = i
                 elif i['name'] == 'Electro Owl' and i['village'] == 'home':
@@ -534,7 +543,7 @@ class Clash:
             get_text_place_color(d, fnt3, first_distance + space * 9, line_high2, Bowler)
             get_text_place_color(d, fnt3, first_distance + space * 10, line_high2, Ice_Golem)
             get_text_place_color(d, fnt3, first_distance + space * 11, line_high2, Headhunter)
-            
+
             # =============================
             # 第三排
             # 英雄
@@ -544,17 +553,17 @@ class Clash:
             Royal_Champion = 0  # 闰土
             Battle_Machine = 0  # 战争机器
             for i in user_dict['heroes']:
-                if i ['name'] == 'Barbarian King':
+                if i['name'] == 'Barbarian King':
                     Barbarian_King = i
-                elif i ['name'] == 'Archer Queen':
+                elif i['name'] == 'Archer Queen':
                     Archer_Queen = i
-                elif i ['name'] == 'Grand Warden':
+                elif i['name'] == 'Grand Warden':
                     Grand_Warden = i
-                elif i ['name'] == 'Royal Champion':
+                elif i['name'] == 'Royal Champion':
                     Royal_Champion = i
-                elif i ['name'] == 'Battle Machine':
+                elif i['name'] == 'Battle Machine':
                     Battle_Machine = i
-                    
+
             get_text_place_color(d, fnt3, first_distance, line_high3, Barbarian_King)
             get_text_place_color(d, fnt3, first_distance + space, line_high3, Archer_Queen)
             get_text_place_color(d, fnt3, first_distance + space * 2, line_high3, Grand_Warden)
@@ -589,7 +598,7 @@ class Clash:
             get_text_place_color2(d, fnt3, first_distance2 + space2 * 9, line_high4, Super_Valkyrie, Valkyrie)
             get_text_place_color2(d, fnt3, first_distance2 + space2 * 10, line_high4, Super_Witch, Witch)
             get_text_place_color2(d, fnt3, first_distance2 + space2 * 11, line_high4, Ice_Hound, Lava_Hound)
-            
+
             # =============================
             # 第五排
             Lightning = 0
@@ -607,32 +616,32 @@ class Clash:
 
             if user_dict.__contains__('spells'):
                 for i in user_dict['spells']:
-                    if i ['name'] == 'Lightning Spell':
+                    if i['name'] == 'Lightning Spell':
                         Lightning = i
-                    elif i ['name'] == 'Healing Spell':
+                    elif i['name'] == 'Healing Spell':
                         Healing = i
-                    elif i ['name'] == 'Rage Spell':
+                    elif i['name'] == 'Rage Spell':
                         Rage = i
-                    elif i ['name'] == 'Jump Spell':
+                    elif i['name'] == 'Jump Spell':
                         Jump = i
-                    elif i ['name'] == 'Freeze Spell':
+                    elif i['name'] == 'Freeze Spell':
                         Freeze = i
-                    elif i ['name'] == 'Clone Spell':
+                    elif i['name'] == 'Clone Spell':
                         Clone = i
-                    elif i ['name'] == 'Invisibility Spell':
+                    elif i['name'] == 'Invisibility Spell':
                         Invisibility = i
-                        
-                    elif i ['name'] == 'Poison Spell':
+
+                    elif i['name'] == 'Poison Spell':
                         Poison = i
-                    elif i ['name'] == 'Earthquake Spell':
+                    elif i['name'] == 'Earthquake Spell':
                         Earthquake = i
-                    elif i ['name'] == 'Haste Spell':
+                    elif i['name'] == 'Haste Spell':
                         Haste = i
-                    elif i ['name'] == 'Skeleton Spell':
+                    elif i['name'] == 'Skeleton Spell':
                         Skeleton = i
-                    elif i ['name'] == 'Bat Spell':
+                    elif i['name'] == 'Bat Spell':
                         Bat = i
-            
+
             get_text_place_color(d, fnt3, first_distance, line_high5, Lightning)
             get_text_place_color(d, fnt3, first_distance + space, line_high5, Healing)
             get_text_place_color(d, fnt3, first_distance + space * 2, line_high5, Rage)
@@ -687,7 +696,7 @@ class Clash:
             clan_dict = json.loads(res.text)
             base = Image.open('data/Clash/部落空白卡.jpg').convert('RGBA')
             # make a blank image for the text, initialized to transparent text color
-            txt = Image.new('RGBA', base.size, (255,255,255,0))
+            txt = Image.new('RGBA', base.size, (255, 255, 255, 0))
             # 设置字体
             font_size = 60
             fnt = ImageFont.truetype('data/Font/FZHTJT.TTF', font_size)
@@ -707,20 +716,20 @@ class Clash:
                 with open(image_path, 'wb') as f:
                     f.write(icon.content)
                 image1 = Image.open(image_path)
-                image1 = image1.resize((350, 350),Image.ANTIALIAS)
+                image1 = image1.resize((350, 350), Image.ANTIALIAS)
                 base.paste(image1, (100, 150))
             else:
                 text = '【图标获取失败】'
-                d.text((200,200), text, font=fnt, fill=gray_color)
+                d.text((200, 200), text, font=fnt, fill=gray_color)
 
             # ====================================
             # 基本信息
             text = str(clan_dict['name'])
-            d.text((890,110), text, font=fnt, fill=fill_black)
+            d.text((890, 110), text, font=fnt, fill=fill_black)
             text = str(clan_dict['tag'])
-            d.text((890,210), text, font=fnt, fill=fill_black)
+            d.text((890, 210), text, font=fnt, fill=fill_black)
             text = str(len(clan_dict['memberList']))
-            d.text((890,305), text, font=fnt, fill=fill_black)
+            d.text((890, 305), text, font=fnt, fill=fill_black)
             text = str(clan_dict['warLeague']['name'])
             if text == 'Unranked':
                 text = '未排位'
@@ -740,10 +749,10 @@ class Clash:
                 text = '泰坦' + get_roman_number(text)
             elif text.startswith('Legend'):
                 text = '传奇'
-            d.text((890,400), text, font=fnt, fill=fill_black)
+            d.text((890, 400), text, font=fnt, fill=fill_black)
 
             text = '主' + str(clan_dict['clanPoints']) + '/夜' + str(clan_dict['clanVersusPoints'])
-            d.text((1840,110), text, font=fnt, fill=fill_black)
+            d.text((1840, 110), text, font=fnt, fill=fill_black)
             text = str(clan_dict['type'])
             if text == 'inviteOnly':
                 text = '只有被批准才能加入'
@@ -751,11 +760,11 @@ class Clash:
                 text = '不可加入'
             elif text == 'open':
                 text = '任何人都可加入'
-            d.text((1840,210), text, font=fnt, fill=fill_black)
+            d.text((1840, 210), text, font=fnt, fill=fill_black)
             text = '主' + str(clan_dict['requiredTrophies']) + '/夜' + str(clan_dict['requiredVersusTrophies'])
-            d.text((1840,305), text, font=fnt, fill=fill_black)
+            d.text((1840, 305), text, font=fnt, fill=fill_black)
             text = '主' + str(clan_dict['requiredTownhallLevel'])
-            d.text((1900,400), text, font=fnt, fill=fill_black)
+            d.text((1900, 400), text, font=fnt, fill=fill_black)
 
             # ====================================
             # 成员信息
@@ -778,7 +787,7 @@ class Clash:
                 user_donation = member['donations']
                 user_recieve = member['donationsReceived']
                 user_win = '（获取失败）'
-                
+
                 user_url = "https://api.clashofclans.com/v1/players/%23" + user_tag[1:]
                 user_res = requests.get(url=user_url, params=params)
                 if user_res.status_code == 200:
@@ -800,24 +809,24 @@ class Clash:
                         user_level += str(user_dict['townHallWeaponLevel']) + '星'
                     user_win = str(user_dict['attackWins'])
 
-                d.text((80,first_line + space * index), user_name, font=fnt2, fill=fill_black)
-                d.text((350,first_line + space * index), user_tag, font=fnt2, fill=fill_black)
-                d.text((700,first_line + space * index), user_level, font=fnt2, fill=fill_black)
+                d.text((80, first_line + space * index), user_name, font=fnt2, fill=fill_black)
+                d.text((350, first_line + space * index), user_tag, font=fnt2, fill=fill_black)
+                d.text((700, first_line + space * index), user_level, font=fnt2, fill=fill_black)
 
-                d.text((935,first_line + space * index), '%6d' % (user_donation), font=fnt2, fill=fill_black)
-                d.text((1055,first_line + space * index), '/', font=fnt2, fill=fill_black)
-                d.text((1080,first_line + space * index), '%-6d' % (user_recieve), font=fnt2, fill=fill_black)
+                d.text((935, first_line + space * index), '%6d' % (user_donation), font=fnt2, fill=fill_black)
+                d.text((1055, first_line + space * index), '/', font=fnt2, fill=fill_black)
+                d.text((1080, first_line + space * index), '%-6d' % (user_recieve), font=fnt2, fill=fill_black)
 
-                d.text((1300,first_line + space * index), user_win, font=fnt2, fill=fill_black)
-                d.text((1500,first_line + space * index), '（未启用）', font=fnt2, fill=fill_black)
+                d.text((1300, first_line + space * index), user_win, font=fnt2, fill=fill_black)
+                d.text((1500, first_line + space * index), '（未启用）', font=fnt2, fill=fill_black)
                 index += 1
 
-            d.text((700,533), str(level_14), font=fnt, fill=fill_black)
-            d.text((1000,533), str(level_13), font=fnt, fill=fill_black)
-            d.text((1300,533), str(level_12), font=fnt, fill=fill_black)
-            d.text((1600,533), str(level_11), font=fnt, fill=fill_black)
-            d.text((1900,533), str(level_10), font=fnt, fill=fill_black)
-            d.text((2350,533), str(level_9), font=fnt, fill=fill_black)
+            d.text((700, 533), str(level_14), font=fnt, fill=fill_black)
+            d.text((1000, 533), str(level_13), font=fnt, fill=fill_black)
+            d.text((1300, 533), str(level_12), font=fnt, fill=fill_black)
+            d.text((1600, 533), str(level_11), font=fnt, fill=fill_black)
+            d.text((1900, 533), str(level_10), font=fnt, fill=fill_black)
+            d.text((2350, 533), str(level_9), font=fnt, fill=fill_black)
 
             out = Image.alpha_composite(base, txt)
             out = transparence2white(out)
@@ -844,7 +853,7 @@ class Clash:
             need_reply = True
             reply_image = 'data/Clash/鱼情.png'
             reply_text = self.fish()
-        
+
         elif message == 'coc清空标签':
             user_config['config']['clash_user_tag'].clear()
             user_config['config']['main_clash_user_tag'] = 0
@@ -946,27 +955,30 @@ class Clash:
                 elif index < user_config['config']['main_clash_tag']:
                     user_config['config']['main_clash_tag'] -= 1
                 dataManage.save_user(qq, user_config)
-                
+
                 reply_text = '删除成功'
             else:
                 reply_text = '没有序号对应的标签'
-        
+
         elif message == 'coc部落':
             need_reply = True
             if len(user_config['config']['clash_tag']) > 0:
                 await bot.send(event, clan_wait_reply)
                 reply_text = self.clan(user_config['config']['clash_tag'][user_config['config']['main_clash_tag']])
                 if reply_text == '完成':
-                    reply_image = 'data/clash/temp/clan_' + user_config['config']['clash_tag'][user_config['config']['main_clash_tag']] + '.png'
+                    reply_image = 'data/clash/temp/clan_' + user_config['config']['clash_tag'][
+                        user_config['config']['main_clash_tag']] + '.png'
                     reply_text = ''
             else:
                 reply_text = '你目前没有绑定部落标签'
         elif message == 'coc玩家':
             need_reply = True
             if len(user_config['config']['clash_user_tag']) > 0:
-                reply_text = self.player(user_config['config']['clash_user_tag'][user_config['config']['main_clash_user_tag']])
+                reply_text = self.player(
+                    user_config['config']['clash_user_tag'][user_config['config']['main_clash_user_tag']])
                 if reply_text == '完成':
-                    reply_image = 'data/clash/temp/' + user_config['config']['clash_user_tag'][user_config['config']['main_clash_user_tag']] + '.png'
+                    reply_image = 'data/clash/temp/' + user_config['config']['clash_user_tag'][
+                        user_config['config']['main_clash_user_tag']] + '.png'
                     reply_text = ''
             else:
                 reply_text = '你目前没有绑定玩家标签'
@@ -1014,7 +1026,8 @@ class Clash:
                 await bot.send(event, clan_wait_reply)
                 reply_text = self.clan(new_user['config']['clash_tag'][new_user['config']['main_clash_tag']])
                 if reply_text == '完成':
-                    reply_image = 'data/clash/temp/clan_' + user_config['config']['clash_tag'][user_config['config']['main_clash_tag']] + '.png'
+                    reply_image = 'data/clash/temp/clan_' + user_config['config']['clash_tag'][
+                        user_config['config']['main_clash_tag']] + '.png'
                     reply_text = ''
             else:
                 reply_text = '你目前没有绑定部落标签'
@@ -1023,13 +1036,15 @@ class Clash:
             new_user = dataManage.read_user(new_qq)
             need_reply = True
             if len(new_user['config']['clash_user_tag']) > 0:
-                reply_text = self.player(new_user['config']['clash_user_tag'][new_user['config']['main_clash_user_tag']])
+                reply_text = self.player(
+                    new_user['config']['clash_user_tag'][new_user['config']['main_clash_user_tag']])
                 if reply_text == '完成':
-                    reply_image = 'data/clash/temp/' + new_user['config']['clash_user_tag'][new_user['config']['main_clash_user_tag']] + '.png'
+                    reply_image = 'data/clash/temp/' + new_user['config']['clash_user_tag'][
+                        new_user['config']['main_clash_user_tag']] + '.png'
                     reply_text = ''
             else:
                 reply_text = '对方目前没有绑定玩家标签'
-        
+
         elif message == 'coc标签':
             reply_text = '玩家标签：'
             for i in range(0, len(user_config['config']['clash_user_tag'])):

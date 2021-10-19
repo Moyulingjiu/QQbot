@@ -18,6 +18,7 @@ from plugins import getNow
 from plugins import logManage
 from plugins import dataManage
 from plugins import Clock
+from plugins import RPG
 
 
 # =============================================================
@@ -120,7 +121,8 @@ async def reset_clock(bot):
             dataManage.save_clock(clock)
 
     for key in del_key:
-        del clock[key]
+        if key != 923691404:
+            del clock[key]
     dataManage.save_clock(clock)
 
 
@@ -148,7 +150,8 @@ async def clock_check(bot, hour, minute):
 
         for name, members in clock_dict.items():
             # 如果需要提醒才进行提醒
-            if members['remind']['hour'] and hour == members['remind']['hour'] and minute == members['remind']['minute']:
+            if members['remind']['hour'] and hour == members['remind']['hour'] and minute == members['remind'][
+                'minute']:
                 del_member = []
                 at_member = []
                 for member in members['member']:
@@ -169,7 +172,8 @@ async def clock_check(bot, hour, minute):
                 dataManage.save_clock(clock)
 
     for key in del_key:
-        del clock[key]
+        if key != 923691404:
+            del clock[key]
     dataManage.save_clock(clock)
 
 
@@ -207,11 +211,12 @@ async def daily_health_report(bot):
             contains = contains.replace('''{account}''', value['account'])
             password = value['password']
             plaintext = base64.b64decode(password)
-            password_decode = str(plaintext, encoding = "utf8")
+            password_decode = str(plaintext, encoding="utf8")
             contains = contains.replace('''{password}''', password_decode)
             f.write(contains)
-        
+
         try_times = 0
+        result = ''
         while try_times < 3:
             result = os.popen(".\\lib\\daily_reporter.exe").read()
             print(result)
@@ -232,7 +237,7 @@ async def daily_health_report(bot):
                     reply += '\n登陆失败！无法打开健康打卡的网页'
                     init = True
                 elif line == 'failed to get businees_ID':
-                    reply += '\n打卡失败！无法获取businees_ID'
+                    reply += '\n打卡失败！无法获取business_ID'
                     init = True
                 elif line == 'can\'t open the report form!':
                     reply += '\n打卡失败！无法打开表单页面'
@@ -281,3 +286,160 @@ async def muteall_schedule(bot, hour, minute):
             else:
                 await bot.send(group, '按照计划关闭全体禁言，但小柒权限不足——由群成员' + str(value['id'] + '编辑'))
 
+
+async def RPG_rank(bot, hour, minute):
+    dayOfWeek = datetime.datetime.now().weekday()
+    if dayOfWeek == 0 and hour == 15 and minute == 0:
+        RPG.lock = True
+        core = RPG.Core()
+        rank = core.get_rank()
+
+        if rank['gold']['1'] != 0:
+            items = {
+                'name': '魔法石',
+                'number': 4,
+                'enchanting': {
+                    'sharp': 0,
+                    'strong': 0,
+                    'rapid': 0
+                }
+            }
+            give_items(rank['gold']['1'], core, items, '排行榜结算获得积分第一')
+        if rank['gold']['2'] != 0:
+            items = {
+                'name': '魔法石',
+                'number': 2,
+                'enchanting': {
+                    'sharp': 0,
+                    'strong': 0,
+                    'rapid': 0
+                }
+            }
+            give_items(rank['gold']['2'], core, items, '排行榜结算获得积分第二')
+        if rank['gold']['3'] != 0:
+            items = {
+                'name': '魔法石',
+                'number': 1,
+                'enchanting': {
+                    'sharp': 0,
+                    'strong': 0,
+                    'rapid': 0
+                }
+            }
+            give_items(rank['gold']['3'], core, items, '排行榜结算获得积分第三')
+        if rank['rate']['all'] != 0:
+            items = {
+                'name': '魔法石',
+                'number': 1,
+                'enchanting': {
+                    'sharp': 0,
+                    'strong': 0,
+                    'rapid': 0
+                }
+            }
+            give_items(rank['rate']['all'], core, items, '排行榜结算获得胜率第一')
+        if rank['rate']['over100'] != 0:
+            items = {
+                'name': '魔法石',
+                'number': 1,
+                'enchanting': {
+                    'sharp': 0,
+                    'strong': 0,
+                    'rapid': 0
+                }
+            }
+            give_items(rank['rate']['over100'], core, items, '排行榜结算获得胜率第一（超过一百场）')
+        if rank['fencing_master'] != 0:
+            items = {
+                'name': '魔法石',
+                'number': 1,
+                'enchanting': {
+                    'sharp': 0,
+                    'strong': 0,
+                    'rapid': 0
+                }
+            }
+            give_items(rank['fencing_master'], core, items, '排行榜结算获得击剑达人')
+        if rank['be_fenced'] != 0:
+            items = {
+                'name': '魔法石',
+                'number': 1,
+                'enchanting': {
+                    'sharp': 0,
+                    'strong': 0,
+                    'rapid': 0
+                }
+            }
+            give_items(rank['be_fenced'], core, items, '排行榜结算获得被击剑次数最多')
+        if rank['monster'] != 0:
+            items = {
+                'name': '魔法石',
+                'number': 5,
+                'enchanting': {
+                    'sharp': 0,
+                    'strong': 0,
+                    'rapid': 0
+                }
+            }
+            give_items(rank['monster'], core, items, '排行榜结算获得怪物猎人')
+        if rank['die'] != 0:
+            items = {
+                'name': '魔法石',
+                'number': 3,
+                'enchanting': {
+                    'sharp': 0,
+                    'strong': 0,
+                    'rapid': 0
+                }
+            }
+            give_items(rank['die'], core, items, '排行榜结算获得反复作死')
+        if rank['travel'] != 0:
+            items = {
+                'name': '魔法石',
+                'number': 3,
+                'enchanting': {
+                    'sharp': 0,
+                    'strong': 0,
+                    'rapid': 0
+                }
+            }
+            give_items(rank['travel'], core, items, '排行榜结算获得流浪者')
+        if rank['mining_max'] != 0:
+            items = {
+                'name': '魔法石',
+                'number': 3,
+                'enchanting': {
+                    'sharp': 0,
+                    'strong': 0,
+                    'rapid': 0
+                }
+            }
+            give_items(rank['mining_max'], core, items, '排行榜结算获得黄金矿工')
+        if rank['sign_max'] != 0:
+            items = {
+                'name': '魔法石',
+                'number': 3,
+                'enchanting': {
+                    'sharp': 0,
+                    'strong': 0,
+                    'rapid': 0
+                }
+            }
+            give_items(rank['sign_max'], core, items, '排行榜结算获得签到达人')
+
+        config = dataManage.read_config()
+        for group_id in config['test_group']:
+            await bot.send_group_message(group_id, '完成排行榜结算！')
+        RPG.force_reload = True
+        RPG.lock = False
+
+
+def give_items(value: int, core: RPG.Core, items: dict, reason: str = ''):
+    user = core.get_user(value)
+    reply, user = core.get_items(user, items)
+    if reply:
+        reason += '获得：%sx%d' % (items['name'], items['number'])
+    else:
+        reason += '获得：%sx%d，但是背包已满。' % (items['name'], items['number'])
+    user['config']['report'] += '\n' + reason
+    core.update(value, user, RPG.Result(), force=True)  # 强制更新

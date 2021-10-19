@@ -15,9 +15,11 @@
 空间兽 cost=稀有灵x30
 棉花种子 cost=劣质灵x20
 
-生姜 cost=劣质灵x1
-板蓝根种子 cost=劣质灵x1
-茶树 cost=劣质灵x1
+生姜 cost=劣质灵x10
+板蓝根种子 cost=劣质灵x10
+茶树 cost=劣质灵x10
+
+命运骰子 cost=普通灵x5
 
 普通灵 cost=劣质灵x30
 稀有灵 cost=普通灵x30

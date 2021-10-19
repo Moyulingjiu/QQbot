@@ -99,6 +99,7 @@ def bool_string(switch):
     else:
         return '已关闭'
 
+
 # 时间预处理
 def time_pretreatment(time: str) -> str:
     time = time.replace('\\', '').strip()
@@ -109,13 +110,15 @@ def time_pretreatment(time: str) -> str:
             return time[1]
     return time
 
+
 # 合法的时间
 def valid_time(hour: int, minute: int) -> bool:
-    if not (hour >= 0 and hour < 24):
+    if not (0 <= hour < 24):
         return False
-    if not (minute >= 0 and minute < 60):
+    if not (0 <= minute < 60):
         return False
     return True
+
 
 class MessageProcessing:
     config = {}
@@ -449,7 +452,7 @@ class MessageProcessing:
                     reply_text = '权限不足，需要群管理或群主'
                 await send_message(bot, event, mode, merge_reply, reply_text, reply_image, need_at, at_qq)
             return
-        
+
         elif message_code == 'flash on' or message == '开启解除闪照':
             if not self.groups[group_id]['config']['flash']:
                 if group_right < 2 or right < 3:
@@ -606,7 +609,8 @@ class MessageProcessing:
                     self.users[qq]['buffer']['id'] = 12
                     self.users[qq]['buffer']['buffer'] = group_id
                     dataManage.save_user(qq, self.users[qq])
-                    await bot.send(event, '欢迎订阅“定时全体禁言”服务！请用以下格式告诉我您的开始和结束时间：\nxx:xx xx:xx（采用24小时制，不足两位补0）\n例如您想从凌晨两点半禁言到早上六点，可以输入：“02:30 06:00”')
+                    await bot.send(event,
+                                   '欢迎订阅“定时全体禁言”服务！请用以下格式告诉我您的开始和结束时间：\nxx:xx xx:xx（采用24小时制，不足两位补0）\n例如您想从凌晨两点半禁言到早上六点，可以输入：“02:30 06:00”')
                 else:
                     await bot.send(event, '权限不足，需要群主或群管理')
             else:
@@ -656,11 +660,11 @@ class MessageProcessing:
             if not remind_schedule.__contains__(group_id) or len(remind_schedule[group_id]) == 0:
                 await bot.send(event, '本群没有任何定时提醒')
                 return
-            
+
             index = 1
             reply = '本群定时提醒如下：'
             for single in remind_schedule[group_id]:
-                reply = '\n%d.' % (index)
+                reply = '\n%d.' % index
             await bot.send(event, reply)
             return
         elif message == '删除定时提醒':
@@ -693,6 +697,98 @@ class MessageProcessing:
                 await send_message(bot, event, mode, merge_reply, reply_text, reply_image, need_at, at_qq)
             return
 
+        elif message[:6] == '添加指令隧穿':
+            if not (group_right < 2 or right < 3):
+                await bot.send(event, '权限不足')
+                return
+            information: list = message[6:].strip().split(' ')
+            if len(information) == 2:
+                if '删除指令隧穿' in information[0] or '查看指令隧穿' in information[0] or '添加指令隧穿' in information[0]:
+                    await bot.send(event, "非法占用，该指令格式不可以占用删除隧穿，查看隧穿")
+                else:
+                    tunneling: dict = dataManage.load_obj('data/Function/tunneling')
+                    if not tunneling.__contains__(group_id):
+                        tunneling[group_id] = {}
+                    information[0] = information[0].strip()
+                    information[1] = information[1].strip()
+                    if tunneling[group_id].__contains__(information[0]):
+                        await bot.send(event, "该隧穿已被占用：%s->%s" % (information[0], tunneling[group_id][information[0]]))
+                    else:
+                        tunneling[group_id][information[0]] = information[1]
+                        dataManage.save_obj(tunneling, 'data/Function/tunneling')
+                        await bot.send(event, "成功添加隧穿指令：%s->%s" % (information[0], information[1]))
+            else:
+                await bot.send(event, "格式错误，该指令格式如下“添加指令隧穿 原始指令 隧穿到某个指令”")
+            return
+        elif message[:6] == '删除指令隧穿':
+            if not (group_right < 2 or right < 3):
+                await bot.send(event, '权限不足')
+                return
+            information: str = message[6:].strip()
+            tunneling: dict = dataManage.load_obj('data/Function/tunneling')
+            if not tunneling.__contains__(group_id) or not tunneling[group_id].__contains__(information):
+                await bot.send(event, "原始隧穿指令不存在")
+            else:
+                await bot.send(event, "成功删除隧穿指令：%s->%s" % (information, tunneling[group_id][information]))
+                del tunneling[group_id][information]
+                dataManage.save_obj(tunneling, 'data/Function/tunneling')
+            return
+        elif message == '查看指令隧穿':
+            tunneling: dict = dataManage.load_obj('data/Function/tunneling')
+            if not tunneling.__contains__(group_id):
+                await bot.send(event, "暂无任何隧穿命令")
+            elif len(tunneling[group_id]) == 0:
+                await bot.send(event, "暂无任何隧穿命令")
+            else:
+                reply = '隧穿指令如下：'
+                for key, value in tunneling[group_id].items():
+                    reply += '\n%s->%s' % (key, value)
+                await bot.send(event, reply)
+            return
+
+        elif message == '开启群回复共享':
+            if not (group_right < 2 or right < 3):
+                await bot.send(event, '权限不足')
+                return
+            copy_allow = dataManage.load_obj('data/Function/reply_copy_right')
+            if copy_allow.__contains__(group_id):
+                await bot.send(event, '本群的回复共享本来就是开启的')
+                return
+            copy_allow[group_id] = True
+            dataManage.save_obj(copy_allow, 'data/Function/reply_copy_right')
+            await bot.send(event, '已开启群回复共享，其他群可以输入“复制群回复%d”来复制回复' % group_id)
+            return
+        elif message == '关闭群回复共享':
+            if not (group_right < 2 or right < 3):
+                await bot.send(event, '权限不足')
+                return
+            copy_allow = dataManage.load_obj('data/Function/reply_copy_right')
+            if not copy_allow.__contains__(group_id):
+                await bot.send(event, '本群的回复共享本来就是关闭的')
+                return
+            del copy_allow[group_id]
+            dataManage.save_obj(copy_allow, 'data/Function/reply_copy_right')
+            await bot.send(event, '已关闭群回复共享')
+            return
+        elif message[:5] == '复制群回复':
+            if not (group_right < 2 or right < 3):
+                await bot.send(event, '权限不足')
+                return
+            target = message[5:].strip()
+            if target.isdigit():
+                target = int(target)
+                copy_allow = dataManage.load_obj('data/Function/reply_copy_right')
+                if copy_allow.__contains__(target):
+                    self.get_group(target)
+                    target_group = self.groups[target]
+                    group = self.groups[group_id]
+                    group['key_reply'] = target_group['key_reply']
+                    dataManage.save_group(group_id, group)
+                    await bot.send(event, '复制成功~')
+                else:
+                    await bot.send(event, '目标群没有共享回复库~')
+            else:
+                await bot.send(event, '格式错误~')
         return 1
 
     # 0：朋友消息，1：群消息，2：临时消息
@@ -770,6 +866,17 @@ class MessageProcessing:
 
         # 获取指令信息
         message = message.strip()
+        tunneling: dict = dataManage.load_obj('data/Function/tunneling')
+        if tunneling.__contains__(group_id):
+            if tunneling[group_id].__contains__(message):
+                print('隧穿指令：%s->%s' % (message, tunneling[group_id][message]))
+                message = tunneling[group_id][message]
+            else:
+                for key, value in tunneling[group_id].items():
+                    if message.startswith(key):
+                        message = message.replace(key, value, 1)
+                        break
+
         message_len = len(message)
         message_code = message.lower()
         if len(key_allow) == 0:
@@ -1012,7 +1119,7 @@ class MessageProcessing:
                 reply_text = '好的~已为您记录下来了，将会在每天12:05自动打卡，并私聊告诉你打卡的结果，请确保有添加' + self.get_name() + '的好友'
                 reply_text += '\n你可以通过输入“AsYNARTvgt”来退订此服务'
 
-                password_byte = bytes(message, encoding = "utf8")
+                password_byte = bytes(message, encoding="utf8")
                 ciphertext = base64.b64encode(password_byte)
 
                 xmu = dataManage.load_obj('lib/account')
@@ -1044,16 +1151,18 @@ class MessageProcessing:
                         list1_1[1] = time_pretreatment(list1_1[1])
                         list1_2[0] = time_pretreatment(list1_2[0])
                         list1_2[1] = time_pretreatment(list1_2[1])
-                        if not list1_1[0].isdigit() or not list1_1[1].isdigit or not list1_2[0].isdigit() or not list1_2[1].isdigit:
+                        if not list1_1[0].isdigit() or not list1_1[1].isdigit or not list1_2[0].isdigit() or not \
+                        list1_2[1].isdigit:
                             get_time = False
                         else:
                             value['hour1'] = int(list1_1[0])
                             value['minute1'] = int(list1_1[1])
                             value['hour2'] = int(list1_2[0])
                             value['minute2'] = int(list1_2[1])
-                            if not valid_time(value['hour1'], value['minute1']) or not valid_time(value['hour2'], value['minute2']):
+                            if not valid_time(value['hour1'], value['minute1']) or not valid_time(value['hour2'],
+                                                                                                  value['minute2']):
                                 get_time = False
-                
+
                 if not get_time:
                     if message != '取消':
                         reset_buffer = False
@@ -1069,7 +1178,6 @@ class MessageProcessing:
                         muteall_schedule[group_id] = value
                         dataManage.save_obj(muteall_schedule, 'data/Function/muteall')
                         await bot.send(event, '创建成功！你可以输入“模块列表”来查看订阅的服务')
-                    
 
             if reset_buffer:
                 self.users[qq]['buffer']['id'] = 0
@@ -1263,7 +1371,7 @@ class MessageProcessing:
         if mode == 1 and self.groups[group_id]['config']['flash']:
             for image in flash_image:
                 await bot.send(event, image.as_image())
-        
+
         # 禁言操作
         if mode == 1 and group_right != 2:
             if message[:2] == '禁言' and len(at_list) > 0:
@@ -1279,7 +1387,7 @@ class MessageProcessing:
                     sum_number = 0
                     temp_number = 0
                     valid = True
-                    
+
                     for index in range(len(message_plain[2:])):
                         char = message_plain[2:][index]
                         if char == '一':
@@ -1316,7 +1424,7 @@ class MessageProcessing:
                         elif char == '万':
                             sum_number = sum_number * 10000 + temp_number * 10000
                             temp_number = 0
-                        
+
                         elif char == '天':
                             sum_number += temp_number
                             mute_seconds += sum_number * 24 * 3600
@@ -1365,7 +1473,7 @@ class MessageProcessing:
                             member = await bot.get_group_member(group_id, qq.target)
                             if member is not None:
                                 if str(member.permission) == 'Permission.Member':
-                                    await bot.mute(member_id = qq.target, target = group_id, time = mute_seconds)
+                                    await bot.mute(member_id=qq.target, target=group_id, time=mute_seconds)
                                     number += 1
                     else:
                         reply_text = '小柒无权禁言'
@@ -1381,17 +1489,17 @@ class MessageProcessing:
                     for qq in at_list:
                         member = await bot.get_group_member(group_id, qq.target)
                         if member is not None:
-                            await bot.unmute(member_id = qq.target, target = group_id)
+                            await bot.unmute(member_id=qq.target, target=group_id)
                             number += 1
                     reply_text = '成功解除' + str(number) + '人禁言'
             elif message == '开启全体禁言':
                 if str(event.sender.group.permission) != 'Permission.Member':
-                    await bot.mute_all(target = group_id)
+                    await bot.mute_all(target=group_id)
                     need_reply = True
                     reply_text = '已开启全体禁言'
             elif message == '解除全体禁言' or message == '关闭全体禁言':
                 if str(event.sender.group.permission) != 'Permission.Member':
-                    await bot.unmute_all(target = group_id)
+                    await bot.unmute_all(target=group_id)
                     need_reply = True
                     reply_text = '已关闭全体禁言'
 
@@ -1418,7 +1526,6 @@ class MessageProcessing:
             else:
                 reply_text = '您没有订阅“厦大自动健康打卡”服务'
 
-
         # -----------------------------------------------------------------------------------
         # 通过名字唤醒
         if message == self.bot_name:
@@ -1444,10 +1551,10 @@ class MessageProcessing:
                 if mode == 0 or mode == 2:
                     reply_text = '这部分命令，只支持群聊哦~'
                     reply_text += '\n目前因为框架更新骰娘未能及时迁移，如果你确保了解什么是骰娘可以使用小柒的妹妹399608601。' + \
-                                    '小捌采用的是塔骰并且加入了全网共同黑名单。违规操作将会被所有塔骰拉黑。'
+                                  '小捌采用的是塔骰并且加入了全网共同黑名单。违规操作将会被所有塔骰拉黑。'
                 else:
                     reply_text = '目前因为框架更新骰娘未能及时迁移，如果你确保了解什么是骰娘可以使用小柒的妹妹399608601。' + \
-                                    '小捌采用的是塔骰并且加入了全网共同黑名单。违规操作将会被所有塔骰拉黑。'
+                                 '小捌采用的是塔骰并且加入了全网共同黑名单。违规操作将会被所有塔骰拉黑。'
                 need_reply = True
             elif message == '塔罗牌帮助':
                 reply_image = command.help_tarot()
@@ -1530,9 +1637,11 @@ class MessageProcessing:
                     today = str(datetime.date.today())
                     reply_text = '打卡<' + name + '>情况如下：'
                     if clock_data['remind']['switch']:
-                        reply_text += '\n提醒时间-%02d:%02d' % (clock_data['remind']['hour'], clock_data['remind']['minute'])
+                        reply_text += '\n提醒时间-%02d:%02d' % (
+                        clock_data['remind']['hour'], clock_data['remind']['minute'])
                     if clock_data['summary']['switch']:
-                        reply_text += '\n总结时间-%02d:%02d' % (clock_data['summary']['hour'], clock_data['summary']['minute'])
+                        reply_text += '\n总结时间-%02d:%02d' % (
+                        clock_data['summary']['hour'], clock_data['summary']['minute'])
                     reply_text += '\n参与打卡的成员：'
                     member_list_origin = await bot.member_list(group_id)
                     member_list = {}
@@ -1666,7 +1775,6 @@ class MessageProcessing:
                     need_reply = True
                     reply_text = BaseFunction.random_char(int(text))
 
-
             if need_reply:
                 self.statistics['base_function'] += 1
                 dataManage.save_statistics(self.statistics)
@@ -1797,8 +1905,9 @@ class MessageProcessing:
         # -----------------------------------------------------------------------------------
         # 部落冲突
         if not need_reply and mode == 1 and self.groups[group_id]['config']['clash']:
-            need_reply, reply_text, reply_image = await self.clash.handle(bot, event, message, group_id, qq, self.groups[group_id],
-                                                                    self.users[qq])
+            need_reply, reply_text, reply_image = await self.clash.handle(bot, event, message, group_id, qq,
+                                                                          self.groups[group_id],
+                                                                          self.users[qq])
             if need_reply:
                 merge_reply = True
 
@@ -1975,7 +2084,7 @@ class MessageProcessing:
             statistics = dataManage.read_statistics()
             statistics['nudge'] += 1
             dataManage.save_statistics(statistics)
-            
+
             if str(event.subject.kind) == 'Group':
                 rand = random.randint(0, 26)
                 if rand == 0:
@@ -2100,7 +2209,7 @@ class MessageProcessing:
         self.get_group(event.group_id)
         if self.groups[event.group_id]['config']['member_wather']:
             reply = '有新的群申请~'
-            reply += '\n申请人：' +  event.nick
+            reply += '\n申请人：' + event.nick
             reply += '\n申请人QQ：' + str(event.from_id)
             reply += '\n申请信息：\n' + event.message
             await bot.send_group_message(event.group_id, reply)
@@ -2111,13 +2220,14 @@ class MessageProcessing:
     async def leave_group(self, bot, event):
         self.get_group(event.group.id)
         if self.groups[event.group.id]['config']['member_wather']:
-            reply = '此刻我们失去了一位成员：' +  event.member.member_name + '（' + str(event.member.id) + '）'
+            reply = '此刻我们失去了一位成员：' + event.member.member_name + '（' + str(event.member.id) + '）'
             await bot.send_group_message(event.group.id, reply)
 
     async def kick_group(self, bot, event):
         self.get_group(event.group.id)
         if self.groups[event.group.id]['config']['member_wather']:
-            reply = '管理员<' + event.operator.member_name + '>踢出成员<' + event.member.member_name + '（' + str(event.member.id) + '）>'
+            reply = '管理员<' + event.operator.member_name + '>踢出成员<' + event.member.member_name + '（' + str(
+                event.member.id) + '）>'
             await bot.send_group_message(event.group.id, reply)
 
     async def member_change(self, bot, event):
