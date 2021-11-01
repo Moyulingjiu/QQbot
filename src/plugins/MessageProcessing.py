@@ -1561,7 +1561,8 @@ class MessageProcessing:
                 need_reply = True
             elif message == '游戏帮助' or message == '游戏指令':
                 reply_image = command.help_game()
-                reply_text = '输入“游戏帮助2”查看下一页'
+                reply_text = '游戏官方社区（906554784）'
+                reply_text += '\n输入“游戏帮助2”查看下一页'
                 if mode == 1:
                     if not self.groups[group_id]['config']['RPG']:
                         reply_text += '\n本群游戏模块为关闭状态，在群内输入“模块列表”查询各个模块开关状态'
@@ -1569,10 +1570,10 @@ class MessageProcessing:
             elif message == '游戏帮助2':
                 reply_image = command.help_game2()
                 need_reply = True
-            elif message == '附魔查询':
+            elif message == '附魔查询' or message == '查询附魔':
                 reply_image = command.enchanting()
                 need_reply = True
-            elif message == 'buff查询':
+            elif message == 'buff查询' or message == '查询buff':
                 reply_image = command.buff()
                 need_reply = True
             elif message == '游戏新手指南' or message == '新手指南':

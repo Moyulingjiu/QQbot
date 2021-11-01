@@ -11,6 +11,7 @@ import asyncio
 import datetime
 import base64
 import os
+import time
 
 # =============================================================
 # 附加功能类
@@ -289,7 +290,7 @@ async def muteall_schedule(bot, hour, minute):
 
 async def RPG_rank(bot, hour, minute):
     dayOfWeek = datetime.datetime.now().weekday()
-    if dayOfWeek == 0 and hour == 15 and minute == 0:
+    if dayOfWeek == 6 and hour == 21 and minute == 10:
         RPG.lock = True
         core = RPG.Core()
         rank = core.get_rank()
@@ -297,7 +298,7 @@ async def RPG_rank(bot, hour, minute):
         if rank['gold']['1'] != 0:
             items = {
                 'name': '魔法石',
-                'number': 4,
+                'number': 8,
                 'enchanting': {
                     'sharp': 0,
                     'strong': 0,
@@ -308,7 +309,7 @@ async def RPG_rank(bot, hour, minute):
         if rank['gold']['2'] != 0:
             items = {
                 'name': '魔法石',
-                'number': 2,
+                'number': 4,
                 'enchanting': {
                     'sharp': 0,
                     'strong': 0,
@@ -319,7 +320,7 @@ async def RPG_rank(bot, hour, minute):
         if rank['gold']['3'] != 0:
             items = {
                 'name': '魔法石',
-                'number': 1,
+                'number': 2,
                 'enchanting': {
                     'sharp': 0,
                     'strong': 0,
@@ -327,32 +328,11 @@ async def RPG_rank(bot, hour, minute):
                 }
             }
             give_items(rank['gold']['3'], core, items, '排行榜结算获得积分第三')
-        if rank['rate']['all'] != 0:
-            items = {
-                'name': '魔法石',
-                'number': 1,
-                'enchanting': {
-                    'sharp': 0,
-                    'strong': 0,
-                    'rapid': 0
-                }
-            }
-            give_items(rank['rate']['all'], core, items, '排行榜结算获得胜率第一')
-        if rank['rate']['over100'] != 0:
-            items = {
-                'name': '魔法石',
-                'number': 1,
-                'enchanting': {
-                    'sharp': 0,
-                    'strong': 0,
-                    'rapid': 0
-                }
-            }
-            give_items(rank['rate']['over100'], core, items, '排行榜结算获得胜率第一（超过一百场）')
+
         if rank['fencing_master'] != 0:
             items = {
                 'name': '魔法石',
-                'number': 1,
+                'number': 3,
                 'enchanting': {
                     'sharp': 0,
                     'strong': 0,
@@ -363,7 +343,7 @@ async def RPG_rank(bot, hour, minute):
         if rank['be_fenced'] != 0:
             items = {
                 'name': '魔法石',
-                'number': 1,
+                'number': 3,
                 'enchanting': {
                     'sharp': 0,
                     'strong': 0,
@@ -374,7 +354,7 @@ async def RPG_rank(bot, hour, minute):
         if rank['monster'] != 0:
             items = {
                 'name': '魔法石',
-                'number': 5,
+                'number': 8,
                 'enchanting': {
                     'sharp': 0,
                     'strong': 0,
@@ -396,7 +376,7 @@ async def RPG_rank(bot, hour, minute):
         if rank['travel'] != 0:
             items = {
                 'name': '魔法石',
-                'number': 3,
+                'number': 5,
                 'enchanting': {
                     'sharp': 0,
                     'strong': 0,
@@ -407,7 +387,7 @@ async def RPG_rank(bot, hour, minute):
         if rank['mining_max'] != 0:
             items = {
                 'name': '魔法石',
-                'number': 3,
+                'number': 8,
                 'enchanting': {
                     'sharp': 0,
                     'strong': 0,
@@ -430,6 +410,7 @@ async def RPG_rank(bot, hour, minute):
         config = dataManage.read_config()
         for group_id in config['test_group']:
             await bot.send_group_message(group_id, '完成排行榜结算！')
+        time.sleep(15)
         RPG.force_reload = True
         RPG.lock = False
 

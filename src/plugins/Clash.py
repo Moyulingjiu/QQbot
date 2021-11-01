@@ -15,7 +15,8 @@ from PIL import Image, ImageDraw, ImageFont
 from plugins import dataManage
 
 # 家庭测试api
-# api_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjBjMjY4ZTdiLWE4ZWUtNDBlYy1hMWEwLTEwNzFlYmI4MjIzMyIsImlhdCI6MTYzMjU1MTAyMywic3ViIjoiZGV2ZWxvcGVyLzUzNTVmZDI5LTc4NDEtYTVjNC0wN2M2LTE2MGNiYTBiN2MwNSIsInNjb3BlcyI6WyJjbGFzaCJdLCJsaW1pdHMiOlt7InRpZXIiOiJkZXZlbG9wZXIvc2lsdmVyIiwidHlwZSI6InRocm90dGxpbmcifSx7ImNpZHJzIjpbIjExNy4zMC4xNzkuODEiXSwidHlwZSI6ImNsaWVudCJ9XX0.A3JLf1HSobT8RoEXMvxhc92UajItFC14jyr0qxeM6AhPKw6y3teeBp8dK04V23EARxMLDDPFkwIbH4tKwNOrOQ'
+# api_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6ImIxNzM1Y2YxLTQxMDYtNGMzYS1hOWVjLTU1YjZlYTNkYTA0NCIsImlhdCI6MTYzNTM0MjI4Niwic3ViIjoiZGV2ZWxvcGVyLzUzNTVmZDI5LTc4NDEtYTVjNC0wN2M2LTE2MGNiYTBiN2MwNSIsInNjb3BlcyI6WyJjbGFzaCJdLCJsaW1pdHMiOlt7InRpZXIiOiJkZXZlbG9wZXIvc2lsdmVyIiwidHlwZSI6InRocm90dGxpbmcifSx7ImNpZHJzIjpbIjExNy4zMC4xODIuMTE2Il0sInR5cGUiOiJjbGllbnQifV19.BJ3T9iT-GYGZtIN_R7ANNwZ_QSXh5qUdlR55Cg7lqjHi3eWwLqA_it6lzaQVO4S3bVTaAWX8Z1BYmiW89DoCnQ'
+
 # 服务器api
 api_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjdjMzEyYTE1LTcyN2EtNGQ3NC04Mzg5LTRhN2VhY2QwNDU5OSIsImlhdCI6MTYzMDY3Nzg4MCwic3ViIjoiZGV2ZWxvcGVyLzUzNTVmZDI5LTc4NDEtYTVjNC0wN2M2LTE2MGNiYTBiN2MwNSIsInNjb3BlcyI6WyJjbGFzaCJdLCJsaW1pdHMiOlt7InRpZXIiOiJkZXZlbG9wZXIvc2lsdmVyIiwidHlwZSI6InRocm90dGxpbmcifSx7ImNpZHJzIjpbIjE1MC4xNTguMTgwLjcxIl0sInR5cGUiOiJjbGllbnQifV19.8lcRUoWtpFQJaxzFFubCDlKul58eKK59F5Y7KP9xQ43p89BVhISYWqV2P8XZDAyTaWwjYPq2iPmGOa1zuBSBhA'
 
@@ -680,7 +681,7 @@ class Clash:
             print('报错信息：' + str(res.text))
             return '爬虫已失效（code：' + str(res.status_code) + '），请前往官方群反馈给主人，群号可以通过添加小柒好友获得'
 
-    def clan(self, tag):
+    async def clan(self, tag):
         if self.clan_cache.__contains__(tag):
             pass
 
@@ -778,36 +779,48 @@ class Clash:
             level_10 = 0
             level_9 = 0
 
-            for member in clan_dict['memberList']:
-                user_name = member['name']
-                if len(user_name) > 6:
-                    user_name = user_name[:6] + '…'
-                user_tag = member['tag']
-                user_level = '（获取失败）'
-                user_donation = member['donations']
-                user_recieve = member['donationsReceived']
-                user_win = '（获取失败）'
-
-                user_url = "https://api.clashofclans.com/v1/players/%23" + user_tag[1:]
+            clan_member = []
+            async def request_clan_member(tag):
+                user_url = "https://api.clashofclans.com/v1/players/%23" + tag[1:]
                 user_res = requests.get(url=user_url, params=params)
                 if user_res.status_code == 200:
-                    user_dict = json.loads(user_res.text)
-                    if user_dict['townHallLevel'] == 14:
-                        level_14 += 1
-                    if user_dict['townHallLevel'] == 13:
-                        level_13 += 1
-                    if user_dict['townHallLevel'] == 12:
-                        level_12 += 1
-                    if user_dict['townHallLevel'] == 11:
-                        level_11 += 1
-                    if user_dict['townHallLevel'] == 10:
-                        level_10 += 1
-                    if user_dict['townHallLevel'] <= 9:
-                        level_9 += 1
-                    user_level = str(user_dict['townHallLevel']) + '本'
-                    if user_dict.__contains__('townHallWeaponLevel'):
-                        user_level += str(user_dict['townHallWeaponLevel']) + '星'
-                    user_win = str(user_dict['attackWins'])
+                    clan_member.append(json.loads(user_res.text))
+            tasks = []
+            for member in clan_dict['memberList']:
+                tasks.append(request_clan_member(member['tag']))
+            start = time.time()
+            print('开始爬数据')
+            await asyncio.gather(asyncio.wait(tasks))
+
+            end = time.time()
+            print('run seconds:', end - start)
+            for user_dict in clan_member:
+                user_name = user_dict['name']
+                if len(user_name) > 6:
+                    print(user_name)
+                    user_name = user_name[:6] + '…'
+                user_tag = user_dict['tag']
+                user_level = '（获取失败）'
+                user_donation = user_dict['donations']
+                user_recieve = user_dict['donationsReceived']
+                user_win = '（获取失败）'
+
+                if user_dict['townHallLevel'] == 14:
+                    level_14 += 1
+                if user_dict['townHallLevel'] == 13:
+                    level_13 += 1
+                if user_dict['townHallLevel'] == 12:
+                    level_12 += 1
+                if user_dict['townHallLevel'] == 11:
+                    level_11 += 1
+                if user_dict['townHallLevel'] == 10:
+                    level_10 += 1
+                if user_dict['townHallLevel'] <= 9:
+                    level_9 += 1
+                user_level = str(user_dict['townHallLevel']) + '本'
+                if user_dict.__contains__('townHallWeaponLevel'):
+                    user_level += str(user_dict['townHallWeaponLevel']) + '星'
+                user_win = str(user_dict['attackWins'])
 
                 d.text((80, first_line + space * index), user_name, font=fnt2, fill=fill_black)
                 d.text((350, first_line + space * index), user_tag, font=fnt2, fill=fill_black)
@@ -964,7 +977,7 @@ class Clash:
             need_reply = True
             if len(user_config['config']['clash_tag']) > 0:
                 await bot.send(event, clan_wait_reply)
-                reply_text = self.clan(user_config['config']['clash_tag'][user_config['config']['main_clash_tag']])
+                reply_text = await self.clan(user_config['config']['clash_tag'][user_config['config']['main_clash_tag']])
                 if reply_text == '完成':
                     reply_image = 'data/clash/temp/clan_' + user_config['config']['clash_tag'][
                         user_config['config']['main_clash_tag']] + '.png'
@@ -986,7 +999,7 @@ class Clash:
             await bot.send(event, clan_wait_reply)
             need_reply = True
             tag = message[6:]
-            reply_text = self.clan(tag)
+            reply_text = await self.clan(tag)
             if reply_text == '完成':
                 reply_image = 'data/clash/temp/clan_' + tag + '.png'
                 reply_text = ''
@@ -1001,7 +1014,7 @@ class Clash:
             index = int(message[5:]) - 1
             if len(user_config['config']['clash_tag']) > index >= 0:
                 await bot.send(event, clan_wait_reply)
-                reply_text = self.clan(user_config['config']['clash_tag'][index])
+                reply_text = await self.clan(user_config['config']['clash_tag'][index])
                 if reply_text == '完成':
                     reply_image = 'data/clash/temp/clan_' + user_config['config']['clash_tag'][index] + '.png'
                     reply_text = ''
@@ -1024,7 +1037,7 @@ class Clash:
             need_reply = True
             if len(new_user['config']['clash_tag']) > 0:
                 await bot.send(event, clan_wait_reply)
-                reply_text = self.clan(new_user['config']['clash_tag'][new_user['config']['main_clash_tag']])
+                reply_text = await self.clan(new_user['config']['clash_tag'][new_user['config']['main_clash_tag']])
                 if reply_text == '完成':
                     reply_image = 'data/clash/temp/clan_' + user_config['config']['clash_tag'][
                         user_config['config']['main_clash_tag']] + '.png'

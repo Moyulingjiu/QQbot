@@ -187,7 +187,7 @@ class DriftingBottle:
         })
         dataManage.save_obj(self.bottle, 'data/Function/Bottle/bottle')
         logManage.member_log(getNow.toString(), qq, '扔出漂流瓶：' + text)
-        return '成功扔出一个漂流瓶，当前有' + str(len(self.bottle['message'])) + '个漂流瓶'
+        return '成功扔出一个漂流瓶，当前有' + str(len(self.bottle['message'])) + '个漂流瓶' + '\n漂流瓶不是法外之地，每条漂流瓶都有日志记录'
 
     def pick(self):
         if len(self.bottle['message']) == 0:

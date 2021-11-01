@@ -40,7 +40,7 @@
 #         枪 3
 #         弓 4
 #         弩 5
-#         火统 6
+#         火铳 6
 #     面具 2
 #     项链 3
 #     戒指 4
@@ -96,6 +96,7 @@
 
 棉花 cost=-1 sell=1 comments=一小团棉花 type=31
 布 cost=-1 sell=1 comments=一小块布 type=31
+丝绸 cost=-1 sell=-1 comments=一块丝绸，摸上去十分顺滑 type=31
 皮革 cost=-1 sell=1 comments=一小块皮革 type=31
 燧石 cost=-1 sell=1 comments=一小块燧石 type=31
 
@@ -144,6 +145,9 @@
 下界核心 cost=-1 sell=60 comments=经过中和加工而成的装备核心，具有不错的性能，可以合成装备 type=34
 灵魂结晶 cost=-1 sell=80 comments=一个强韧的灵魂中和了下界石英，再用灵石固定，就成了灵魂结晶 type=34
 
+龙晶 cost=-1 sell=-1 comments=暂无简介 type=34
+龙血 cost=-1 sell=-1 comments=从强大的龙族身上逼出的精血 type=34
+龙鳞 cost=-1 sell=-1 comments=龙的鳞片 type=34
 
 玛瑙 cost=-1 sell=30 comments=附魔师所需要的石头，我也不知道这些材料怎么合成的玛瑙 type=34
 天蓝石 cost=-1 sell=30 comments=附魔师所需要的石头，蕴含了锋利 type=34
@@ -157,12 +161,24 @@
 
 锆石 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了锋利 type=34
 绿松石 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了锋利 type=34
+鸡血石 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了锋利 type=34
+琥珀 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了锋利 type=34
+七彩石 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了锋利 type=34
+夜光石 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了锋利 type=34
 
 珊瑚 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了迅捷 type=34
 欧珀 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了迅捷 type=34
+辰砂 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了迅捷 type=34
+软玉 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了迅捷 type=34
+珍珠 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了迅捷 type=34
+白玉 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了迅捷 type=34
 
 红宝石 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了坚固 type=34
 蓝宝石 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了坚固 type=34
+紫宝石 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了坚固 type=34
+红玉髓 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了坚固 type=34
+蓝玉髓 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了坚固 type=34
+紫玉髓 cost=-1 sell=30 comments=附魔师所需要的石头 ，蕴含了坚固 type=34
 
 
 钻石 cost=1000 sell=50 comments=璀璨闪亮，可以用来合成很多东西以及附魔 type=32
@@ -178,8 +194,9 @@
 杂交水稻种子 cost=30 sell=1 comments=一粒水稻种子，在培育师手里有不一样的效果 type=27
 灵木树苗 cost=-1 sell=1 comments=一颗灵木树苗，可以种出来一些带有魔法的东西 type=27
 棉花种子 cost=-1 sell=1 comments=一颗棉花种子 type=27
+蚕 cost=-1 sell=1 comments=一条蚕，可以吐出蚕丝 type=27
 
-
+蚕丝 cost=-1 sell=20 comments=珍贵无比的蚕丝 type=22
 肉 cost=30 hp=1 strength=1 sell=3 comments=牲畜的肉，可以直接吃，也可以做成药水 type=22
 熟肉 cost=50 sell=-1 hp=4 strength=4 comments=一块烤熟的肉，尝起来还不错 type=22
 米 cost=5 sell=1 comments=可以直接吃，也可以做成药水 type=22
@@ -187,7 +204,7 @@
 #=========================================
 # 药水
 #=========================================
-体力药水 cost=5 sell=1 strength=5 limit=20 comments=一瓶普通的体力药水，可以帮助恢复体力 type=21
+体力药水 cost=5 sell=1 strength=10 limit=20 comments=一瓶普通的体力药水，可以帮助恢复体力 type=21
 晨露 cost=20 sell=1 strength=-1 limit=1 comments=活力满满！直接回满体力 type=21
 
 生命药水 cost=5 sell=1 hp=10 limit=20 comments=一瓶普通的生命药水，可以帮助恢复生命 type=21
@@ -266,7 +283,7 @@
 钛合金剑 attack=10 armor=4 cost=-1 sell=50 comments=顶尖的合金工艺 type=111 enchanting-sharp=2 enchanting-rapid=2
 钛合金斧 attack=14 armor=0 cost=-1 sell=50 comments=重量刚刚好！ type=112 enchanting-sharp=2 enchanting-rapid=2
 钛合金枪 attack=18 armor=-2 cost=-1 sell=50 comments=有些沉，但很好用 type=113 enchanting-sharp=2 enchanting-rapid=2
-钛合金火统 attack=12 armor=0 speed=20 cost=-1 sell=50 comments=口径就是正义 type=115 enchanting-sharp=2 enchanting-rapid=2
+钛合金火铳 attack=12 armor=0 speed=20 cost=-1 sell=50 comments=口径就是正义 type=115 enchanting-sharp=2 enchanting-rapid=2
 钛合金弩 attack=4 armor=0 speed=50 cost=-1 sell=50 comments=十字弩，双连发！ type=116 enchanting-sharp=2 enchanting-rapid=2
 
 #=========================================
@@ -359,20 +376,6 @@
 秘银弓 attack=70 armor=0 speed=50 cost=-1 sell=120 comments=十分纤细但威力十足，双连发！ type=116 enchanting-sharp=5 enchanting-rapid=5
 
 #=========================================
-# 太古合金装备
-#=========================================
-太古合金头盔 attack=7 armor=20 speed=-6 cost=-1 sell=110 comments=由古老的工艺制作而成，看上去十分震撼 type=15 enchanting-rapid=6 enchanting-strong=6
-太古合金甲 attack=7 armor=26 speed=-6 cost=-1 sell=110 comments=很难想象是如何制作而成的，感受到了满满的安全感 type=16 enchanting-rapid=6 enchanting-strong=6
-太古合金护腿 attack=7 armor=26 speed=-6 cost=-1 sell=110 comments=有了它，再也不会感觉凉飕飕的了 type=17 enchanting-rapid=6 enchanting-strong=6
-太古合金靴 attack=7 armor=20 speed=-6 cost=-1 sell=110 comments=虽然是由剩余的边角料制作而成，但是还是起到了很好的防护作用 type=18 enchanting-rapid=6 enchanting-strong=6
-
-太古合金剑 attack=81 armor=10 cost=-1 sell=150 comments=顶尖的合金工艺，似乎可以斩断一切 type=111 enchanting-sharp=6 enchanting-rapid=6
-太古合金斧 attack=93 armor=6 cost=-1 sell=150 comments=沉甸甸的重量带来了满满的实力 type=112 enchanting-sharp=6 enchanting-rapid=6
-太古合金枪 attack=107 armor=-2 cost=-1 sell=150 comments=很锋利，使用起来似乎可以做到无坚不摧 type=113 enchanting-sharp=6 enchanting-rapid=6
-太古合金火铳 attack=99 armor=2 speed=20 cost=-1 sell=150 comments=远古的金属再一次提高了火铳的实力 type=115 enchanting-sharp=6 enchanting-rapid=6
-太古合金弓 attack=89 armor=6 speed=50 cost=-1 sell=150 comments=这么坚韧的弓箭真的可以拉动吗？双连发！ type=116 enchanting-sharp=6 enchanting-rapid=6
-
-#=========================================
 # 背包
 #=========================================
 布背包 knapsack=5 cost=200 sell=10 comments=布制成的背包，可以稍微装一些物品 type=19
@@ -383,7 +386,7 @@
 #=========================================
 # 饰品
 #=========================================
-魅舞面具 strength-recovery=20 strength-max=30 cost=-1 sell=200 comments=戴上它去舞池一定可以光芒四射 type=12
+魅舞面具 strength-recovery=20 strength-max=20 cost=-1 sell=200 comments=戴上它去舞池一定可以光芒四射 type=12
 魔女面纱 san-max=20 san-recovery=20 cost=-1 sell=50 comments=这是魔女佩戴的面纱 type=12
 
 轻盈指环 speed=10 cost=-1 sell=180 comments=戴上它，身体变得轻快了些 type=14
@@ -394,7 +397,7 @@
 泰坦之心 hp-max=10 cost=-1 sell=50 comments=实际上并不是用泰坦的心脏制成的 type=13
 生命女神之叹息 cost=-1 comments=勇士，您现在没有足够的力量佩戴也无法窥探她 type=13
 
-不死图腾 resurrection=1 strength=-1 hp=-1 cost=-1 sell=10 limit=2 comments=可以自动复活哟，专业品质，值得信赖 type=10
+不死图腾 resurrection=1 hp=-1 cost=-1 sell=10 limit=2 comments=可以自动复活哟，专业品质，值得信赖 type=10
 
 锦鲤项链 cost=-1 sell=-1 comments=由传统节日纪念品合成，它会给你带来好运的 type=13
 锦鲤戒指 hp-max=10 cost=-1 sell=-1 comments=它会给你带来好运的 type=14
@@ -414,17 +417,23 @@
 #=========================================
 # 卷轴
 #=========================================
-5级防御卷轴 cost=-1 sell=20 comments=获得一次5级防御buff type=25
-4级防御卷轴 cost=-1 sell=10 comments=获得一次4级防御buff type=25
-3级防御卷轴 cost=-1 sell=2 comments=获得一次3级防御buff type=25
-2级防御卷轴 cost=-1 sell=1 comments=获得一次2级防御buff type=25
-1级防御卷轴 cost=-1 sell=0 comments=获得一次1级防御buff type=25
+五级防御卷轴 cost=-1 sell=-1 comments=获得一次5级防御buff type=25
+四级防御卷轴 cost=-1 sell=-1 comments=获得一次4级防御buff type=25
+三级防御卷轴 cost=-1 sell=-1 comments=获得一次3级防御buff type=25
+二级防御卷轴 cost=-1 sell=-1 comments=获得一次2级防御buff type=25
+一级防御卷轴 cost=-1 sell=-1 comments=获得一次1级防御buff type=25
 
-5级进攻卷轴 cost=-1 sell=20 comments=获得一次5级进攻buff type=25
-4级进攻卷轴 cost=-1 sell=10 comments=获得一次4级进攻buff type=25
-3级进攻卷轴 cost=-1 sell=2 comments=获得一次3级进攻buff type=25
-2级进攻卷轴 cost=-1 sell=1 comments=获得一次2级进攻buff type=25
-1级进攻卷轴 cost=-1 sell=0 comments=获得一次1级进攻buff type=25
+五级进攻卷轴 cost=-1 sell=-1 comments=获得一次5级进攻buff type=25
+四级进攻卷轴 cost=-1 sell=-1 comments=获得一次4级进攻buff type=25
+三级进攻卷轴 cost=-1 sell=-1 comments=获得一次3级进攻buff type=25
+二级进攻卷轴 cost=-1 sell=-1 comments=获得一次2级进攻buff type=25
+一级进攻卷轴 cost=-1 sell=-1 comments=获得一次1级进攻buff type=25
+
+五级回复卷轴 cost=-1 sell=-1 comments=获得一次5级回复buff type=25
+四级回复卷轴 cost=-1 sell=-1 comments=获得一次4级回复buff type=25
+三级回复卷轴 cost=-1 sell=-1 comments=获得一次3级回复buff type=25
+二级回复卷轴 cost=-1 sell=-1 comments=获得一次2级回复buff type=25
+一级回复卷轴 cost=-1 sell=-1 comments=获得一次1级回复buff type=25
 
 #=========================================
 # 纪念品
@@ -469,9 +478,10 @@
 茱萸 cost=-1 sell=1 comments=遥知兄弟登高处，遍插茱萸少一人。 type=44
 
 糖果 cost=-1 sell=1 comments=不给糖果就捣蛋！ type=44
+袜子 cost=-1 sell=1 comments=会不会有圣诞老人呢 type=44
 
 #=========================================
-天灾之心 cost=-1 sell=100 comments=不知道有什么用，但是它是你打败传奇的证明 type=43
+天灾之心 cost=-1 sell=-1 comments=不知道有什么用，但是它是你打败传奇的证明 type=43
 
 #=========================================
 # 灵
@@ -533,6 +543,21 @@
 天使祝福原石 cost=-1 sell=-1 limit=1 comments=其中有着澎湃的光元素 type=26
 天使祝福技能石 cost=-1 sell=-1 comments=使用后可以获得技能《天使祝福》 type=26
 
+光元素祝福原石 cost=-1 sell=-1 limit=1 comments=其中有着澎湃的光元素 type=26
+光元素祝福技能石 cost=-1 sell=-1 comments=使用后可以获得技能《光元素祝福》 type=26
+
+暗元素祝福原石 cost=-1 sell=-1 limit=1 comments=其中有着澎湃的暗元素 type=26
+暗元素祝福技能石 cost=-1 sell=-1 comments=使用后可以获得技能《暗元素祝福》 type=26
+
+下毒原石 cost=-1 sell=-1 limit=1 comments=阴狠狡诈 type=26
+下毒技能石 cost=-1 sell=-1 comments=使用后可以获得技能《下毒》 type=26
+
+虚弱原石 cost=-1 sell=-1 limit=1 comments=阴狠狡诈 type=26
+虚弱技能石 cost=-1 sell=-1 comments=使用后可以获得技能《虚弱》 type=26
+
+闪电原石 cost=-1 sell=-1 limit=1 comments=阴狠狡诈 type=26
+闪电技能石 cost=-1 sell=-1 comments=使用后可以获得技能《闪电》 type=26
+
 #=========================================
 # 特殊药剂
 #=========================================
@@ -540,6 +565,11 @@
 冰粉 cost=-1 sell=-1 comments=可以降降火气 type=28
 板蓝根 cost=-1 sell=-1 comments=可以祛除毒气 type=28
 茶水 cost=-1 sell=-1 comments=可以解麻 type=28
+金苹果 cost=-1 sell=-1 comments=看！金子做的苹果！ type=28
+金萝卜 cost=-1 sell=-1 comments=闪闪发光！ type=28
+
+胡萝卜 cost=-1 sell=-1 comments=可以种 type=27
+土豆块 cost=-1 sell=-1 comments=可以种 type=27
 
 生姜 cost=-1 sell=-1 comments=可以种 type=27
 板蓝根种子 cost=-1 sell=1 comments=可以种 type=27
@@ -548,6 +578,59 @@
 面粉 cost=-1 sell=-1 comments=可以种 type=22
 茶叶 cost=-1 sell=-1 comments=散发着缕缕茶香 type=22
 生姜粉 cost=-1 sell=-1 comments=生姜磨成的粉末 type=22
+土豆 hp=1 strength=1 cost=-1 sell=-1 comments=一种食物 type=22
+薯条 hp=5 cost=-1 sell=-1 comments=不错的食物 type=22
+薯片 strength=2 cost=-1 sell=-1 comments=不错的食物 type=22
+土豆泥 hp=3 strength=1 cost=-1 sell=-1 comments=土豆磨成泥做出来的 type=22
+胡萝卜羹 hp=5 comments=由胡萝卜做成的汤食 type=22
 
-命运骰子 cost=-1 sell=-1 use-limit=3 comments=拨动命运的脉络 type=28
+命运骰子 cost=-1 sell=-1 use-limit=3 comments=拨动命运的脉络，或许能够逆天改命 type=28
 驱魔石 cost=-1 sell=-1 comments=可以祛除魔法 type=26
+
+
+
+
+
+#=========================================
+# 三期装备
+#=========================================
+福袋 cost=-1 sell=-1 comments=指不定能够开出一些好东西 type=28
+金丝楠木 cost=-1 sell=-1 comments=一种名贵木头 type=31
+
+磐石之心 san-max=10 speed=-10 hp-max=50 cost=-1 sell=-1 comments=坚韧 type=13
+鎏金面具 strength-recovery=50 san-max=10 speed=10 cost=-1 sell=-1 type=12
+
+
+#=========================================
+# 太古合金装备
+#=========================================
+太古合金头盔 attack=7 armor=20 speed=-6 cost=-1 sell=110 comments=由古老的工艺制作而成，看上去十分震撼 type=15 enchanting-rapid=6 enchanting-strong=6
+太古合金甲 attack=7 armor=26 speed=-6 cost=-1 sell=110 comments=很难想象是如何制作而成的，感受到了满满的安全感 type=16 enchanting-rapid=6 enchanting-strong=6
+太古合金护腿 attack=7 armor=26 speed=-6 cost=-1 sell=110 comments=有了它，再也不会感觉凉飕飕的了 type=17 enchanting-rapid=6 enchanting-strong=6
+太古合金靴 attack=7 armor=20 speed=-6 cost=-1 sell=110 comments=虽然是由剩余的边角料制作而成，但是还是起到了很好的防护作用 type=18 enchanting-rapid=6 enchanting-strong=6
+
+太古合金剑 attack=81 armor=10 cost=-1 sell=150 comments=顶尖的合金工艺，似乎可以斩断一切 type=111 enchanting-sharp=6 enchanting-rapid=6 occupation=盾战士6
+太古合金斧 attack=93 armor=6 cost=-1 sell=150 comments=沉甸甸的重量带来了满满的实力 type=112 enchanting-sharp=6 enchanting-rapid=6 occupation=战士6，盾战士6
+太古合金枪 attack=107 armor=-2 cost=-1 sell=150 comments=很锋利，使用起来似乎可以做到无坚不摧 type=113 enchanting-sharp=6 enchanting-rapid=6 occupation=战士6
+太古合金火铳 attack=99 armor=2 speed=20 cost=-1 sell=150 comments=远古的金属再一次提高了火铳的实力 type=115 enchanting-sharp=6 enchanting-rapid=6 occupation=弓箭手6，魔法师6
+太古合金弓 attack=89 armor=6 speed=50 cost=-1 sell=150 comments=这么坚韧的弓箭真的可以拉动吗？双连发！ type=116 enchanting-sharp=6 enchanting-rapid=6 occupation=弓箭手6
+太古合金法杖 attack=103 armor=-20 san-max=10 speed=50 cost=-1 sell=150 comments=没想到吧！有一天人类也能拥有法杖 type=116 enchanting-sharp=6 enchanting-rapid=6 occupation=魔法师6
+
+
+
+#=========================================
+# 龙鳞装备
+#=========================================
+龙鳞头盔 attack=10 armor=22 speed=-6 cost=-1 sell=130 comments=由古老的工艺制作而成，看上去十分震撼 type=15 enchanting-rapid=6 enchanting-strong=6
+龙鳞甲 attack=10 armor=28 speed=-6 cost=-1 sell=130 comments=很难想象是如何制作而成的，感受到了满满的安全感 type=16 enchanting-rapid=6 enchanting-strong=6
+龙鳞护腿 attack=10 armor=28 speed=-6 cost=-1 sell=130 comments=有了它，再也不会感觉凉飕飕的了 type=17 enchanting-rapid=6 enchanting-strong=6
+龙鳞靴 attack=10 armor=22 speed=-6 cost=-1 sell=130 comments=虽然是由剩余的边角料制作而成，但是还是起到了很好的防护作用 type=18 enchanting-rapid=6 enchanting-strong=6
+
+龙鳞剑 attack=108 armor=5 cost=-1 sell=150 comments=顶尖的魔法工艺，似乎可以斩断一切 type=111 enchanting-sharp=7 enchanting-rapid=7 occupation=战士6
+龙鳞戟 attack=123 armor=-15 cost=-1 sell=150 comments=沉甸甸的重量带来了满满的实力 type=111 enchanting-sharp=7 enchanting-rapid=7 occupation=战士6
+龙鳞棍 attack=117 armor=-10 hp-max=10 speed=20 cost=-1 sell=150 comments=有条龙盘在上面 type=112 enchanting-sharp=7 enchanting-rapid=7 occupation=盾战士6
+龙鳞盾 attack=86 armor=40 hp-max=30 speed=-20 cost=-1 sell=150 comments=远古的魔法带来坚实的护盾 type=113 enchanting-sharp=7 enchanting-rapid=7 occupation=盾战士6
+龙鳞旗 attack=119 san-max=50 speed=-10 cost=-1 sell=150 comments=谁会拿着棋子上战场啊 type=116 enchanting-sharp=7 enchanting-rapid=7 occupation=魔法师6
+龙鳞法杖 attack=153 armor=-40 san-max=10 speed=10 cost=-1 sell=150 comments=龙的魔法力量大大加强了法杖的能力 type=116 enchanting-sharp=7 enchanting-rapid=7 occupation=魔法师6
+龙鳞弓 attack=113 armor=-5 speed=50 cost=-1 sell=150 comments=拉开这种弓，属实不容易 type=116 enchanting-sharp=7 enchanting-rapid=7 occupation=弓箭手6
+龙鳞弩 attack=109 armor=-10 speed=80 cost=-1 sell=150 comments=灵活的弩身带来灵活的速度 type=116 enchanting-sharp=7 enchanting-rapid=7 occupation=弓箭手6
