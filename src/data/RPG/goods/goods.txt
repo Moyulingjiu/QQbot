@@ -89,7 +89,20 @@
 中级传送石 cost=50 sell=1 limit=10 comments=磅礴的空间之力简直快要溢出来，使用它或许有奇效 type=26
 高级传送石 cost=-1 sell=1 comments=磅礴的空间之力的背后直觉告诉你有一丝危险的气息 type=26
 传奇传送石 cost=-1 sell=1 comments=只有真正的传奇才敢使用它！ type=26
+木元素传送石 cost=-1 sell=1 comments=它好像在指引我们去一个地方 type=26
+火元素传送石 cost=-1 sell=1 comments=它好像在指引我们去一个地方 type=26
+水元素传送石 cost=-1 sell=1 comments=它好像在指引我们去一个地方 type=26
+雷元素传送石 cost=-1 sell=1 comments=它好像在指引我们去一个地方 type=26
+光元素传送石 cost=-1 sell=1 comments=它好像在指引我们去一个地方 type=26
+暗元素传送石 cost=-1 sell=1 comments=它好像在指引我们去一个地方 type=26
 
+
+水元素晶石 cost=-1 sell=10 comments=附带着水元素的石头 type=32
+火元素晶石 cost=-1 sell=10 comments=附带着火元素的石头 type=32
+雷元素晶石 cost=-1 sell=10 comments=附带着雷元素的石头 type=32
+木元素晶石 cost=-1 sell=10 comments=附带着木元素的石头 type=32
+光元素晶石 cost=-1 sell=10 comments=附带着木元素的石头 type=32
+暗元素晶石 cost=-1 sell=10 comments=附带着木元素的石头 type=32
 #=========================================
 # 材料
 #=========================================
@@ -125,11 +138,6 @@
 太古岩石 cost=-1 sell=30 comments=从远古时代流传下来的宝贝 type=32
 钨矿石 cost=-1 sell=5 comments=单质为银白色有光泽的金属，硬度高，熔点高，常温下不受空气侵蚀，化学性质比较稳定 type=32
 铬矿石 cost=-1 sell=5 comments=地表最坚硬的金属 type=32
-
-水元素晶石 cost=-1 sell=10 comments=附带着水元素的石头 type=32
-火元素晶石 cost=-1 sell=10 comments=附带着火元素的石头 type=32
-雷元素晶石 cost=-1 sell=10 comments=附带着雷元素的石头 type=32
-木元素晶石 cost=-1 sell=10 comments=附带着木元素的石头 type=32
 
 
 九天玄铁 cost=-1 sell=20 comments=经过加工后的星钢岩 type=34
@@ -598,7 +606,8 @@
 金丝楠木 cost=-1 sell=-1 comments=一种名贵木头 type=31
 
 磐石之心 san-max=10 speed=-10 hp-max=50 cost=-1 sell=-1 comments=坚韧 type=13
-鎏金面具 strength-recovery=50 san-max=10 speed=10 cost=-1 sell=-1 type=12
+鎏金面具 strength-recovery=50 san-max=10 speed=10 cost=-1 sell=-1 comments=奢华雍容 type=12
+守护戒指 armor=5 cost=-1 sell=-1 comments=它可以保护你 type=14
 
 
 #=========================================
@@ -609,28 +618,28 @@
 太古合金护腿 attack=7 armor=26 speed=-6 cost=-1 sell=110 comments=有了它，再也不会感觉凉飕飕的了 type=17 enchanting-rapid=6 enchanting-strong=6
 太古合金靴 attack=7 armor=20 speed=-6 cost=-1 sell=110 comments=虽然是由剩余的边角料制作而成，但是还是起到了很好的防护作用 type=18 enchanting-rapid=6 enchanting-strong=6
 
-太古合金剑 attack=81 armor=10 cost=-1 sell=150 comments=顶尖的合金工艺，似乎可以斩断一切 type=111 enchanting-sharp=6 enchanting-rapid=6 occupation=盾战士6
-太古合金斧 attack=93 armor=6 cost=-1 sell=150 comments=沉甸甸的重量带来了满满的实力 type=112 enchanting-sharp=6 enchanting-rapid=6 occupation=战士6，盾战士6
-太古合金枪 attack=107 armor=-2 cost=-1 sell=150 comments=很锋利，使用起来似乎可以做到无坚不摧 type=113 enchanting-sharp=6 enchanting-rapid=6 occupation=战士6
+太古合金剑 attack=92 armor=12 cost=-1 sell=150 comments=顶尖的合金工艺，似乎可以斩断一切 type=111 enchanting-sharp=6 enchanting-rapid=6 occupation=盾战士6
+太古合金斧 attack=102 armor=6 cost=-1 sell=150 comments=沉甸甸的重量带来了满满的实力 type=112 enchanting-sharp=6 enchanting-rapid=6 occupation=战士6，盾战士6
+太古合金枪 attack=115 armor=-4 cost=-1 sell=150 comments=很锋利，使用起来似乎可以做到无坚不摧 type=113 enchanting-sharp=6 enchanting-rapid=6 occupation=战士6
 太古合金火铳 attack=99 armor=2 speed=20 cost=-1 sell=150 comments=远古的金属再一次提高了火铳的实力 type=115 enchanting-sharp=6 enchanting-rapid=6 occupation=弓箭手6，魔法师6
 太古合金弓 attack=89 armor=6 speed=50 cost=-1 sell=150 comments=这么坚韧的弓箭真的可以拉动吗？双连发！ type=116 enchanting-sharp=6 enchanting-rapid=6 occupation=弓箭手6
-太古合金法杖 attack=103 armor=-20 san-max=10 speed=50 cost=-1 sell=150 comments=没想到吧！有一天人类也能拥有法杖 type=116 enchanting-sharp=6 enchanting-rapid=6 occupation=魔法师6
+太古合金法杖 attack=103 armor=-20 san-max=10 speed=20 cost=-1 sell=150 comments=没想到吧！有一天人类也能拥有法杖 type=116 enchanting-sharp=6 enchanting-rapid=6 occupation=魔法师6
 
 
 
 #=========================================
 # 龙鳞装备
 #=========================================
-龙鳞头盔 attack=10 armor=22 speed=-6 cost=-1 sell=130 comments=由古老的工艺制作而成，看上去十分震撼 type=15 enchanting-rapid=6 enchanting-strong=6
-龙鳞甲 attack=10 armor=28 speed=-6 cost=-1 sell=130 comments=很难想象是如何制作而成的，感受到了满满的安全感 type=16 enchanting-rapid=6 enchanting-strong=6
-龙鳞护腿 attack=10 armor=28 speed=-6 cost=-1 sell=130 comments=有了它，再也不会感觉凉飕飕的了 type=17 enchanting-rapid=6 enchanting-strong=6
-龙鳞靴 attack=10 armor=22 speed=-6 cost=-1 sell=130 comments=虽然是由剩余的边角料制作而成，但是还是起到了很好的防护作用 type=18 enchanting-rapid=6 enchanting-strong=6
+龙鳞头盔 attack=15 armor=22 speed=-6 cost=-1 sell=130 comments=由古老的工艺制作而成，看上去十分震撼 type=15 enchanting-rapid=6 enchanting-strong=6
+龙鳞甲 attack=15 armor=28 speed=-6 cost=-1 sell=130 comments=很难想象是如何制作而成的，感受到了满满的安全感 type=16 enchanting-rapid=6 enchanting-strong=6
+龙鳞护腿 attack=15 armor=28 speed=-6 cost=-1 sell=130 comments=有了它，再也不会感觉凉飕飕的了 type=17 enchanting-rapid=6 enchanting-strong=6
+龙鳞靴 attack=15 armor=22 speed=-6 cost=-1 sell=130 comments=虽然是由剩余的边角料制作而成，但是还是起到了很好的防护作用 type=18 enchanting-rapid=6 enchanting-strong=6
 
-龙鳞剑 attack=108 armor=5 cost=-1 sell=150 comments=顶尖的魔法工艺，似乎可以斩断一切 type=111 enchanting-sharp=7 enchanting-rapid=7 occupation=战士6
-龙鳞戟 attack=123 armor=-15 cost=-1 sell=150 comments=沉甸甸的重量带来了满满的实力 type=111 enchanting-sharp=7 enchanting-rapid=7 occupation=战士6
-龙鳞棍 attack=117 armor=-10 hp-max=10 speed=20 cost=-1 sell=150 comments=有条龙盘在上面 type=112 enchanting-sharp=7 enchanting-rapid=7 occupation=盾战士6
-龙鳞盾 attack=86 armor=40 hp-max=30 speed=-20 cost=-1 sell=150 comments=远古的魔法带来坚实的护盾 type=113 enchanting-sharp=7 enchanting-rapid=7 occupation=盾战士6
-龙鳞旗 attack=119 san-max=50 speed=-10 cost=-1 sell=150 comments=谁会拿着棋子上战场啊 type=116 enchanting-sharp=7 enchanting-rapid=7 occupation=魔法师6
-龙鳞法杖 attack=153 armor=-40 san-max=10 speed=10 cost=-1 sell=150 comments=龙的魔法力量大大加强了法杖的能力 type=116 enchanting-sharp=7 enchanting-rapid=7 occupation=魔法师6
-龙鳞弓 attack=113 armor=-5 speed=50 cost=-1 sell=150 comments=拉开这种弓，属实不容易 type=116 enchanting-sharp=7 enchanting-rapid=7 occupation=弓箭手6
-龙鳞弩 attack=109 armor=-10 speed=80 cost=-1 sell=150 comments=灵活的弩身带来灵活的速度 type=116 enchanting-sharp=7 enchanting-rapid=7 occupation=弓箭手6
+龙鳞剑 attack=123 armor=5 cost=-1 sell=150 comments=顶尖的魔法工艺，似乎可以斩断一切 type=111 enchanting-sharp=7 enchanting-rapid=7 occupation=战士6
+龙鳞戟 attack=138 armor=-15 cost=-1 sell=150 comments=沉甸甸的重量带来了满满的实力 type=111 enchanting-sharp=7 enchanting-rapid=7 occupation=战士6
+龙鳞棍 attack=137 armor=-10 hp-max=10 speed=20 cost=-1 sell=150 comments=有条龙盘在上面 type=112 enchanting-sharp=7 enchanting-rapid=7 occupation=盾战士6
+龙鳞盾 attack=96 armor=40 hp-max=30 speed=-20 cost=-1 sell=150 comments=远古的魔法带来坚实的护盾 type=113 enchanting-sharp=7 enchanting-rapid=7 occupation=盾战士6
+龙鳞旗 attack=124 armor=30 san-max=50 speed=-10 cost=-1 sell=150 comments=谁会拿着棋子上战场啊 type=116 enchanting-sharp=7 enchanting-rapid=7 occupation=魔法师6
+龙鳞法杖 attack=183 armor=-40 san-max=10 speed=10 cost=-1 sell=150 comments=龙的魔法力量大大加强了法杖的能力 type=116 enchanting-sharp=7 enchanting-rapid=7 occupation=魔法师6
+龙鳞弓 attack=121 armor=-5 speed=50 cost=-1 sell=150 comments=拉开这种弓，属实不容易 type=116 enchanting-sharp=7 enchanting-rapid=7 occupation=弓箭手6
+龙鳞弩 attack=114 armor=0 speed=80 cost=-1 sell=150 comments=灵活的弩身带来灵活的速度 type=116 enchanting-sharp=7 enchanting-rapid=7 occupation=弓箭手6

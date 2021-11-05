@@ -1621,6 +1621,8 @@ class Result:
                 reply += '\n不能袭击自己'
             elif self.PVP2['state'] == 'he is die':
                 reply += '\n对手没有生命值'
+            elif self.PVP2['state'] == 'you are die':
+                reply += '\n你没有生命值'
 
             if self.PVP2.__contains__('gets') and len(self.PVP2['gets']) != 0:
                 reply += '\n额外获得物品'
@@ -2559,13 +2561,14 @@ class Core:
 
     def save_user_information(self, force: bool = False) -> None:
         global lock, save_hour, save_minute
-        if lock and not force:
-            return
-        now = datetime.datetime.now()
-        if now.hour == save_hour and now.minute == save_minute:
-            return
-        save_hour = now.hour
-        save_minute = now.minute
+        if not force:
+            if lock:
+                return
+            now = datetime.datetime.now()
+            if now.hour == save_hour and now.minute == save_minute:
+                return
+            save_hour = now.hour
+            save_minute = now.minute
         dataManage.save_obj(self.users, user_path)
         dataManage.save_obj(self.rank, rank_path)
 
@@ -3089,8 +3092,8 @@ class Core:
     # ==========================================
     # 数据获取
     def get_fight_number(self, user):
-        fight_number = (self.get_attack(user) + self.get_armor(user))\
-                       * (self.get_speed(user) / 5) * (self.get_max_san(user) / 100)
+        fight_number = (self.get_attack(user) + self.get_armor(user)) * self.get_speed(user) * self.get_max_hp(user) / 10000
+
         return int(fight_number)
 
     def get_attack(self, user):
@@ -4165,37 +4168,41 @@ class Core:
         }
 
         if user['occupation']['work'] == '矿工':
+            user['attribute']['occupation']['armor'] += 2
             user['attribute']['occupation']['strength']['max'] += 100
         elif user['occupation']['work'] == '培育师':
-            user['attribute']['occupation']['strength']['max'] += 80
+            user['attribute']['occupation']['san']['max'] += 20
+            user['attribute']['occupation']['strength']['max'] += 100
         elif user['occupation']['work'] == '锻造师':
-            user['attribute']['occupation']['strength']['max'] += 80
+            user['attribute']['occupation']['speed'] += 10
+            user['attribute']['occupation']['strength']['max'] += 100
         elif user['occupation']['work'] == '附魔师':
-            user['attribute']['occupation']['strength']['max'] += 80
+            user['attribute']['occupation']['san']['max'] += 20
+            user['attribute']['occupation']['strength']['max'] += 100
 
         if user['occupation']['fight'] == '战士':
-            user['attribute']['occupation']['attack'] += 2 * user['occupation']['fight_level']
-            user['attribute']['occupation']['armor'] += 2 * user['occupation']['fight_level']
+            user['attribute']['occupation']['attack'] += 3 * user['occupation']['fight_level']
+            user['attribute']['occupation']['armor'] += 3 * user['occupation']['fight_level']
 
-            user['attribute']['occupation']['speed'] += 10
+            user['attribute']['occupation']['speed'] += 30
+            user['attribute']['occupation']['hp']['max'] += 20 + 2 * user['occupation']['fight_level']
         elif user['occupation']['fight'] == '盾战士':
-            user['attribute']['occupation']['armor'] += int(3.5 * user['occupation']['fight_level'])
+            user['attribute']['occupation']['armor'] += int(4 * user['occupation']['fight_level'])
             user['attribute']['occupation']['san']['max'] -= 5 * user['occupation']['fight_level']
 
-            user['attribute']['occupation']['speed'] -= 20
-            user['attribute']['occupation']['hp']['max'] += 10
-            user['attribute']['occupation']['strength']['max'] += 20
+            user['attribute']['occupation']['speed'] -= 10
+            user['attribute']['occupation']['hp']['max'] += 10 + 5 * user['occupation']['fight_level']
         elif user['occupation']['fight'] == '弓箭手':
             user['attribute']['occupation']['attack'] += 3 * user['occupation']['fight_level']
             user['attribute']['occupation']['speed'] += 15 + 5 * user['occupation']['fight_level']
             user['attribute']['occupation']['san']['max'] += 10 * user['occupation']['fight_level']
 
-            user['attribute']['occupation']['hp']['max'] -= 10
+            user['attribute']['occupation']['hp']['max'] -= 10 - 2 * user['occupation']['fight_level']
         elif user['occupation']['fight'] == '魔法师':
             user['attribute']['occupation']['attack'] += 3 * user['occupation']['fight_level']
             user['attribute']['occupation']['san']['max'] += 20 * user['occupation']['fight_level']
+            user['attribute']['occupation']['speed'] += 20 + 2 * user['occupation']['fight_level']
 
-            user['attribute']['occupation']['strength']['max'] -= 50
             user['attribute']['occupation']['hp']['max'] -= 20
 
         user['skill']['max'] = 3
@@ -5151,7 +5158,7 @@ class Core:
 
         if active == passive:  # 和自己击剑
             PVP['state'] = 'fencing with yourself'
-        elif user_active['attribute']['own']['strength']['number'] < 1:  # 没有体力值
+        elif user_active['attribute']['own']['strength']['number'] < 2:  # 没有体力值
             PVP['state'] = 'no strength'
         elif user_active['attribute']['own']['gold'] < 1:  # 主动击剑的人没有积分
             PVP['state'] = 'active fencers have no points'
@@ -5189,7 +5196,7 @@ class Core:
                                 PVP['gets'] = {}
                             PVP['gets'][name] = [items]
 
-            user_active['attribute']['own']['strength']['number'] -= 1
+            user_active['attribute']['own']['strength']['number'] -= 2
             user_active['combat_data']['PVP_active'] += 1
             user_passive['combat_data']['PVP_passive'] += 1
             user_passive['attribute']['own']['san']['number'] -= 1
@@ -5266,8 +5273,10 @@ class Core:
         }
         if active == passive:  # 和自己击剑
             PVP2['state'] = 'attack with yourself'
-        elif user_active['attribute']['own']['strength']['number'] < 1:  # 没有体力值
+        elif user_active['attribute']['own']['strength']['number'] < 2:  # 没有体力值
             PVP2['state'] = 'no strength'
+        elif user_active['attribute']['own']['hp']['number'] < 1:  # 你没有生命值
+            PVP2['state'] = 'you are die'
         elif user_passive['attribute']['own']['hp']['number'] < 1:  # 对手没有生命值
             PVP2['state'] = 'he is die'
         else:
@@ -5302,7 +5311,7 @@ class Core:
                                 PVP2['gets'] = {}
                             PVP2['gets'][name] = [items]
 
-            user_active['attribute']['own']['strength']['number'] -= 1
+            user_active['attribute']['own']['strength']['number'] -= 2
             user_active['combat_data']['PVP_active'] += 1
             user_passive['combat_data']['PVP_passive'] += 1
             user_passive['attribute']['own']['san']['number'] -= 1
@@ -5404,7 +5413,7 @@ class Core:
                     else:
                         part_luck = 1.0 / (1.0 + (50.0 - luck) / 50.0)
                     hurt /= part_luck
-                    part_rand = random.randint(0, 10) * 0.1 + 1.0
+                    part_rand = random.randint(0, 5) * 0.1 + 1.0
                     hurt *= part_rand
 
                     reply_fire, level_fire, user = self.remove_buff('火元素祝福', user)
@@ -5471,7 +5480,7 @@ class Core:
 
                     hurt = int(hurt)
                     if hurt <= 0:
-                        hurt = 1
+                        hurt = random.randint(1, 3)
                     if reply_invincible:
                         hurt = 0
                     result_PVE['hp'] += hurt
@@ -6011,8 +6020,60 @@ class Core:
                                 user['survival_data']['travel'] += 1
                             elif name == '传奇传送石':
                                 use['comments'] = '好像什么也没有发生'
-                            elif name == '哥布林传送石':
-                                use['comments'] = '好像什么也没有发生'
+                            elif name == '木元素传送石':
+                                init_map = []
+                                for key, value in self.map.items():
+                                    if key.startswith('幽暗之森'):
+                                        init_map.append(key)
+                                if len(init_map) != 0:
+                                    user['config']['place'] = random.choice(init_map)
+                                use['comments'] = '再一次天转地旋之后你被传送到了' + user['config']['place']
+                                user['survival_data']['travel'] += 1
+                            elif name == '火元素传送石':
+                                init_map = []
+                                for key, value in self.map.items():
+                                    if key.startswith('烈焰峡谷'):
+                                        init_map.append(key)
+                                if len(init_map) != 0:
+                                    user['config']['place'] = random.choice(init_map)
+                                use['comments'] = '再一次天转地旋之后你被传送到了' + user['config']['place']
+                                user['survival_data']['travel'] += 1
+                            elif name == '雷元素传送石':
+                                init_map = []
+                                for key, value in self.map.items():
+                                    if key.startswith('雷霆空域'):
+                                        init_map.append(key)
+                                if len(init_map) != 0:
+                                    user['config']['place'] = random.choice(init_map)
+                                use['comments'] = '再一次天转地旋之后你被传送到了' + user['config']['place']
+                                user['survival_data']['travel'] += 1
+                            elif name == '水元素传送石':
+                                init_map = []
+                                for key, value in self.map.items():
+                                    if key.startswith('寒冰深海'):
+                                        init_map.append(key)
+                                if len(init_map) != 0:
+                                    user['config']['place'] = random.choice(init_map)
+                                use['comments'] = '再一次天转地旋之后你被传送到了' + user['config']['place']
+                                user['survival_data']['travel'] += 1
+                            elif name == '光元素传送石':
+                                init_map = []
+                                for key, value in self.map.items():
+                                    if key.startswith('圣光平原'):
+                                        init_map.append(key)
+                                if len(init_map) != 0:
+                                    user['config']['place'] = random.choice(init_map)
+                                use['comments'] = '再一次天转地旋之后你被传送到了' + user['config']['place']
+                                user['survival_data']['travel'] += 1
+                            elif name == '暗元素传送石':
+                                init_map = []
+                                for key, value in self.map.items():
+                                    if key.startswith('暮色森林'):
+                                        init_map.append(key)
+                                if len(init_map) != 0:
+                                    user['config']['place'] = random.choice(init_map)
+                                use['comments'] = '再一次天转地旋之后你被传送到了' + user['config']['place']
+                                user['survival_data']['travel'] += 1
                             elif name == '驱魔石':
                                 use['state'] = 'exorcism'
                             elif name[-2:] == '原石':
@@ -7678,6 +7739,7 @@ class RPG:
         reply = '昵称：' + user['config']['name']
         if not user['config']['init_name']:
             reply += '（自动获取）'
+        reply += '\n战力：' + str(self.core.get_fight_number(user))
         reply += '\n积分：' + str(user['attribute']['own']['gold'])
         reply += '\n体力：' + str(user['attribute']['own']['strength']['number']) + '/' + str(
             self.core.get_max_strength(user)) + '（+' + str(self.core.get_recovery_strength(user)) + '/天）'
@@ -7740,6 +7802,7 @@ class RPG:
     def get_rate(self, user):
         reply = user['config']['name'] + '你的数据如下：'
         reply += '\n签到：' + str(user['config']['sign']['sum']) + '天'
+        reply += '\n战力：' + str(self.core.get_fight_number(user))
 
         reply += '\nPVP场次：' + str(self.core.get_PVP_times(user)) + '场（胜利：' + str(
             user['combat_data']['PVP_victory']) + '场）'
@@ -8989,6 +9052,10 @@ class RPG:
             reply_text = '备份成功，备份时间：' + getNow.toString()
             self.core.backups_user_information()
             reply_text += '\n总计玩家数：' + str(len(self.core.users))
+        elif message == '立即存档':
+            need_reply = True
+            self.core.save_user_information(True)
+            reply_text = '存档完成，存档时间：' + getNow.toString()
 
         elif message == '锁定游戏':
             lock = True
@@ -9006,5 +9073,27 @@ class RPG:
             lock = False
             need_reply = True
             reply_text = '已重新加载游戏数据！'
+
+        elif message[:2] == '传送':
+            reply_text = '格式错误~'
+            need_reply = True
+            data = message[2:].strip().split(' ')
+            maps = self.core.map
+            if len(data) == 1:
+                if maps.__contains__(data[0]):
+                    user = self.core.get_user(qq)
+                    user['config']['place'] = data[0]
+                    self.core.update(qq, user, Result())
+                    reply_text = '传送成功！'
+                else:
+                    reply_text = '不存在该地图'
+            elif len(data) == 2 and data[0].isdigit():
+                if maps.__contains__(data[1]):
+                    user = self.core.get_user(int(data[0]))
+                    user['config']['place'] = data[1]
+                    self.core.update(int(data[0]), user, Result())
+                    reply_text = '传送成功！'
+                else:
+                    reply_text = '不存在该地图'
 
         return need_reply, reply_text, reply_image

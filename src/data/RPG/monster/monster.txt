@@ -26,15 +26,17 @@
 哥布林祭祀 level=3 armor=1 attack=20 speed=80 hp=100 comments=鼓舞与治疗是任何一个军队都必不可少的 spoils=铝合金x1
 哥布林领主 level=4 armor=2 attack=41 speed=120 hp=300 comments=肥胖的哥布林领主看起来可真奇怪 spoils=金锭x2
 巨型哥布林 level=5 armor=8 attack=45 speed=50 hp=200 comments=这，这是什么？哥布林的秘密武器么？! spoils=铁锭x5，木板x5，铝锭x1
+哥布林王 level=6 armor=29 attack=120 speed=100 hp=60 comments=哥布林的王 spoils=寒铁x5
 
 民兵 level=1 armor=0 attack=5 speed=45 hp=24 comments=征召而来的民兵 spoils=石头x2
 士兵 level=2 armor=2 attack=19 speed=40 hp=35 comments=受到严格训练的士兵 spoils=木板x4
 弓箭手 level=2 armor=2 attack=20 speed=75 hp=18 comments=经过训练的弓箭手 spoils=石头x5
 剑士 level=3 armor=4 attack=20 speed=60 hp=80 comments=精湛的剑术，擅长双手剑 spoils=铁锭x2
-骑士 level=3 armor=4 attack=35 speed=60 hp=100 comments=当他们冲锋的时候应该没有什么能够阻挡 spoils=金锭x1
+骑士 level=3 armor=4 attack=35 speed=60 hp=100 comments=当他们冲锋的时候应该没有什么能够阻挡 spoils=铝合金x2
 火枪手 level=3 armor=3 attack=38 speed=70 hp=70 comments=大人，时代变了！ spoils=铝合金x1
 法师 level=4 armor=5 attack=42 speed=50 hp=100 comments=人类也是一种亲近自然元素的种族，这是人族法师 spoils=金锭x2
 军队统领 level=5 armor=2 attack=45 speed=50 hp=300 comments=一将功成万骨枯！ spoils=铁锭x5，木板x5，铝锭x1
+御前侍卫 level=6 armor=29 attack=100 speed=150 hp=60 comments=真正的精锐之徒 spoils=寒铁x5，金锭x2
 
 骷髅 level=1 armor=0 attack=6 speed=50 hp=17 comments=骨头也可以站起来！ spoils=木板x2
 骷髅战士 level=2 armor=0 attack=19 speed=80 hp=25 comments=当骷髅拿起剑与盾 spoils=石头x3
@@ -44,6 +46,7 @@
 骷髅炸弹人 level=3 armor=0 attack=80 speed=60 hp=20 comments=他们只会与你同归于尽！ spoils=铝合金x1
 骷髅骑士 level=4 armor=5 attack=45 speed=80 hp=50 comments=骷髅+骷髅马，这是什么东西？ spoils=金锭x2
 骨龙 level=5 armor=5 attack=46 speed=90 hp=120 comments=龙族？！不，这是骷髅族从龙墓中挖出的骷髅！ spoils=铁锭x5，木板x5，铝锭x1
+骨刺 level=6 armor=29 attack=100 speed=150 hp=60 comments=骨头！延绵不断的骨头 spoils=精神药水x1，布x1
 
 精灵 level=1 armor=0 attack=4 speed=80 hp=20 comments=精灵的颜值与箭术让人望尘莫及 spoils=石头x2
 精灵战士 level=2 armor=1 attack=19 speed=120 hp=15 comments=银色铠甲如此耀眼 spoils=木板x4
@@ -55,6 +58,11 @@
 精灵精锐弓箭手 level=5 armor=4 attack=46 speed=160 hp=80 comments=这是精灵弓箭手中的精锐，她们速度更快，百发百中 spoils=铁锭x5，木板x5，铝锭x1
 黑暗精灵法师 level=5 armor=2 attack=54 speed=170 hp=70 comments=献祭自己堕入黑暗的精灵 spoils=铁锭x3，木板x5，铝锭x2
 德鲁伊 level=5 armor=2 attack=54 speed=170 hp=70 comments=献祭自己于自然，换来变成动物的能力 spoils=钛矿石x7
+火元素精灵法师 level=6 armor=4 attack=80 speed=300 hp=40 comments=准备防御，这是雷暴！ spoils=棉花x4 element=火
+水元素精灵法师 level=6 armor=4 attack=80 speed=300 hp=40 comments=准备防御，这是雷暴！ spoils=布x2 element=水
+木元素精灵法师 level=6 armor=4 attack=80 speed=300 hp=40 comments=准备防御，这是雷暴！ spoils=寒铁x2 element=木
+雷元素精灵法师 level=6 armor=4 attack=80 speed=300 hp=40 comments=准备防御，这是雷暴！ spoils=钨矿石x1 element=雷
+精灵领主 level=6 armor=29 attack=100 speed=150 hp=60 comments=精灵的领主 spoils=棉花x3
 
 
 # ========================================
